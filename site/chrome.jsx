@@ -1,0 +1,99 @@
+// Shared UI pieces. Nav, Footer, Buttons, Icons
+
+const PlayIcon = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M8 5v14l11-7z" fill="#0a0a0a" />
+  </svg>
+);
+const ArrowIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+);
+const DownloadIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3v12M6 9l6 6 6-6M4 21h16" />
+  </svg>
+);
+const CheckIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12l5 5L20 7" />
+  </svg>
+);
+
+function Nav({ page, go, overlay }) {
+  const links = [
+    { id: 'plugins', label: 'Plugins' },
+    { id: 'luts', label: 'LUTs' },
+    { id: 'portfolio', label: 'Portfolio' },
+    { id: 'services', label: 'Services' },
+    { id: 'support', label: 'Support' },
+  ];
+  return (
+    <nav className={"nav" + (overlay ? " nav-overlay" : "")}>
+      <div className="nav-inner">
+        <a className="brand" href="#" onClick={(e) => { e.preventDefault(); go('home'); }}>
+          <span className="brand-dot" />alexg.mov
+        </a>
+        <div className="nav-links">
+          {links.map(l => (
+            <a key={l.id} href="#" className={page === l.id ? 'active' : ''}
+              onClick={(e) => { e.preventDefault(); go(l.id); }}>{l.label}</a>
+          ))}
+        </div>
+        <a className="nav-cta" href="#" onClick={(e) => { e.preventDefault(); go('plugins'); }}>
+          Shop products <span style={{ opacity: 0.5 }}>↗</span>
+        </a>
+      </div>
+    </nav>
+  );
+}
+
+function Footer({ go }) {
+  return (
+    <footer>
+      <div className="wrap">
+        <div className="foot">
+          <div>
+            <div className="foot-brand">alexg.mov</div>
+            <p className="foot-tag">Filmmaker, editor, tool-maker. Premiere plugins and LUTs for editors who want fewer clicks and faster turnaround.</p>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>
+              <a href="mailto:alex@alexg.mov">alex@alexg.mov</a>
+            </div>
+          </div>
+          <div className="foot-col">
+            <h5>Products</h5>
+            <ul>
+              <li><a href="#" onClick={e => { e.preventDefault(); go('plugins'); }}>Plugins</a></li>
+              <li><a href="#" onClick={e => { e.preventDefault(); go('luts'); }}>LUTs</a></li>
+              <li><a href="#" onClick={e => { e.preventDefault(); go('services'); }}>Services</a></li>
+            </ul>
+          </div>
+          <div className="foot-col">
+            <h5>Credibility</h5>
+            <ul>
+              <li><a href="#" onClick={e => { e.preventDefault(); go('portfolio'); }}>Portfolio</a></li>
+              <li><a href="https://tiktok.com/@alexg.mov" target="_blank" rel="noreferrer">TikTok ↗</a></li>
+              <li><a href="https://youtube.com/@alexg.mov" target="_blank" rel="noreferrer">YouTube ↗</a></li>
+            </ul>
+          </div>
+          <div className="foot-col">
+            <h5>Help</h5>
+            <ul>
+              <li><a href="#" onClick={e => { e.preventDefault(); go('support'); }}>Support</a></li>
+              <li><a href="#" onClick={e => { e.preventDefault(); go('terms'); }}>Terms</a></li>
+              <li><a href="#" onClick={e => { e.preventDefault(); go('refund'); }}>Refund policy</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="foot-bottom">
+          <span>© 2026 alexg.mov</span>
+          <span>Made in Premiere, shipped from the timeline.</span>
+          <span>v1.0.0</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+Object.assign(window, { Nav, Footer, PlayIcon, ArrowIcon, DownloadIcon, CheckIcon });
