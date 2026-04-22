@@ -56,7 +56,7 @@ function Footer({ go }) {
         <div className="foot">
           <div>
             <div className="foot-brand">alexg.mov</div>
-            <p className="foot-tag">Filmmaker, editor, tool-maker. Premiere plugins and LUTs for editors who want fewer clicks and faster turnaround.</p>
+            <p className="foot-tag">Filmmaker, editor, tool-maker. Plugins and LUTs for editors who want fewer clicks and faster turnaround.</p>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)' }}>
               <a href="mailto:alex@alexg.mov">alex@alexg.mov</a>
             </div>
@@ -70,11 +70,11 @@ function Footer({ go }) {
             </ul>
           </div>
           <div className="foot-col">
-            <h5>Credibility</h5>
+            <h5>Channels</h5>
             <ul>
-              <li><a href="#" onClick={e => { e.preventDefault(); go('portfolio'); }}>Portfolio</a></li>
-              <li><a href="https://tiktok.com/@alexg.mov" target="_blank" rel="noreferrer">TikTok ↗</a></li>
-              <li><a href="https://youtube.com/@alexg.mov" target="_blank" rel="noreferrer">YouTube ↗</a></li>
+              <li><a href="https://www.instagram.com/alexg.mov/" target="_blank" rel="noreferrer">Instagram ↗</a></li>
+              <li><a href="https://www.tiktok.com/@alexg.mov" target="_blank" rel="noreferrer">TikTok ↗</a></li>
+              <li><a href="https://www.linkedin.com/in/alex-garrett-a21564243/" target="_blank" rel="noreferrer">LinkedIn ↗</a></li>
             </ul>
           </div>
           <div className="foot-col">
@@ -88,7 +88,8 @@ function Footer({ go }) {
         </div>
         <div className="foot-bottom">
           <span>© 2026 alexg.mov</span>
-          <span>Made in Premiere, shipped from the timeline.</span>
+          <span>Creative work and digital products.</span>
+          <a href="https://www.instagram.com/alexg.mov/" target="_blank" rel="noreferrer">@alexg.mov ↗</a>
           <span>v1.0.0</span>
         </div>
       </div>

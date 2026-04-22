@@ -138,9 +138,50 @@ const LOCATIONS = {
 // Itinerary loaded from site/travel.js (edit that file to update the site)
 const ITINERARY = window.ALEXG_TRAVEL;
 
+// Module-level geo-data cache — fetched once, shared across mounts
+let _geoCache = null;
+let _geoPending = [];
+function loadGeo(cb) {
+  if (_geoCache) { cb(_geoCache); return; }
+  _geoPending.push(cb);
+  if (_geoPending.length > 1) return; // already in-flight
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    .then(r => r.json())
+    .then(world => {
+      const topo = window.topojson;
+      const d3   = window.d3;
+      _geoCache = {
+        land:      topo.feature(world, world.objects.land),
+        borders:   topo.mesh(world, world.objects.countries, (a, b) => a !== b),
+        sphere:    { type: 'Sphere' },
+      };
+      _geoPending.forEach(fn => fn(_geoCache));
+      _geoPending = [];
+    });
+}
+
+function withAlpha(color, alpha) {
+  if (!color) return `rgba(26,115,184,${alpha})`;
+  const value = color.trim();
+  if (value.startsWith('#')) {
+    let hex = value.slice(1);
+    if (hex.length === 3) hex = hex.split('').map(ch => ch + ch).join('');
+    const num = parseInt(hex, 16);
+    const r = (num >> 16) & 255;
+    const g = (num >> 8) & 255;
+    const b = num & 255;
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+  if (value.startsWith('rgb(')) return value.replace('rgb(', 'rgba(').replace(')', `,${alpha})`);
+  return value;
+}
+
 function HologramGlobe({ locKey }) {
   const canvasRef = React.useRef(null);
+  const geoRef    = React.useRef(null);
   const loc = LOCATIONS[locKey];
+
+  React.useEffect(() => { loadGeo(data => { geoRef.current = data; }); }, []);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -155,34 +196,6 @@ function HologramGlobe({ locKey }) {
     const onScroll = () => { scrollY = window.scrollY; };
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    const D2R = Math.PI / 180;
-
-    const proj = (latD, lngD, rotY, rotX, cx, cy, R) => {
-      const phi = latD * D2R, th = lngD * D2R + rotY;
-      const x  =  Math.cos(phi) * Math.sin(th);
-      const y  =  Math.sin(phi);
-      const z  =  Math.cos(phi) * Math.cos(th);
-      const y2 =  y * Math.cos(rotX) - z * Math.sin(rotX);
-      const z2 =  y * Math.sin(rotX) + z * Math.cos(rotX);
-      return { sx: cx + x * R, sy: cy - y2 * R, z: z2 };
-    };
-
-    const strokeSegs = (pts, frontStyle, frontW, backStyle, backW) => {
-      if (backStyle) {
-        ctx.beginPath();
-        let m = true;
-        for (const p of pts) { m ? (ctx.moveTo(p.sx, p.sy), m = false) : ctx.lineTo(p.sx, p.sy); }
-        ctx.strokeStyle = backStyle; ctx.lineWidth = backW; ctx.stroke();
-      }
-      ctx.beginPath();
-      let d = false;
-      for (const p of pts) {
-        if (p.z > 0) { d ? ctx.lineTo(p.sx, p.sy) : (ctx.moveTo(p.sx, p.sy), d = true); }
-        else { d = false; }
-      }
-      ctx.strokeStyle = frontStyle; ctx.lineWidth = frontW; ctx.stroke();
-    };
-
     const draw = () => {
       const w = canvas.offsetWidth, h = canvas.offsetHeight;
       if (Math.round(canvas.width) !== Math.round(w * dpr)) {
@@ -191,122 +204,97 @@ function HologramGlobe({ locKey }) {
         sectionTop = canvas.getBoundingClientRect().top + scrollY;
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      phase = (phase + 0.04) % (Math.PI * 2);
 
-      const cx = w / 2, cy = h / 2;
-      const Rg = Math.min(w, h) * 0.39;
-      // rotY = 0 when section center aligns with viewport center → pin faces viewer
-      const sectionCenterY = sectionTop + h / 2;
+      const styles = getComputedStyle(canvas);
+      const baseHeight = parseFloat(styles.getPropertyValue('--travel2-globe-base-height')) || h;
+      const topBleed = Math.abs(parseFloat(styles.top) || 0);
+      const drawHeight = baseHeight + (topBleed * 2);
+      const globeVerticalLift = 72;
+      const cx = w / 2;
+      const cy = (baseHeight / 2) + topBleed - globeVerticalLift;
+      const padding = 28;
+      const R  = Math.max(0, Math.min((w / 2) - padding, (drawHeight / 2) - padding) * 1.5);
+
+      // pin faces viewer when section center == viewport center
+      const sectionCenterY  = sectionTop + h / 2;
       const viewportCenterY = scrollY + window.innerHeight / 2;
-      const offset = viewportCenterY - sectionCenterY;
-      const rotY = -loc.lng * D2R + offset * 0.002;
-      const rotX = loc.lat * D2R * 0.08;
-      phase = (phase + 0.045) % (Math.PI * 2);
+      const offset  = viewportCenterY - sectionCenterY; // 0 when centred
+      const currentLocHorizontalBias = 32;
+      const rotLng  = -loc.lng - currentLocHorizontalBias + offset * 0.12; // degrees
+      const rotLat  = -loc.lat * 0.08;
 
-      // Background
-      ctx.fillStyle = '#030e18';
-      ctx.fillRect(0, 0, w, h);
-      const bgG = ctx.createRadialGradient(cx, cy, 0, cx, cy, Rg * 1.4);
-      bgG.addColorStop(0, 'rgba(0,55,100,0.32)'); bgG.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = bgG; ctx.fillRect(0, 0, w, h);
+      const d3  = window.d3;
+      const geo = geoRef.current;
+      const liveBlue = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#6EC1FF';
 
-      const NLAT = 10, NLNG = 18, NSEG = 90;
-      ctx.shadowColor = '#00ccff';
+      const projection = d3.geoOrthographic()
+        .scale(R)
+        .translate([cx, cy])
+        .rotate([rotLng, rotLat, 0])
+        .clipAngle(90);
 
-      // Latitude parallels
-      for (let i = 0; i <= NLAT; i++) {
-        const lat = -90 + 180 * i / NLAT;
-        const eq  = i === NLAT / 2;
-        const pts = Array.from({ length: NSEG + 1 }, (_, j) =>
-          proj(lat, -180 + 360 * j / NSEG, rotY, rotX, cx, cy, Rg));
-        ctx.shadowBlur = eq ? 9 : 3;
-        strokeSegs(pts,
-          eq ? 'rgba(0,210,255,0.45)' : 'rgba(0,195,255,0.14)', eq ? 0.9 : 0.48,
-          'rgba(0,180,255,0.04)', eq ? 0.5 : 0.25);
-      }
+      const path = d3.geoPath().projection(projection).context(ctx);
+      const sphere = geo ? geo.sphere : { type: 'Sphere' };
 
-      // Longitude meridians
-      ctx.shadowBlur = 2;
-      for (let i = 0; i < NLNG; i++) {
-        const lng = -180 + 360 * i / NLNG;
-        const pts = Array.from({ length: NSEG / 2 + 1 }, (_, j) =>
-          proj(-90 + 180 * j / (NSEG / 2), lng, rotY, rotX, cx, cy, Rg));
-        strokeSegs(pts, 'rgba(0,190,255,0.09)', 0.4, 'rgba(0,180,255,0.02)', 0.25);
-      }
-
-      // Coastlines + geographic features
-      if (window.WORLD_LINES) {
-        ctx.shadowColor = '#00e0ff'; ctx.shadowBlur = 6;
-        ctx.lineWidth = 0.9;
-        for (const line of window.WORLD_LINES) {
-          // Faint back hemisphere trace
-          ctx.beginPath();
-          let m = true;
-          for (const [lng, lat] of line) {
-            const p = proj(lat, lng, rotY, rotX, cx, cy, Rg);
-            m ? (ctx.moveTo(p.sx, p.sy), m = false) : ctx.lineTo(p.sx, p.sy);
-          }
-          ctx.strokeStyle = 'rgba(0,220,255,0.04)'; ctx.lineWidth = 0.5; ctx.stroke();
-          // Front hemisphere bright
-          ctx.beginPath();
-          let d = false;
-          for (const [lng, lat] of line) {
-            const p = proj(lat, lng, rotY, rotX, cx, cy, Rg);
-            if (p.z > 0) { d ? ctx.lineTo(p.sx, p.sy) : (ctx.moveTo(p.sx, p.sy), d = true); }
-            else { d = false; }
-          }
-          ctx.strokeStyle = 'rgba(0,220,255,0.62)'; ctx.lineWidth = 0.85; ctx.stroke();
-        }
-      }
-
-      // Rim glow
-      ctx.shadowColor = '#00d4ff'; ctx.shadowBlur = 26;
-      ctx.strokeStyle = 'rgba(0,200,255,0.6)'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(cx, cy, Rg, 0, Math.PI * 2); ctx.stroke();
-
-      // Atmospheric halo
-      ctx.shadowBlur = 0;
-      const ha = ctx.createRadialGradient(cx, cy, Rg * 0.84, cx, cy, Rg * 1.13);
-      ha.addColorStop(0,   'rgba(0,180,255,0)');
-      ha.addColorStop(0.5, 'rgba(0,180,255,0.04)');
-      ha.addColorStop(1,   'rgba(0,180,255,0.20)');
-      ctx.beginPath(); ctx.arc(cx, cy, Rg * 1.1, 0, Math.PI * 2);
-      ctx.fillStyle = ha; ctx.fill();
-
-      // Pin
-      const pin = proj(loc.lat, loc.lng, rotY, rotX, cx, cy, Rg);
-      if (pin.z > 0.1) {
-        const { sx: px, sy: py } = pin;
-        const pt = (Math.sin(phase) + 1) / 2;
-        ctx.save();
-        ctx.shadowColor = '#00e5ff';
-
-        // Expanding pulse rings
-        [[14, 0.55], [22, 0.35], [30, 0.20]].forEach(([maxR, baseA]) => {
-          const rr = 3 + (maxR - 3) * pt;
-          const a  = baseA * (1 - pt);
-          ctx.shadowBlur = 8;
-          ctx.beginPath(); ctx.arc(px, py, rr, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(0,229,255,${a.toFixed(3)})`; ctx.lineWidth = 1; ctx.stroke();
-        });
-
-        // Crosshair
-        const arm = 20, gap = 8;
-        ctx.shadowBlur = 14; ctx.strokeStyle = 'rgba(0,229,255,0.92)'; ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(px - arm, py); ctx.lineTo(px - gap, py);
-        ctx.moveTo(px + gap,  py); ctx.lineTo(px + arm, py);
-        ctx.moveTo(px, py - arm); ctx.lineTo(px, py - gap);
-        ctx.moveTo(px, py + gap); ctx.lineTo(px, py + arm);
+      if (geo) {
+        ctx.shadowBlur = 0;
+        ctx.beginPath(); path(geo.land);
+        ctx.shadowColor = liveBlue;
+        ctx.shadowBlur = 11;
+        ctx.strokeStyle = withAlpha(liveBlue, 0.96);
+        ctx.lineWidth = 1.15;
         ctx.stroke();
 
-        // Center dot
-        ctx.shadowBlur = 24;
-        ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2);
-        ctx.fillStyle = '#00e5ff'; ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.beginPath(); ctx.arc(px, py, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff'; ctx.fill();
+        ctx.shadowColor = liveBlue;
+        ctx.shadowBlur = 3;
+        ctx.beginPath(); path(geo.borders);
+        ctx.strokeStyle = withAlpha(liveBlue, 0.82);
+        ctx.lineWidth = 0.4;
+        ctx.stroke();
+      }
 
+      // Sphere rim
+      ctx.shadowColor = liveBlue;
+      ctx.shadowBlur = 7;
+      ctx.beginPath(); path(sphere);
+      ctx.strokeStyle = withAlpha(liveBlue, 0.88);
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+
+      // Current-location ping on the front hemisphere.
+      const pinDist = d3.geoDistance([loc.lng, loc.lat], [-rotLng, -rotLat]);
+      if (pinDist < Math.PI / 2) {
+        const [px, py] = projection([loc.lng, loc.lat]);
+        const t = (Math.sin(phase) + 1) / 2;
+        ctx.save();
+        ctx.font = '500 12px Calibri, "Segoe UI", Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = withAlpha(liveBlue, 0.96);
+        ctx.fillText(loc.city, px, py - 18);
+
+        ctx.strokeStyle = withAlpha(liveBlue, 0.9 - (t * 0.45));
+        ctx.lineWidth = 1.4;
+        ctx.shadowColor = liveBlue;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(px, py, 8 + (t * 11), 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = withAlpha(liveBlue, 0.95);
+        ctx.beginPath();
+        ctx.arc(px, py, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(px, py, 1.8, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
       }
 
@@ -317,12 +305,12 @@ function HologramGlobe({ locKey }) {
     return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(raf); };
   }, [locKey]);
 
-  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />;
+  return <canvas ref={canvasRef} className="travel2-globe-canvas" style={{ display: 'block' }} />;
 }
+
 
 function TravelLog() {
   const currentKey = ITINERARY.find(i => i.status === 'here').key;
-  const current = LOCATIONS[currentKey];
   const scrollRef = React.useRef(null);
   const hereRef = React.useRef(null);
 
@@ -336,20 +324,18 @@ function TravelLog() {
 
   return (
     <div className="travel2">
-      <div className="travel2-map" style={{ background: '#030e18' }}>
-        <HologramGlobe locKey={currentKey} />
-        <div className="travel2-map-overlay" style={{ background: 'rgba(2,14,24,0.78)', borderColor: 'rgba(0,200,255,0.18)' }}>
-          <div className="travel2-eyebrow" style={{ color: '#00c8ff' }}>
-            <span className="travel2-dot" style={{ background: '#00c8ff', boxShadow: '0 0 0 3px rgba(0,200,255,0.2)' }} />
-            <span>CURRENTLY · LIVE</span>
-          </div>
-          <div className="travel2-city" style={{ color: '#fff' }}>{current.city}</div>
-          <div className="travel2-coords" style={{ color: 'rgba(0,200,255,0.65)' }}>
-            {current.lat.toFixed(4)}°N &nbsp;·&nbsp; {current.lng.toFixed(4)}°E
-          </div>
+      <div className="travel2-globe-panel">
+        <div className="travel2-map">
+          <HologramGlobe locKey={currentKey} />
         </div>
       </div>
       <div className="travel2-list">
+        <div className="travel2-scroll-cue" aria-hidden="true">
+          <span className="travel2-scroll-cue-icon">
+            <span />
+            <span />
+          </span>
+        </div>
         <div className="travel2-scroll" ref={scrollRef}>
           {ITINERARY.map((row, i) => {
             const loc = LOCATIONS[row.key];
@@ -396,10 +382,11 @@ function useHeroScroll() {
     const onScroll = () => {
       if (!ref.current) return;
       const y = Math.max(0, window.scrollY);
-      const t = Math.min(1, y / 500);
-      ref.current.style.setProperty('--hero-scroll-blur', `${t * 14}px`);
-      ref.current.style.setProperty('--hero-scroll-opacity', `${1 - t * 0.85}`);
-      ref.current.style.setProperty('--hero-scroll-lift', `${-t * 40}px`);
+      const blurT = Math.min(1, y / 800);
+      const motionT = Math.min(1, y / 500);
+      ref.current.style.setProperty('--hero-scroll-blur', `${blurT * 14}px`);
+      ref.current.style.setProperty('--hero-scroll-opacity', `${1 - motionT * 0.85}`);
+      ref.current.style.setProperty('--hero-scroll-lift', `${-motionT * 40}px`);
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -420,6 +407,23 @@ function HeroTitle() {
 
 function Home({ go }) {
   const actionsRef = useHeroScroll();
+  const featuredLut = (window.LUTS || []).find(l => l.id === 'cinematic-01') || {
+    id: 'cinematic-01',
+    name: 'Ochre No 1',
+    oneline: 'A warm, contrasty LUT for golden-hour footage, skin tones, and clean cinematic rolloff.',
+    price: 9,
+    badge: 'BESTSELLER',
+    compare: {
+      title: 'Ochre No 1',
+      beforeLabel: 'Ungraded',
+      afterLabel: 'Graded',
+      beforeTitle: 'Ochre No 1 ungraded preview',
+      afterTitle: 'Ochre No 1 graded preview',
+      beforeSrc: 'videos/Ochre No 1 Ungraded.mp4',
+      afterSrc: 'videos/Ochre No 1 Graded.mp4',
+    },
+  };
+
   return (
     <>
       <section className="hero hero-immersive">
@@ -440,10 +444,6 @@ function Home({ go }) {
       {/* Travel log */}
       <section className="section-xs">
         <div className="wrap">
-          <div className="travel2-head">
-            <p className="section-title">TRAVEL LOG</p>
-            <p className="travel2-sub">Where I am, where I've been, where I'm going.</p>
-          </div>
           <TravelLog />
         </div>
       </section>
@@ -460,7 +460,7 @@ function Home({ go }) {
               </div>
               <div>
                 <h3 className="about-h">Digital products.</h3>
-                <p className="about-p">Premiere plugins and LUTs. Every tool comes out of a real edit session.</p>
+                <p className="about-p">Plugins and LUTs. Every tool comes out of a real edit session.</p>
               </div>
               <div>
                 <h3 className="about-h">Systems.</h3>
@@ -481,14 +481,14 @@ function Home({ go }) {
             </div>
             <div className="card-body">
               <div className="card-eyebrow">
-                <span>v1.2.0 · PREMIERE 2024+</span>
-                <span style={{ color: 'var(--blue-ink)' }}>● NEW</span>
+                <span>v1.0.0 · PREMIERE 2024+</span>
+                <span style={{ color: 'var(--blue-ink)' }}>● RELEASED</span>
               </div>
-              <h3 className="card-title">YouTube Downloader for Premiere</h3>
-              <p className="card-desc">Pull reference clips into your timeline without leaving Premiere. Paste a URL, pick a resolution, cut.</p>
+              <h3 className="card-title">FlowState</h3>
+              <p className="card-desc">Turn rough talking-head timelines into cleaner first cuts without leaving Premiere.</p>
               <div className="card-foot">
-                <div className="card-price">$9<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
-                <button className="btn btn-primary" onClick={() => go('plugin:youtube-downloader')}>View <ArrowIcon /></button>
+                <div className="card-price">$19<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
+                <button className="btn btn-primary" onClick={() => go('plugin:flowstate')}>View <ArrowIcon /></button>
               </div>
             </div>
           </div>
@@ -499,17 +499,17 @@ function Home({ go }) {
       <section className="section-sm">
         <div className="wrap">
           <p className="section-title">FEATURED · LUT</p>
-          <div className="card" onClick={() => go('lut:cinematic-01')} style={{ cursor: 'pointer' }}>
-            <div className="card-media"><LutPreview tone="teal-orange" /></div>
+          <div className="card card-featured" onClick={() => go('lut:' + featuredLut.id)} style={{ cursor: 'pointer' }}>
+            <div className="card-media"><LutPreview tone="teal-orange" interactive compare={featuredLut.compare} /></div>
             <div className="card-body">
               <div className="card-eyebrow">
-                <span>10 LOOKS · .CUBE + .LOOK</span>
-                <span style={{ color: 'var(--orange-ink)' }}>★ BESTSELLER</span>
+                <span>INDIVIDUAL LUT · .CUBE + .LOOK</span>
+                <span style={{ color: 'var(--orange-ink)' }}>★ {featuredLut.badge || 'BESTSELLER'}</span>
               </div>
-              <h3 className="card-title">Cinematic Pack Vol. 01</h3>
-              <p className="card-desc">Ten hand-calibrated looks. Teal/orange, moody blue, warm film. Tested on S-Log3, V-Log, LOG-C, Rec.709.</p>
+              <h3 className="card-title">{featuredLut.name}</h3>
+              <p className="card-desc">{featuredLut.oneline}</p>
               <div className="card-foot">
-                <div className="card-price">$24<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
+                <div className="card-price">${featuredLut.price}<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
               </div>
             </div>
           </div>
@@ -524,7 +524,7 @@ function Home({ go }) {
             <div className="proof-grid">
               <div>
                 <h2 className="proof-num">3.8<span className="unit">M VIEWS</span></h2>
-                <p className="proof-label">OMI LAUNCH VIDEO · END-TO-END · 2025</p>
+                <p className="proof-label">OMI LAUNCH VIDEO · FULL STACK VIDEO PRODUCTION · 2025</p>
               </div>
               <div className="proof-body">
                 <h3>Shipped a 3.8M-view launch video. Strategy, production, and post.</h3>

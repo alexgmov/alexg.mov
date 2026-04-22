@@ -123,8 +123,13 @@ function PremiereScreenshot({ variant = "youtube-dl", scale = 1 }) {
   );
 }
 
-// LUT preview. a cinematic still with a split-before/after line
-function LutPreview({ tone = "teal-orange", scale = 1 }) {
+// LUT preview. draggable before/after wipe for LUT demos.
+function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, initialSplit = 0.5, compare = null }) {
+  const wrapRef = React.useRef(null);
+  const baseVideoRef = React.useRef(null);
+  const revealVideoRef = React.useRef(null);
+  const [split, setSplit] = React.useState(initialSplit);
+  const hasVideoCompare = Boolean(compare && compare.beforeSrc && compare.afterSrc);
   const tones = {
     "teal-orange": {
       a: "linear-gradient(135deg, #2a3540 0%, #1a2028 50%, #0f1519 100%)",
@@ -148,28 +153,208 @@ function LutPreview({ tone = "teal-orange", scale = 1 }) {
     },
   };
   const t = tones[tone] || tones["teal-orange"];
+  const updateSplit = React.useCallback((clientX) => {
+    if (!wrapRef.current) return;
+    const rect = wrapRef.current.getBoundingClientRect();
+    const next = (clientX - rect.left) / rect.width;
+    setSplit(Math.max(0.08, Math.min(0.92, next)));
+  }, []);
+
+  React.useEffect(() => {
+    if (!hasVideoCompare) return undefined;
+    const base = baseVideoRef.current;
+    const reveal = revealVideoRef.current;
+    if (!base || !reveal) return undefined;
+
+    const syncReveal = () => {
+      if (!base || !reveal) return;
+      if (Math.abs((reveal.currentTime || 0) - (base.currentTime || 0)) > 0.08) {
+        try {
+          reveal.currentTime = base.currentTime || 0;
+        } catch (err) {}
+      }
+      if (reveal.playbackRate !== base.playbackRate) reveal.playbackRate = base.playbackRate;
+      if (base.paused && !reveal.paused) reveal.pause();
+      if (!base.paused && reveal.paused) reveal.play().catch(() => {});
+    };
+
+    const handleLoadedMetadata = () => {
+      try {
+        reveal.currentTime = base.currentTime || 0;
+      } catch (err) {}
+      if (base.paused) return;
+      reveal.play().catch(() => {});
+    };
+
+    base.addEventListener('play', syncReveal);
+    base.addEventListener('pause', syncReveal);
+    base.addEventListener('seeking', syncReveal);
+    base.addEventListener('seeked', syncReveal);
+    base.addEventListener('ratechange', syncReveal);
+    base.addEventListener('timeupdate', syncReveal);
+    base.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+    reveal.play().catch(() => {});
+    base.play().catch(() => {});
+
+    return () => {
+      base.removeEventListener('play', syncReveal);
+      base.removeEventListener('pause', syncReveal);
+      base.removeEventListener('seeking', syncReveal);
+      base.removeEventListener('seeked', syncReveal);
+      base.removeEventListener('ratechange', syncReveal);
+      base.removeEventListener('timeupdate', syncReveal);
+      base.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
+  }, [hasVideoCompare, compare?.beforeSrc, compare?.afterSrc]);
+
+  const renderSubject = (fill) => (
+    <div style={{
+      position: 'absolute', left: '30%', top: '35%', width: '30%', height: '40%',
+      background: fill,
+      borderRadius: '50% 50% 45% 45%',
+    }} />
+  );
+
   return (
-    <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
-      <div style={{ flex: 1, background: t.a, position: 'relative' }}>
-        {/* fake subject */}
-        <div style={{
-          position: 'absolute', left: '30%', top: '35%', width: '30%', height: '40%',
-          background: 'radial-gradient(ellipse, rgba(255,255,255,0.08), transparent)',
-          borderRadius: '50% 50% 45% 45%',
-        }} />
-        <div style={{ position: 'absolute', left: 10 * scale, top: 10 * scale,
-          fontFamily: '"Courier New", monospace', fontSize: 9 * scale, color: 'rgba(255,255,255,0.5)' }}>BEFORE</div>
-      </div>
-      <div style={{ width: 1, background: 'rgba(255,255,255,0.8)' }} />
-      <div style={{ flex: 1, background: t.b, position: 'relative' }}>
-        <div style={{
-          position: 'absolute', left: '30%', top: '35%', width: '30%', height: '40%',
-          background: 'radial-gradient(ellipse, rgba(255,200,150,0.2), transparent)',
-          borderRadius: '50% 50% 45% 45%',
-        }} />
-        <div style={{ position: 'absolute', right: 10 * scale, top: 10 * scale,
-          fontFamily: '"Courier New", monospace', fontSize: 9 * scale, color: 'rgba(255,255,255,0.8)' }}>AFTER</div>
-      </div>
+    <div
+      ref={wrapRef}
+      onClick={interactive ? (e) => e.stopPropagation() : undefined}
+      onPointerDown={interactive ? (e) => {
+        e.stopPropagation();
+        updateSplit(e.clientX);
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } : undefined}
+      onPointerMove={interactive ? (e) => {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) updateSplit(e.clientX);
+      } : undefined}
+      onPointerUp={interactive ? (e) => {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+      } : undefined}
+      onPointerCancel={interactive ? (e) => {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+      } : undefined}
+      style={{ position: 'absolute', inset: 0, overflow: 'hidden', touchAction: interactive ? 'none' : 'auto', cursor: interactive ? 'ew-resize' : 'default' }}
+    >
+      {hasVideoCompare ? (
+        <>
+          <video
+            ref={baseVideoRef}
+            src={compare.beforeSrc}
+            title={compare.beforeTitle || `${compare.title || 'LUT'} ${compare.beforeLabel || 'ungraded'} preview`}
+            aria-label={compare.beforeTitle || `${compare.title || 'LUT'} ${compare.beforeLabel || 'ungraded'} preview`}
+            muted
+            loop
+            playsInline
+            autoPlay
+            preload="metadata"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            clipPath: `inset(0 ${Math.max(0, (1 - split) * 100)}% 0 0)`,
+          }}>
+            <video
+              ref={revealVideoRef}
+              src={compare.afterSrc}
+              title={compare.afterTitle || `${compare.title || 'LUT'} ${compare.afterLabel || 'graded'} preview`}
+              aria-label={compare.afterTitle || `${compare.title || 'LUT'} ${compare.afterLabel || 'graded'} preview`}
+              muted
+              loop
+              playsInline
+              autoPlay
+              preload="metadata"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
+          <div style={{
+            position: 'absolute',
+            left: 10 * scale,
+            top: 10 * scale,
+            fontFamily: '"Courier New", monospace',
+            fontSize: 9 * scale,
+            color: 'rgba(255,255,255,0.9)',
+            padding: `${4 * scale}px ${8 * scale}px`,
+            background: 'rgba(0,0,0,0.45)',
+            borderRadius: 999,
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+          }}>{(compare.afterLabel || 'GRADED').toUpperCase()}</div>
+          <div style={{
+            position: 'absolute',
+            right: 10 * scale,
+            top: 10 * scale,
+            fontFamily: '"Courier New", monospace',
+            fontSize: 9 * scale,
+            color: 'rgba(255,255,255,0.76)',
+            padding: `${4 * scale}px ${8 * scale}px`,
+            background: 'rgba(0,0,0,0.35)',
+            borderRadius: 999,
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+          }}>{(compare.beforeLabel || 'UNGRADED').toUpperCase()}</div>
+        </>
+      ) : (
+        <>
+          <div style={{ position: 'absolute', inset: 0, background: t.a }}>
+            {renderSubject('radial-gradient(ellipse, rgba(255,255,255,0.08), transparent)')}
+            <div style={{ position: 'absolute', left: 10 * scale, top: 10 * scale,
+              fontFamily: '"Courier New", monospace', fontSize: 9 * scale, color: 'rgba(255,255,255,0.5)' }}>BEFORE</div>
+          </div>
+
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: t.b,
+            clipPath: `inset(0 0 0 ${split * 100}%)`,
+          }}>
+            {renderSubject('radial-gradient(ellipse, rgba(255,200,150,0.2), transparent)')}
+            <div style={{ position: 'absolute', right: 10 * scale, top: 10 * scale,
+              fontFamily: '"Courier New", monospace', fontSize: 9 * scale, color: 'rgba(255,255,255,0.8)' }}>AFTER</div>
+          </div>
+        </>
+      )}
+
+      {interactive ? (
+        <>
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: `calc(${split * 100}% - 0.5px)`,
+            width: 1,
+            background: 'rgba(255,255,255,0.95)',
+            boxShadow: '0 0 0 1px rgba(0,0,0,0.08)',
+          }} />
+          <div style={{
+            position: 'absolute',
+            left: `calc(${split * 100}% - ${15 * scale}px)`,
+            top: '50%',
+            width: 30 * scale,
+            height: 30 * scale,
+            marginTop: -15 * scale,
+            borderRadius: '999px',
+            background: 'rgba(255,255,255,0.12)',
+            border: '1px solid rgba(255,255,255,0.72)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+          }}>
+            <div style={{
+              fontFamily: '"Courier New", monospace',
+              fontSize: 10 * scale,
+              letterSpacing: '-0.08em',
+              color: 'rgba(255,255,255,0.9)',
+            }}>‹›</div>
+          </div>
+        </>
+      ) : (
+        <div style={{ position: 'absolute', top: 0, bottom: 0, left: `calc(${split * 100}% - 0.5px)`, width: 1, background: 'rgba(255,255,255,0.8)' }} />
+      )}
     </div>
   );
 }

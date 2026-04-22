@@ -1,29 +1,6 @@
 /* alexg.mov. SaaS-clean, serif only for hero, minimal retro cues */
 
 :root {
-  --bg: #ffffff;
-  --ink: #0a0a0a;
-  --ink-soft: #1c1c1c;
-  --muted: #6b6b6b;
-  --muted-2: #9a9a9a;
-  --hairline: #e8e8e8;
-  --hairline-2: #f0f0f0;
-  --surface: #fafafa;
-  --surface-2: #f4f4f4;
-  --blue: #6EC1FF;
-  --blue-ink: #1a73b8;
-  --orange: #FFB066;
-  --orange-ink: #b86a1a;
-  --radius: 10px;
-  --radius-sm: 6px;
-  --max: 1180px;
-  --sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-  --serif: "Cormorant Garamond", "Apple Garamond", "EB Garamond", Georgia, serif;
-  --mono: "Courier New", ui-monospace, Menlo, monospace;
-  --shadow: 0 1px 0 rgba(0,0,0,0.02), 0 8px 32px rgba(0,0,0,0.04);
-}
-
-[data-theme="dark"] {
   --bg: #0c0c0d;
   --ink: #f5f5f5;
   --ink-soft: #e4e4e4;
@@ -37,7 +14,30 @@
   --blue-ink: #9fd5ff;
   --orange: #ffb870;
   --orange-ink: #ffcd94;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --max: 1180px;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --serif: "Cormorant Garamond", "Apple Garamond", "EB Garamond", Georgia, serif;
+  --mono: "Courier New", ui-monospace, Menlo, monospace;
   --shadow: 0 1px 0 rgba(255,255,255,0.03), 0 8px 32px rgba(0,0,0,0.3);
+}
+
+[data-theme="light"] {
+  --bg: #ffffff;
+  --ink: #0a0a0a;
+  --ink-soft: #1c1c1c;
+  --muted: #6b6b6b;
+  --muted-2: #9a9a9a;
+  --hairline: #e8e8e8;
+  --hairline-2: #f0f0f0;
+  --surface: #fafafa;
+  --surface-2: #f4f4f4;
+  --blue: #6EC1FF;
+  --blue-ink: #1a73b8;
+  --orange: #FFB066;
+  --orange-ink: #b86a1a;
+  --shadow: 0 1px 0 rgba(0,0,0,0.02), 0 8px 32px rgba(0,0,0,0.04);
 }
 
 * { box-sizing: border-box; }
@@ -617,6 +617,55 @@ img, svg, video { display: block; max-width: 100%; }
   padding: 40px 0 72px;
 }
 @media (max-width: 820px) { .list-grid { grid-template-columns: 1fr; } }
+.lut-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 980px) {
+  .lut-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 820px) {
+  .lut-grid { grid-template-columns: 1fr; }
+}
+.lut-card .card-media {
+  aspect-ratio: 16 / 8;
+}
+.lut-card .card-body {
+  padding: 16px 18px 18px;
+}
+.lut-card .card-eyebrow {
+  margin-bottom: 8px;
+}
+.lut-card .card-title {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+.lut-card .card-desc {
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.lut-card .card-price {
+  font-size: 14px;
+}
+.lut-card-soon .card-media {
+  background: linear-gradient(180deg, #f7f6f2 0%, #efede7 100%);
+}
+.lut-card-soon .card-body {
+  padding-top: 14px;
+}
+.lut-card-soon .card-title {
+  margin-bottom: 2px;
+}
+.lut-card-soon .card-foot {
+  justify-content: flex-start;
+}
+.lut-card-soon-art {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0,0,0,0.035) 0, rgba(0,0,0,0.035) 18%, transparent 19%),
+    linear-gradient(135deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));
+}
 
 /* ── Portfolio ─────────────────────────────────── */
 .port-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; padding: 32px 0 72px; }
@@ -1017,6 +1066,8 @@ footer {
 
 /* ── About strip ───────────────────────────────── */
 .about-row {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 200px 1fr;
   gap: 40px;
@@ -1104,7 +1155,12 @@ footer {
 }
 
 /* ── Travel log v2 ────────────────────────────── */
-.section-xs { padding: 56px 0; }
+.section-xs {
+  padding: 0 0 56px;
+  position: relative;
+  overflow: visible;
+  z-index: 0;
+}
 .travel2-head {
   display: flex;
   align-items: baseline;
@@ -1120,34 +1176,70 @@ footer {
   margin: 0;
 }
 .travel2 {
-  display: grid;
-  grid-template-columns: 1.7fr 1fr;
-  gap: 0;
-  border: 1px solid var(--hairline);
-  background: var(--surface);
-  overflow: hidden;
-  border-radius: 2px;
+  --travel2-frame-height: 440px;
+  --travel2-globe-base-height: 546px;
+  position: relative;
+  min-height: var(--travel2-frame-height);
+  overflow: visible;
 }
-@media (max-width: 900px) { .travel2 { grid-template-columns: 1fr; } }
+@media (max-width: 1020px) {
+  .travel2 {
+    --travel2-frame-height: 480px;
+    --travel2-globe-base-height: 480px;
+    display: grid;
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
+    gap: 24px;
+  }
+}
 .travel2-map {
   position: relative;
-  aspect-ratio: 25 / 9;
-  background: var(--surface);
-  overflow: hidden;
+  min-height: var(--travel2-frame-height);
+  background: transparent;
+  overflow: visible;
   color: var(--ink);
+}
+.travel2-globe-canvas {
+  --travel2-globe-bleed: clamp(76px, 7.3vw, 110px);
+  --travel2-globe-bottom-bleed: clamp(220px, 20vw, 320px);
+  position: absolute;
+  inset-inline: 0;
+  top: calc(var(--travel2-globe-bleed) * -1);
+  height: calc(var(--travel2-globe-base-height) + (var(--travel2-globe-bleed) * 2) + var(--travel2-globe-bottom-bleed));
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .travel2-map {
+    aspect-ratio: auto;
+    min-height: 480px;
+  }
+  .travel2-globe-canvas {
+    --travel2-globe-bleed: 44px;
+    --travel2-globe-bottom-bleed: 120px;
+  }
+}
+.travel2-globe-panel {
+  position: relative;
+  min-height: var(--travel2-frame-height);
+  z-index: 0;
+}
+@media (max-width: 900px) {
+  .travel2-globe-panel { min-height: 480px; }
 }
 .wmap { display: block; width: 100%; height: 100%; }
 .travel2-map-overlay {
   position: absolute;
-  left: 24px; bottom: 24px;
+  left: 14px;
+  bottom: 72px;
   z-index: 2;
   background: color-mix(in srgb, var(--surface) 82%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--hairline);
-  padding: 14px 18px 16px;
+  padding: 10px 12px 11px;
   border-radius: 2px;
-  min-width: 240px;
+  min-width: 180px;
 }
 .travel2-eyebrow {
   font-family: var(--mono);
@@ -1172,28 +1264,74 @@ footer {
   font-family: var(--serif);
   font-style: italic;
   font-weight: 400;
-  font-size: 34px;
+  font-size: 24px;
   line-height: 1;
   color: var(--ink);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   letter-spacing: -0.01em;
 }
 .travel2-coords {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 9px;
   color: var(--muted);
   letter-spacing: 0.02em;
 }
 
 .travel2-list {
-  border-left: 1px solid var(--hairline);
+  position: absolute;
+  left: clamp(12px, 2.4vw, 28px);
+  top: 50%;
+  transform: translateY(-50%);
+  border: 1px solid var(--hairline);
   background: var(--bg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border-radius: 2px;
+  height: clamp(170px, 18vw, 224px);
+  width: min(280px, calc(100% - 56px));
+  max-width: 100%;
+  min-height: 0;
+  z-index: 2;
 }
-@media (max-width: 900px) {
-  .travel2-list { border-left: none; border-top: 1px solid var(--hairline); }
+@media (max-width: 1020px) {
+  .travel2-list {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    height: auto;
+    width: auto;
+    min-height: 0;
+  }
+}
+.travel2-scroll-cue {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--hairline) 75%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+.travel2-scroll-cue-icon {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.travel2-scroll-cue-icon span {
+  width: 6px;
+  height: 6px;
+  border-right: 1px solid var(--muted);
+  border-bottom: 1px solid var(--muted);
+  transform: rotate(45deg);
 }
 .travel2-scroll {
   flex: 1;
@@ -1207,18 +1345,18 @@ footer {
 .travel2-scroll::-webkit-scrollbar { display: none; }
 .travel2-row {
   display: grid;
-  grid-template-columns: 88px 1fr auto;
+  grid-template-columns: 76px 1fr auto;
   align-items: baseline;
-  gap: 14px;
-  padding: 14px 22px;
+  gap: 10px;
+  padding: 10px 16px;
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 12px;
   border-bottom: 1px dashed color-mix(in srgb, var(--hairline) 60%, transparent);
 }
 .travel2-row:last-child { border-bottom: none; }
 .travel2-when {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 9px;
   color: var(--muted);
   letter-spacing: 0.06em;
 }
@@ -1234,11 +1372,11 @@ footer {
 }
 .travel2-status {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 8px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
-  padding: 2px 6px;
+  padding: 2px 5px;
   border: 1px solid var(--hairline);
   border-radius: 2px;
 }

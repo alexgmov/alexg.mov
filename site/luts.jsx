@@ -3,34 +3,45 @@
 const LUTS = [
   {
     id: 'cinematic-01',
-    name: 'Cinematic Pack Vol. 01',
-    oneline: 'Ten hand-calibrated looks for narrative work.',
-    price: 24,
-    count: 10,
+    name: 'Ochre No 1',
+    oneline: 'A warm, contrasty LUT for golden-hour footage, skin tones, and clean cinematic rolloff.',
+    price: 9,
     formats: '.CUBE · .LOOK',
     badge: 'BESTSELLER',
     tone: 'teal-orange',
-    looks: ['Night Teal', 'Orange Glow', 'Dusk Fog', 'Clean Neutral', 'Warm Film', 'Cold Steel', 'Golden Hour', 'Mid-Afternoon', 'Interior Soft', 'Blue Hour'],
+    available: true,
+    demoLabel: 'Ochre No 1',
+    compare: {
+      title: 'Ochre No 1',
+      beforeLabel: 'Ungraded',
+      afterLabel: 'Graded',
+      beforeTitle: 'Ochre No 1 ungraded preview',
+      afterTitle: 'Ochre No 1 graded preview',
+      beforeSrc: 'videos/Ochre No 1 Ungraded.mp4',
+      afterSrc: 'videos/Ochre No 1 Graded.mp4',
+    },
   },
   {
     id: 'street-02',
-    name: 'Street Pack Vol. 02',
-    oneline: 'Gritty, moody looks built for documentary and b-roll.',
-    price: 19,
-    count: 8,
+    name: 'Rainy Neon LUT',
+    oneline: 'A cool, contrasty street LUT built for documentary, b-roll, and night footage.',
+    price: 9,
     formats: '.CUBE · .LOOK',
     tone: 'moody-blue',
-    looks: ['Wet Asphalt', 'Rainy Neon', 'Alley Blue', 'Morning Haze', 'Subway Glow', 'Late Night', 'Concrete', 'Brick & Rust'],
+    available: true,
+    demoLabel: 'Rainy Neon',
   },
   {
-    id: 'warm-film-03',
-    name: 'Warm Film Vol. 03',
-    oneline: 'Kodak-inspired warmth for lifestyle and brand work.',
-    price: 19,
-    count: 8,
+    id: 'interior-03',
+    name: 'Soft Linen LUT',
+    oneline: 'A softer interior-grade LUT for natural light, talking heads, and lifestyle footage.',
+    price: null,
     formats: '.CUBE · .LOOK',
+    badge: 'COMING SOON',
     tone: 'warm-film',
-    looks: ['Portra Light', 'Ektar Gold', 'Faded 200', 'Sunset 400', 'Beach Warm', 'Paper Ivory', 'Gold Leaf', 'Peach'],
+    available: false,
+    release: 'Q2',
+    demoLabel: 'Soft Linen',
   },
 ];
 
@@ -40,42 +51,43 @@ function LutsList({ go }) {
       <section className="list-head">
         <div className="wrap">
           <h1>LUTs that actually sit on the shot.</h1>
-          <p>Calibrated on real cameras: S-Log3, V-Log, LOG-C, Rec.709. No neon overreach, no crushed shadows.</p>
-          <div className="list-meta">
-            <span>{LUTS.length} PACKS</span>
-            <span>·</span>
-            <span>.CUBE + .LOOK FORMATS</span>
-            <span>·</span>
-            <span>PREMIERE · DAVINCI · FINAL CUT</span>
-          </div>
         </div>
       </section>
       <div className="wrap">
-        <div className="list-grid">
+        <div className="list-grid lut-grid">
           {LUTS.map(l => (
-            <article key={l.id} className="card" onClick={() => go('lut:' + l.id)} style={{ cursor: 'pointer' }}>
-              <div className="card-media"><LutPreview tone={l.tone} /></div>
+            <article
+              key={l.id}
+              className={"card lut-card" + (l.available ? '' : ' lut-card-soon')}
+              onClick={l.available ? () => go('lut:' + l.id) : undefined}
+              style={{
+                cursor: l.available ? 'pointer' : 'default',
+                opacity: l.available ? 1 : 0.72,
+                borderStyle: l.available ? 'solid' : 'dashed',
+                background: l.available ? 'var(--bg)' : 'var(--surface)',
+              }}
+            >
+              <div className="card-media">
+                {l.available ? (
+                  <LutPreview tone={l.tone} interactive compare={l.compare} />
+                ) : (
+                  <div className="lut-card-soon-art" />
+                )}
+              </div>
               <div className="card-body">
                 <div className="card-eyebrow">
-                  <span>{l.count} LOOKS · {l.formats}</span>
-                  {l.badge && <span style={{ color: 'var(--orange-ink)' }}>★ {l.badge}</span>}
+                  <span>{l.available ? `INDIVIDUAL LUT · ${l.formats}` : 'COMING SOON'}</span>
+                  {l.badge && <span style={{ color: l.available ? 'var(--orange-ink)' : 'var(--muted)' }}>{l.available ? '★ ' : ''}{l.badge}</span>}
                 </div>
                 <h3 className="card-title">{l.name}</h3>
-                <p className="card-desc">{l.oneline}</p>
+                {l.available && <p className="card-desc">{l.oneline}</p>}
                 <div className="card-foot">
-                  <div className="card-price">${l.price}</div>
-                  <span className="btn btn-secondary btn-sm">View <ArrowIcon /></span>
+                  <div className="card-price">{l.available ? `$${l.price}` : l.release}</div>
+                  {l.available ? <span className="btn btn-secondary btn-sm">View <ArrowIcon /></span> : null}
                 </div>
               </div>
             </article>
           ))}
-          <article className="card" style={{ borderStyle: 'dashed', background: 'var(--surface)', opacity: 0.7, display: 'grid', placeItems: 'center', minHeight: 280 }}>
-            <div style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)', marginBottom: 6 }}>IN DEVELOPMENT</div>
-              <h3 style={{ fontFamily: 'var(--serif)', fontSize: 24, fontWeight: 500, margin: '0 0 8px' }}>Pack Vol. 04</h3>
-              <p style={{ color: 'var(--muted)', fontSize: 13, margin: 0 }}>Interior and natural light. Q2.</p>
-            </div>
-          </article>
         </div>
       </div>
       <section className="section-sm">
@@ -83,19 +95,19 @@ function LutsList({ go }) {
           <p className="section-title">HOW IT WORKS</p>
           <div className="how">
             <div className="how-item">
-              <div className="how-num">01 / BUY ONCE</div>
-              <h4 className="how-h">Instant checkout</h4>
-              <p className="how-p">No subscriptions. No seats. Pay once, download immediately.</p>
+              <div className="how-num">01 / DOWNLOAD LUT</div>
+              <h4 className="how-h">Get the LUT file</h4>
+              <p className="how-p">Download the LUT and unzip it. You’ll get the `.cube` file, the Premiere `.look`, and a quick usage note.</p>
             </div>
             <div className="how-item">
-              <div className="how-num">02 / INSTALL FAST</div>
-              <h4 className="how-h">Double-click installer</h4>
-              <p className="how-p">Signed installers for Mac and Windows. Under 60 seconds from download to open.</p>
+              <div className="how-num">02 / APPLY AFTER BASE GRADE</div>
+              <h4 className="how-h">Drop it on normalized footage</h4>
+              <p className="how-p">Convert your log footage first or start from a clean Rec.709 base. Then apply the LUT on a clip or adjustment layer.</p>
             </div>
             <div className="how-item">
-              <div className="how-num">03 / EDIT FASTER</div>
-              <h4 className="how-h">Lives in your workflow</h4>
-              <p className="how-p">Tools dock inside Premiere. No web apps, no round-tripping, no account required.</p>
+              <div className="how-num">03 / DIAL IT IN</div>
+              <h4 className="how-h">Tune intensity shot by shot</h4>
+              <p className="how-p">Adjust exposure, white balance, and opacity so the look sits on the footage instead of crushing the image.</p>
             </div>
           </div>
         </div>
@@ -105,9 +117,11 @@ function LutsList({ go }) {
 }
 
 function LutDetail({ id, go }) {
-  const [active, setActive] = React.useState(0);
   const l = LUTS.find(x => x.id === id) || LUTS[0];
-  const tones = ['teal-orange', 'moody-blue', 'warm-film', 'clean', 'neon'];
+  React.useEffect(() => {
+    if (!l.available) go('luts');
+  }, [l.available, go]);
+  if (!l.available) return null;
   return (
     <div className="wrap">
       <div className="pd-crumbs">
@@ -118,50 +132,30 @@ function LutDetail({ id, go }) {
       <div className="pd-hero">
         <div>
           <div className="pd-media">
-            <LutPreview tone={tones[active % tones.length]} scale={1.4} />
+            <LutPreview tone={l.tone} scale={1.4} interactive compare={l.compare} />
             <div className="reel-meta">
               <span>BEFORE / AFTER</span>
-              <span style={{ opacity: 0.6 }}>{l.looks[active]}</span>
-            </div>
-          </div>
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)', marginBottom: 10 }}>BROWSE LOOKS · {l.count}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
-              {l.looks.map((n, i) => (
-                <div key={i} onClick={() => setActive(i)} style={{
-                  aspectRatio: '4/3', borderRadius: 4,
-                  border: '1px solid ' + (active === i ? 'var(--ink)' : 'var(--hairline)'),
-                  overflow: 'hidden', position: 'relative', cursor: 'pointer',
-                }}>
-                  <LutPreview tone={tones[i % tones.length]} scale={0.3} />
-                  <div style={{
-                    position: 'absolute', left: 0, right: 0, bottom: 0,
-                    background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
-                    color: '#fff', fontFamily: 'var(--mono)', fontSize: 9,
-                    padding: '8px 6px 4px', textAlign: 'center',
-                  }}>{n}</div>
-                </div>
-              ))}
+              <span style={{ opacity: 0.6 }}>{l.demoLabel}</span>
             </div>
           </div>
         </div>
 
         <div className="pd-info">
-          <div className="pd-tag"><span className="pd-tag-dot" style={{ background: 'var(--orange)' }} /> LUT PACK · {l.count} LOOKS</div>
+          <div className="pd-tag"><span className="pd-tag-dot" style={{ background: 'var(--orange)' }} /> INDIVIDUAL LUT · .CUBE + .LOOK</div>
           <h1>{l.name}</h1>
           <p className="pd-benefit">{l.oneline}</p>
 
           <div className="pd-price-row">
             <div className="pd-price">${l.price}</div>
-            <div className="pd-price-note">ONE-TIME · ALL FORMATS INCLUDED</div>
+            <div className="pd-price-note">ONE-TIME · BOTH FORMATS INCLUDED</div>
           </div>
           <button className="btn btn-primary btn-lg pd-buy"><DownloadIcon /> Buy &amp; Download</button>
-          <div className="pd-reassure"><CheckIcon /> Instant download · ZIP · 120 MB</div>
+          <div className="pd-reassure"><CheckIcon /> Instant download · ZIP · .cube + .look</div>
 
           <div className="pd-bullets">
-            <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">Adds ready-to-grade looks that preserve skin tones and shadow detail. Drop on an adjustment layer, dial opacity.</div></div>
-            <div className="pd-bullet"><div className="pd-bullet-k">WHO IT'S FOR</div><div className="pd-bullet-v">Editors and DPs grading S-Log3 / V-Log / LOG-C / Rec.709 who want a sane starting point, not a hard look.</div></div>
-            <div className="pd-bullet"><div className="pd-bullet-k">WHAT YOU GET</div><div className="pd-bullet-v">{l.count} × .CUBE · {l.count} × .LOOK · a README with recommended exposure & base grade · free updates for 1 year.</div></div>
+            <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">Gives you one finished look you can apply after your base correction, then tune with opacity and exposure.</div></div>
+            <div className="pd-bullet"><div className="pd-bullet-k">WHO IT'S FOR</div><div className="pd-bullet-v">Editors and filmmakers who want one reliable LUT for a specific mood instead of a large bundle they will never fully use.</div></div>
+            <div className="pd-bullet"><div className="pd-bullet-k">WHAT YOU GET</div><div className="pd-bullet-v">1 × .CUBE · 1 × .LOOK · a short README with recommended use and base-grade notes.</div></div>
           </div>
         </div>
       </div>

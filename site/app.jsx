@@ -1,7 +1,7 @@
 // Main SPA shell. routing, tweaks, mounting
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "theme": "light"
+  "theme": "dark"
 }/*EDITMODE-END*/;
 
 function App({ initialPage, embedded }) {
@@ -14,8 +14,6 @@ function App({ initialPage, embedded }) {
     if (embedded) return;
     const saved = localStorage.getItem('alexgmov:page');
     if (saved) setPage(saved);
-    const t = localStorage.getItem('alexgmov:theme');
-    if (t) setTheme(t);
   }, []);
   React.useEffect(() => {
     if (!embedded) localStorage.setItem('alexgmov:page', page);
@@ -82,5 +80,6 @@ if (document.getElementById('root')) {
   const qs = new URLSearchParams(location.search);
   const initial = qs.get('page') || 'home';
   const embedded = qs.get('embedded') === '1';
+  document.documentElement.setAttribute('data-theme', TWEAK_DEFAULTS.theme);
   ReactDOM.createRoot(document.getElementById('root')).render(<App initialPage={initial} embedded={embedded} />);
 }

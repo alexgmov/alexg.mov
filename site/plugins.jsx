@@ -2,53 +2,55 @@
 
 const PLUGINS = [
   {
-    id: 'youtube-downloader',
-    name: 'YouTube Downloader',
-    oneline: 'Pull reference clips into Premiere without leaving your timeline.',
-    price: 9,
-    version: '1.2.0',
-    badge: 'NEW',
+    id: 'flowstate',
+    name: 'FlowState',
+    oneline: 'Turn rough talking-head timelines into cleaner first cuts without leaving Premiere.',
+    price: 19,
+    version: '1.0.0',
+    badge: 'RELEASED',
+    status: 'released',
     variant: 'youtube-dl',
-    what: 'Download YouTube videos from inside Premiere so you can reference, cut, and iterate faster.',
-    who: 'Editors who grab references, temp clips, or inspiration during a session.',
+    what: 'FlowState helps you move from messy selects to a watchable first pass faster, with focused cleanup actions built right into Premiere.',
+    who: 'Editors cutting interviews, podcasts, explainers, and creator content on tight turnarounds.',
     get: 'Self-contained Premiere extension · installer for Mac & Windows · quick start guide · free updates for 1 year.',
     install: [
       'Download the installer (.dmg for Mac, .exe for Windows).',
       'Close Premiere if it is currently running.',
       'Double-click the installer. Follow the two prompts.',
-      'Reopen Premiere. Window → Extensions → YouTube Downloader.',
-      'Paste any YouTube URL. Pick resolution. Hit Download.',
+      'Reopen Premiere. Window → Extensions → FlowState.',
+      'Open your sequence, choose a cleanup preset, and run the pass.',
     ],
     specs: [
       'Adobe Premiere Pro 2024 (24.0) or later',
       'macOS 13+ · Windows 10/11',
-      '~40 MB install · Network connection required for downloads',
+      '~40 MB install',
       'Works with CPU & Apple Silicon',
     ],
   },
   {
-    id: 'smart-cut',
-    name: 'Smart Cut',
-    oneline: 'Silence detection + jump-cut generator. One pass, clean timeline.',
-    price: 19,
-    version: '0.9.0 BETA',
-    badge: 'BETA',
+    id: 'demonclipper',
+    name: 'DemonClipper',
+    oneline: 'A faster way to carve long sessions into usable selects. Coming soon.',
+    price: null,
+    version: 'COMING SOON',
+    badge: 'COMING SOON',
+    status: 'coming-soon',
     variant: 'toolkit',
-    what: 'Auto-detect silences in dialogue tracks and generate clean jump cuts across V1.',
-    who: 'YouTubers, podcasters on video, and editors who cut a lot of talking-head content.',
-    get: 'Premiere extension · presets for pace (tight/medium/loose) · 1 year of updates.',
+    what: 'DemonClipper is built for turning long raw sessions into tighter selects before the real edit begins.',
+    who: 'Editors working through interviews, multicam podcasts, and long-form creator shoots.',
+    get: 'Premiere extension for Mac & Windows · early access for launch list subscribers.',
     install: [
-      'Download and run the installer.',
-      'Restart Premiere if it was open.',
-      'Open Window → Extensions → Smart Cut.',
-      'Select a clip on V1 with audio on A1.',
-      'Pick a preset. Click Analyze. Review. Apply.',
+      'Join the launch list.',
+      'Get the release email when DemonClipper ships.',
+      'Download the installer for Mac or Windows.',
+      'Open Window → Extensions → DemonClipper in Premiere.',
+      'Start clipping down long sessions into selects.',
     ],
     specs: [
       'Premiere Pro 2024 (24.0)+',
       'macOS 13+ / Windows 10/11',
-      'Requires ffmpeg (bundled)',
-      'Beta: expect weekly updates',
+      'Release timing: 2026',
+      'Launch build is in active development',
     ],
   },
 ];
@@ -58,7 +60,7 @@ function PluginsList({ go }) {
     <>
       <section className="list-head">
         <div className="wrap">
-          <h1>Premiere plugins that do one thing well.</h1>
+          <h1>Plugins that do one thing well.</h1>
           <p>Small, focused tools that live inside Premiere. No round-tripping, no web apps. Built for editors on deadlines.</p>
           <div className="list-meta">
             <span>{PLUGINS.length} PLUGINS</span>
@@ -77,25 +79,17 @@ function PluginsList({ go }) {
               <div className="card-body">
                 <div className="card-eyebrow">
                   <span>v{p.version} · PLUGIN</span>
-                  {p.badge && <span style={{ color: p.badge === 'NEW' ? 'var(--blue-ink)' : 'var(--orange-ink)' }}>● {p.badge}</span>}
+                  {p.badge && <span style={{ color: p.status === 'released' ? 'var(--blue-ink)' : 'var(--orange-ink)' }}>● {p.badge}</span>}
                 </div>
                 <h3 className="card-title">{p.name}</h3>
                 <p className="card-desc">{p.oneline}</p>
                 <div className="card-foot">
-                  <div className="card-price">${p.price}</div>
-                  <span className="btn btn-secondary btn-sm">View <ArrowIcon /></span>
+                  <div className="card-price">{p.price != null ? `$${p.price}` : 'Soon'}</div>
+                  <span className="btn btn-secondary btn-sm">{p.status === 'released' ? 'View' : 'Preview'} <ArrowIcon /></span>
                 </div>
               </div>
             </article>
           ))}
-          {/* Empty slot. "max 5 ever" narrative */}
-          <article className="card" style={{ borderStyle: 'dashed', background: 'var(--surface)', opacity: 0.7, display: 'grid', placeItems: 'center', minHeight: 280 }}>
-            <div style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)', marginBottom: 6 }}>IN DEVELOPMENT</div>
-              <h3 style={{ fontFamily: 'var(--serif)', fontSize: 24, fontWeight: 500, margin: '0 0 8px' }}>Plugin #3</h3>
-              <p style={{ color: 'var(--muted)', fontSize: 13, margin: 0 }}>Next drop ships Q2.</p>
-            </div>
-          </article>
         </div>
       </div>
       <section className="section-sm">
@@ -171,11 +165,13 @@ function PluginDetail({ id, go }) {
           <p className="pd-benefit">{p.oneline}</p>
 
           <div className="pd-price-row">
-            <div className="pd-price">${p.price}</div>
-            <div className="pd-price-note">ONE-TIME · LIFETIME DOWNLOAD</div>
+            <div className="pd-price">{p.price != null ? `$${p.price}` : 'Soon'}</div>
+            <div className="pd-price-note">{p.status === 'released' ? 'ONE-TIME · LIFETIME DOWNLOAD' : 'IN DEVELOPMENT · LAUNCH LIST OPEN'}</div>
           </div>
-          <button className="btn btn-primary btn-lg pd-buy"><DownloadIcon /> Buy &amp; Download</button>
-          <div className="pd-reassure"><CheckIcon /> Instant download · 24h support reply · No refunds</div>
+          {p.status === 'released'
+            ? <button className="btn btn-primary btn-lg pd-buy"><DownloadIcon /> Buy &amp; Download</button>
+            : <button className="btn btn-secondary btn-lg pd-buy">Join Launch List</button>}
+          <div className="pd-reassure"><CheckIcon /> {p.status === 'released' ? 'Instant download · 24h support reply' : 'Shipping updates posted as development continues'}</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{p.what}</div></div>

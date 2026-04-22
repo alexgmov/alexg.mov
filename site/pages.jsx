@@ -48,10 +48,10 @@ function Portfolio({ go }) {
 }
 
 const SERVICES = [
-  { n: '01', name: 'Brand Film', sub: 'Full Stack Video Production', desc: 'Launch or anthem film. Concept, shoot, edit, deliver. Best when you need one sharp hero asset.', price: 'from $12k', turnaround: '4–6 weeks' },
-  { n: '02', name: 'Video Editing', desc: 'You shot it, I cut it. Bring camera originals and a reference. I deliver a polished cut and grade.', price: 'from $3k', turnaround: '1–2 weeks' },
-  { n: '03', name: 'Motion Graphics', desc: 'Title sequences, lower thirds, explainer overlays, logo animations. After Effects native.', price: 'from $2k', turnaround: '1–3 weeks' },
-  { n: '04', name: 'Consulting', desc: 'Audit of your edit workflow, stack, or short-form strategy. 90 min call plus written notes.', price: '$600', turnaround: '1 week' },
+  { n: '01', name: 'Brand Film', sub: 'Full Stack Video Production', desc: 'Launch or anthem film. Concept, shoot, edit, deliver. Best when you need one sharp hero asset.', price: 'from $5k', turnaround: '4–6 weeks' },
+  { n: '02', name: 'Video Editing', desc: 'You shot it, I cut it. Bring camera originals and a reference. I deliver a polished cut and grade.', price: 'from $199', turnaround: '1–2 weeks' },
+  { n: '03', name: 'Motion Graphics', desc: 'Title sequences, lower thirds, explainer overlays, logo animations. After Effects native.', price: 'from $1500', turnaround: '1–3 weeks' },
+  { n: '04', name: 'Consulting', desc: 'Audit of your edit workflow, stack, or short-form strategy. 90 min call plus written notes.', price: '$90/hour', turnaround: '1 week' },
 ];
 
 const SVC_PROCESS = [
@@ -61,7 +61,26 @@ const SVC_PROCESS = [
   { k: '04', h: 'Deliver', p: 'Final masters in your preferred specs. Project file included if you want it.' },
 ];
 
-const SVC_CLIENTS = ['OMI', 'Morrow Studios', 'Threadfare', 'Noon', 'Parallel', 'Halftone', 'Late Coast', 'Paper House'];
+const SVC_CLIENTS = ['OMI', 'Cluely', 'Starbucks', 'InterviewCoder', 'Fazm', 'University of Utah', 'Kaedim'];
+
+function openBriefEmail() {
+  const subject = 'Project brief';
+  const body = [
+    'Hi Alex,',
+    '',
+    'Here is my project brief:',
+    '',
+    'Project type:',
+    'Scope:',
+    'Timeline:',
+    'Budget:',
+    'Links:',
+    '',
+    'Best,',
+    '',
+  ].join('\n');
+  window.location.href = `mailto:alex@alexg.mov?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
 
 function Services({ go }) {
   return (
@@ -69,7 +88,6 @@ function Services({ go }) {
       <div className="wrap">
         <div className="svc-intro">
           <h1>Services.</h1>
-          <p>I take a small number of projects per quarter. Portfolio first, tools second. Services are for folks who want me in the Premiere window themselves.</p>
         </div>
 
         {/* Availability strip */}
@@ -130,7 +148,7 @@ function Services({ go }) {
         </div>
 
         <div style={{ padding: '48px 0 72px', display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-primary btn-lg" onClick={() => window.location.href = 'mailto:alex@alexg.mov'}>Email a brief</button>
+          <button className="btn btn-primary btn-lg" onClick={openBriefEmail}>Email a brief</button>
           <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--muted)' }}>alex@alexg.mov · reply within 24h</span>
         </div>
       </div>
@@ -142,7 +160,6 @@ const FAQS = [
   { q: 'Do your plugins work on Windows?', a: 'Yes. Every plugin ships with a signed installer for Mac and Windows. Premiere Pro 2024 (24.0) or later.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
   { q: 'Do you offer refunds?', a: 'No. These are digital downloads. Once the files hit your machine, there is no way to un-deliver them. If you hit an install bug or something is broken on my end, email me and I will fix it or replace the file.' },
-  { q: 'What if the plugin breaks after a Premiere update?', a: 'Free updates for 12 months from purchase. After that, a small upgrade price applies. I ship compatibility updates within two weeks of a major Premiere release.' },
   { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Often same-day. Include your OS, Premiere version, and a screen recording. It cuts debugging time in half.' },
 ];
 
@@ -219,7 +236,7 @@ function Refund() {
     <div className="wrap" style={{ maxWidth: 720, padding: '56px 32px 80px' }}>
       <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--muted)', marginBottom: 12 }}>LAST UPDATED · APR 2026</div>
       <h1 style={{ fontFamily: 'var(--serif)', fontSize: 44, fontWeight: 500, letterSpacing: '-0.02em', margin: '0 0 16px' }}>Refund policy.</h1>
-      <p style={{ fontFamily: 'var(--serif)', fontSize: 22, color: 'var(--muted)', fontStyle: 'italic', margin: '0 0 40px' }}>Short version: no refunds.</p>
+      <p style={{ fontFamily: 'var(--serif)', fontSize: 22, color: 'var(--muted)', fontStyle: 'italic', margin: '0 0 40px' }}>All sales are final. Broken files get fixed or replaced.</p>
       <div style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--ink-soft)' }}>
         <p>All sales are final. These are digital downloads. Once the files are on your machine there is no way to un-deliver them.</p>
         <p>If something is broken (install bug, missing file, LUT that will not load) email <a href="mailto:alex@alexg.mov" style={{ fontFamily: 'var(--mono)' }}>alex@alexg.mov</a> within 14 days. I will fix it or replace the file.</p>
