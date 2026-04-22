@@ -1,45 +1,245 @@
 // Portfolio, Services, Support, Terms, Refund
 
-const PORTFOLIO = [
-  { id: 'omi', title: 'OMI Launch Film', tag: 'STRATEGY · EDIT', views: '3.8M', size: 'hero', seed: 1 },
-  { id: 'brand-01', title: 'Morrow Studios Brand', tag: 'DIRECT · EDIT', views: '920K', size: 'wide', seed: 3 },
-  { id: 'doc-01', title: 'Threadfare Doc', tag: 'EDIT', views: '420K', size: '', seed: 4 },
-  { id: 'spot-01', title: 'Noon Spot', tag: 'EDIT · COLOR', views: '1.1M', size: '', seed: 5 },
-  { id: 'music-01', title: '"Still / Here" MV', tag: 'EDIT', views: '680K', size: 'tall', seed: 7 },
-  { id: 'tt-01', title: 'Short Form Series · Cut 04', tag: 'SERIES', views: '2.1M', size: 'wide', seed: 2 },
-  { id: 'bts-01', title: 'OMI BTS', tag: 'BTS', views: '140K', size: '', seed: 0 },
-  { id: 'tut-01', title: 'Cutting Fast', tag: 'YOUTUBE', views: '310K', size: '', seed: 6 },
+// Keep source links and per-project metadata on each tile so the next
+// click-through / project-file purchase layer can attach to this same model.
+const PORTFOLIO_VIDEOS = [
+  {
+    id: 'ekta-portrait',
+    title: 'Ekta portrait cut',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/p/DMZNWMJRyu5/',
+    src: 'videos/portfolio/web/ekta-portrait.mp4',
+    layout: 'portrait offset-lg',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'alexg-portrait',
+    title: 'Alex Garrett social spot',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/p/DOyrMpyCXV0/',
+    src: 'videos/portfolio/web/alexg-portrait.mp4',
+    layout: 'portrait',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'interview-coder-linkedin',
+    title: 'Interview Coder launch film',
+    source: 'LinkedIn',
+    sourceUrl: 'https://www.linkedin.com/posts/abdulla007_i-spent-the-last-few-months-building-interview-activity-7389017263137366017-mnw5?utm_source=share&utm_medium=member_desktop&rcm=ACoAADxqsrkB2ELwiS4XdDkChEYtbz9dxTc-INc',
+    src: 'videos/portfolio/web/interview-coder-linkedin.mp4',
+    layout: 'feature',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'eldo-reel',
+    title: 'Eldo reel',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/reel/DJHzWMmoXz2/',
+    src: 'videos/portfolio/web/eldo-reel.mp4',
+    layout: 'portrait offset-sm',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'abdulla-case-study',
+    title: 'Abdulla case study',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/p/DVipr1igHR3/',
+    src: 'videos/portfolio/web/abdulla-case-study.mp4',
+    layout: 'portrait',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'motion-graphics-drive',
+    title: 'Motion graphics build',
+    source: 'Drive',
+    sourceUrl: 'https://drive.google.com/file/d/17DS1xWMJFBe0rNCXQHvWcRSJ1y_vxUPv/view',
+    src: 'videos/portfolio/web/motion-graphics-drive.mp4',
+    layout: 'landscape-wide offset-md',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'abdulla-showcase',
+    title: 'Abdulla showcase cut',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/p/DVrfbfvjkko/',
+    src: 'videos/portfolio/web/abdulla-showcase.mp4',
+    layout: 'portrait',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'infiniteviews-real-estate',
+    title: 'Real estate tour promo',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/reels/DHqw-C_pAtq/',
+    src: 'videos/portfolio/web/infiniteviews-real-estate.mp4',
+    layout: 'portrait offset-lg',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'infiniteviews-marketing',
+    title: 'Infinite Views marketing reel',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/reels/DN3XI1IYksn/',
+    src: 'videos/portfolio/web/infiniteviews-marketing.mp4',
+    layout: 'portrait-wide',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'pcg-luxury-real-estate',
+    title: 'Luxury real estate promo',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/reels/DJ5J48LgmjQ/',
+    src: 'videos/portfolio/web/pcg-luxury-real-estate.mp4',
+    layout: 'portrait',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'snowflakes-youtube',
+    title: 'Snowflakes widescreen preview',
+    source: 'YouTube',
+    sourceUrl: 'https://www.youtube.com/watch?v=RE6ahIf3kwA&t=61s',
+    src: 'videos/portfolio/web/snowflakes-youtube.mp4',
+    layout: 'landscape',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'wide-youtube',
+    title: 'Widescreen interview preview',
+    source: 'YouTube',
+    sourceUrl: 'https://www.youtube.com/watch?v=xTR8c4j_DKk&t=13s',
+    src: 'videos/portfolio/web/wide-youtube.mp4',
+    layout: 'landscape-wide offset-sm',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'ashlie-realtor',
+    title: 'Ashlie Brewer realtor reel',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/p/C4gJ_6qut97/',
+    src: 'videos/portfolio/web/ashlie-realtor.mp4',
+    layout: 'portrait',
+    projectFileState: 'planned',
+  },
+  {
+    id: 'kaedim-linkedin',
+    title: 'Kaedim launch post',
+    source: 'LinkedIn',
+    sourceUrl: 'https://www.linkedin.com/posts/kaedim_today-is-a-big-milestone-for-kaedim-for-activity-7434690563268018176--REi?utm_source=share&utm_medium=member_desktop&rcm=ACoAADxqsrkB2ELwiS4XdDkChEYtbz9dxTc-INc',
+    src: 'videos/portfolio/web/kaedim-linkedin.mp4',
+    layout: 'landscape',
+    projectFileState: 'planned',
+  },
 ];
+
+function PortfolioVideoTile({ item, priority = false }) {
+  const cardRef = React.useRef(null);
+  const videoRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const card = cardRef.current;
+    const video = videoRef.current;
+    if (!card || !video) return undefined;
+
+    let hydrated = Boolean(video.currentSrc || video.getAttribute('src'));
+    let inView = false;
+
+    const ensureHydrated = () => {
+      if (hydrated) return;
+      hydrated = true;
+      video.src = item.src;
+      video.load();
+    };
+
+    const play = () => {
+      ensureHydrated();
+      const pending = video.play();
+      if (pending && typeof pending.catch === 'function') pending.catch(() => {});
+    };
+
+    const pause = () => {
+      video.pause();
+    };
+
+    const handleVisibility = () => {
+      if (document.hidden) pause();
+      else if (inView) play();
+    };
+
+    const handleCanPlay = () => {
+      if (inView && !document.hidden) play();
+    };
+
+    video.defaultMuted = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.loop = true;
+
+    if (priority) ensureHydrated();
+
+    const observer = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      if (entry.isIntersecting && !document.hidden) play();
+      else pause();
+    }, {
+      threshold: 0.15,
+      rootMargin: '160px 0px',
+    });
+
+    observer.observe(card);
+    document.addEventListener('visibilitychange', handleVisibility);
+    video.addEventListener('canplay', handleCanPlay);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibility);
+      video.removeEventListener('canplay', handleCanPlay);
+      pause();
+    };
+  }, [item.src, priority]);
+
+  return (
+    <article
+      ref={cardRef}
+      className={"port-item port-video " + item.layout}
+      data-portfolio-id={item.id}
+      data-project-file-state={item.projectFileState}
+      data-source={item.source}
+      data-source-url={item.sourceUrl}
+    >
+      <video
+        ref={videoRef}
+        src={priority ? item.src : undefined}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload={priority ? 'auto' : 'none'}
+        aria-label={item.title}
+        title={item.title}
+        disablePictureInPicture
+        controlsList="nodownload nofullscreen noremoteplayback"
+      />
+    </article>
+  );
+}
 
 function Portfolio({ go }) {
   return (
     <>
-      <section className="list-head">
+      <section className="list-head portfolio-head">
         <div className="wrap">
-          <h1>Work that had to perform.</h1>
-          <p>Case studies, brand films, and cuts that shipped. Every frame cut in the same Premiere setup I build tools for.</p>
-          <div className="list-meta">
-            <span>{PORTFOLIO.length} PROJECTS</span>
-            <span>·</span>
-            <span>10.3M COMBINED VIEWS</span>
-            <span>·</span>
-            <span>2023–2026</span>
-          </div>
+          <h1>Selected video work.</h1>
+          <p>Short form, motion, real estate, and widescreen edits playing silently as soon as the page lands.</p>
         </div>
       </section>
       <div className="wrap">
         <div className="port-grid">
-          {PORTFOLIO.map((p, i) => (
-            <div key={p.id} className={"port-item " + p.size}>
-              <PortfolioStill seed={p.seed} />
-              <div className="port-overlay">
-                <div>
-                  <h4>{p.title}</h4>
-                  <div className="meta">{p.tag}</div>
-                </div>
-                <div className="views">{p.views}</div>
-              </div>
-            </div>
+          {PORTFOLIO_VIDEOS.map((item, index) => (
+            <PortfolioVideoTile
+              key={item.id}
+              item={item}
+              priority={index < 6}
+            />
           ))}
         </div>
       </div>
