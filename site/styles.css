@@ -1917,6 +1917,7 @@ footer {
   --travel2-globe-bottom-bleed: clamp(220px, 20vw, 320px);
   position: absolute;
   inset-inline: 0;
+  width: 100%;
   top: calc(var(--travel2-globe-bleed) * -1);
   height: calc(var(--travel2-globe-base-height) + (var(--travel2-globe-bleed) * 2) + var(--travel2-globe-bottom-bleed));
   pointer-events: none;

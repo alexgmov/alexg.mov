@@ -221,10 +221,13 @@ function HologramGlobe({ locKey }) {
       const topBleed = Math.abs(parseFloat(styles.top) || 0);
       const drawHeight = baseHeight + (topBleed * 2);
       const globeVerticalLift = 72;
-      const cx = w / 2;
+      const isDesktopTravelLayout = w > 1020;
+      const globeHorizontalShift = isDesktopTravelLayout ? Math.min(264, Math.max(192, w * 0.216)) : 0;
+      const globeRadiusScale = isDesktopTravelLayout ? 1.32 : 1.5;
+      const cx = (w / 2) + globeHorizontalShift;
       const cy = (baseHeight / 2) + topBleed - globeVerticalLift;
       const padding = 28;
-      const R  = Math.max(0, Math.min((w / 2) - padding, (drawHeight / 2) - padding) * 1.5);
+      const R  = Math.max(0, Math.min((w / 2) - padding, (drawHeight / 2) - padding) * globeRadiusScale);
 
       if (baselineRotLng == null) {
         const rect = canvas.getBoundingClientRect();
