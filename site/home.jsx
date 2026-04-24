@@ -191,7 +191,17 @@ function HologramGlobe({ locKey }) {
     let scrollY = window.scrollY;
     let phase = 0;
     let raf;
-    let sectionTop = canvas.getBoundingClientRect().top + scrollY;
+    let baselineRotLng = null;
+    let baselineScrollY = scrollY;
+    let stableFrames = 0;
+    let waitFrames = 0;
+    let lastLayoutSignature = '';
+    let fontsReady = !document.fonts || document.fonts.status === 'loaded';
+    const currentLocHorizontalBias = 32;
+
+    if (document.fonts && !fontsReady) {
+      document.fonts.ready.then(() => { fontsReady = true; });
+    }
 
     const onScroll = () => { scrollY = window.scrollY; };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -201,7 +211,6 @@ function HologramGlobe({ locKey }) {
       if (Math.round(canvas.width) !== Math.round(w * dpr)) {
         canvas.width  = Math.round(w * dpr);
         canvas.height = Math.round(h * dpr);
-        sectionTop = canvas.getBoundingClientRect().top + scrollY;
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
@@ -217,12 +226,49 @@ function HologramGlobe({ locKey }) {
       const padding = 28;
       const R  = Math.max(0, Math.min((w / 2) - padding, (drawHeight / 2) - padding) * 1.5);
 
-      // pin faces viewer when section center == viewport center
-      const sectionCenterY  = sectionTop + h / 2;
-      const viewportCenterY = scrollY + window.innerHeight / 2;
-      const offset  = viewportCenterY - sectionCenterY; // 0 when centred
-      const currentLocHorizontalBias = 32;
-      const rotLng  = -loc.lng - currentLocHorizontalBias + offset * 0.12; // degrees
+      if (baselineRotLng == null) {
+        const rect = canvas.getBoundingClientRect();
+        const viewport = window.visualViewport;
+        const viewportHeight = viewport ? viewport.height : window.innerHeight;
+        const viewportWidth = viewport ? viewport.width : window.innerWidth;
+        const viewportOffsetTop = viewport ? viewport.offsetTop : 0;
+        const layoutSignature = [
+          Math.round(rect.top * 10),
+          Math.round(w),
+          Math.round(h),
+          Math.round(viewportWidth),
+          Math.round(viewportHeight),
+          Math.round(viewportOffsetTop * 10),
+          fontsReady ? 1 : 0,
+        ].join('|');
+
+        if (!fontsReady || !w || !h) {
+          lastLayoutSignature = layoutSignature;
+          stableFrames = 0;
+          raf = requestAnimationFrame(draw);
+          return;
+        }
+
+        if (layoutSignature === lastLayoutSignature) stableFrames += 1;
+        else {
+          lastLayoutSignature = layoutSignature;
+          stableFrames = 0;
+        }
+
+        waitFrames += 1;
+        if (stableFrames < 10 && waitFrames < 180) {
+          raf = requestAnimationFrame(draw);
+          return;
+        }
+        const sectionTop = rect.top + scrollY;
+        const sectionCenterY  = sectionTop + h / 2;
+        const viewportCenterY = scrollY + viewportOffsetTop + (viewportHeight / 2);
+        const offset  = viewportCenterY - sectionCenterY;
+        baselineScrollY = scrollY;
+        baselineRotLng = -loc.lng - currentLocHorizontalBias + offset * 0.12;
+      }
+
+      const rotLng  = baselineRotLng + ((scrollY - baselineScrollY) * 0.12);
       const rotLat  = -loc.lat * 0.08;
 
       const d3  = window.d3;
@@ -405,6 +451,36 @@ function HeroTitle() {
   );
 }
 
+const OMI_CASE_STUDY = {
+  client: 'OMI',
+  impactValue: '5.5',
+  impactUnit: 'M VIEWS',
+  impactWindow: 'in 4 days',
+  label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2025',
+  heroTitle: "Directed OMI's launch film end-to-end and drove 5.5M views in four days.",
+  summary: 'OMI needed a launch asset built for reach. I owned the concept, script, direction, production, edit, and the product UI moments that made the assistant feel alive onscreen.',
+  highlightPoints: [
+    'Led a rapid creative pivot to a higher-stakes narrative designed to spark emotion and debate.',
+    'Ran overnight casting and produced a lean three-actor shoot in New York on a compressed timeline.',
+    'Cut the final film and engineered the voice and UI interactions that sold the assistant as real.',
+  ],
+  services: ['Brand Film', 'Video Editing', 'Motion Graphics'],
+  detailSections: [
+    {
+      title: 'Brief',
+      body: 'OMI needed a launch film with one clear KPI: reach. I produced and directed the project end-to-end, owning the concept, scripting, and full creative execution from first idea through final delivery.',
+    },
+    {
+      title: 'Execution',
+      body: 'To maximize distribution, I led a rapid pivot to a higher-stakes narrative designed to create emotion and debate without losing polish. I built a fast shoot plan, ran casting overnight, assembled a three-actor lineup, and managed lean production in New York City under intense time pressure.',
+    },
+    {
+      title: 'Post + outcome',
+      body: 'In post, I cut the final spot and engineered the voice and on-screen product moments that made the assistant feel alive. The launch broke out quickly, driving 5.5M views across X and Instagram in four days.',
+    },
+  ],
+};
+
 function Home({ go }) {
   const actionsRef = useHeroScroll();
   const featuredLut = (window.LUTS || []).find(l => l.id === 'cinematic-01') || {
@@ -500,7 +576,7 @@ function Home({ go }) {
         <div className="wrap">
           <p className="section-title">FEATURED · LUT</p>
           <div className="card card-featured" onClick={() => go('lut:' + featuredLut.id)} style={{ cursor: 'pointer' }}>
-            <div className="card-media"><LutPreview tone="teal-orange" interactive compare={featuredLut.compare} /></div>
+            <div className="card-media"><LutPreview tone="teal-orange" interactive compare={featuredLut.compare} scrollLinked /></div>
             <div className="card-body">
               <div className="card-eyebrow">
                 <span>INDIVIDUAL LUT · .CUBE + .LOOK</span>
@@ -519,23 +595,23 @@ function Home({ go }) {
       {/* Proof */}
       <section className="section">
         <div className="wrap">
-          <p className="section-title">PROOF · CASE STUDY</p>
+          <p className="section-title">PROOF · FEATURED CASE STUDY</p>
           <div className="proof">
             <div className="proof-grid">
               <div>
-                <h2 className="proof-num">3.8<span className="unit">M VIEWS</span></h2>
-                <p className="proof-label">OMI LAUNCH VIDEO · FULL STACK VIDEO PRODUCTION · 2025</p>
+                <h2 className="proof-num">{OMI_CASE_STUDY.impactValue}<span className="unit">{OMI_CASE_STUDY.impactUnit}</span></h2>
+                <p className="proof-label">{OMI_CASE_STUDY.label}</p>
+                <p className="proof-subhead">{OMI_CASE_STUDY.impactWindow}</p>
               </div>
               <div className="proof-body">
-                <h3>Shipped a 3.8M-view launch video. Strategy, production, and post.</h3>
-                <p>I use the same tools I sell. Every plugin here came out of real editing sessions, on real deadlines, cutting real footage.</p>
-                <button className="btn btn-secondary btn-sm" onClick={() => go('portfolio')}>See the case study <ArrowIcon /></button>
-                <div className="proof-meta">
-                  <span><strong>Client</strong>OMI</span>
-                  <span><strong>Role</strong>Strategy + Edit</span>
-                  <span><strong>Platform</strong>TikTok</span>
-                  <span><strong>Duration</strong>3 weeks</span>
+                <h3>{OMI_CASE_STUDY.heroTitle}</h3>
+                <p>{OMI_CASE_STUDY.summary}</p>
+                <div className="proof-points">
+                  {OMI_CASE_STUDY.highlightPoints.map((point) => (
+                    <p key={point} className="proof-point">{point}</p>
+                  ))}
                 </div>
+                <button className="btn btn-secondary btn-sm" onClick={() => go('services', { target: 'service-case-studies' })}>See the full case study <ArrowIcon /></button>
               </div>
             </div>
           </div>
@@ -547,4 +623,4 @@ function Home({ go }) {
   );
 }
 
-Object.assign(window, { Home });
+Object.assign(window, { Home, OMI_CASE_STUDY });

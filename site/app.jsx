@@ -8,6 +8,7 @@ function App({ initialPage, embedded }) {
   const [page, setPage] = React.useState(initialPage || 'home');
   const [theme, setTheme] = React.useState(TWEAK_DEFAULTS.theme);
   const [editMode, setEditMode] = React.useState(false);
+  const [pendingScrollTarget, setPendingScrollTarget] = React.useState(null);
 
   // Persist & restore
   React.useEffect(() => {
@@ -23,6 +24,23 @@ function App({ initialPage, embedded }) {
     if (!embedded) localStorage.setItem('alexgmov:theme', theme);
   }, [theme]);
 
+  React.useEffect(() => {
+    if (!pendingScrollTarget) return undefined;
+    let rafA = 0;
+    let rafB = 0;
+    rafA = requestAnimationFrame(() => {
+      rafB = requestAnimationFrame(() => {
+        const node = document.getElementById(pendingScrollTarget);
+        if (node) node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setPendingScrollTarget(null);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(rafA);
+      cancelAnimationFrame(rafB);
+    };
+  }, [page, pendingScrollTarget]);
+
   // Tweaks
   React.useEffect(() => {
     if (embedded) return;
@@ -36,7 +54,12 @@ function App({ initialPage, embedded }) {
     return () => window.removeEventListener('message', onMsg);
   }, []);
 
-  const go = (p) => { setPage(p); window.scrollTo(0, 0); };
+  const go = (p, options = {}) => {
+    const [nextPage, inlineTarget] = String(p).split('#');
+    setPendingScrollTarget(options.target || inlineTarget || null);
+    setPage(nextPage);
+    window.scrollTo(0, 0);
+  };
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
     setTheme(next);

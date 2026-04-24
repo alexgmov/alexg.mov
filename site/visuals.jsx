@@ -124,11 +124,17 @@ function PremiereScreenshot({ variant = "youtube-dl", scale = 1 }) {
 }
 
 // LUT preview. draggable before/after wipe for LUT demos.
-function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, initialSplit = 0.5, compare = null }) {
+function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, initialSplit = 0.5, compare = null, scrollLinked = false }) {
   const wrapRef = React.useRef(null);
   const baseVideoRef = React.useRef(null);
   const revealVideoRef = React.useRef(null);
-  const [split, setSplit] = React.useState(initialSplit);
+  const splitMin = scrollLinked ? 0 : 0.08;
+  const splitMax = scrollLinked ? 1 : 0.92;
+  const clampSplit = React.useCallback((next) => Math.max(splitMin, Math.min(splitMax, next)), [splitMin, splitMax]);
+  const [baseSplit, setBaseSplit] = React.useState(scrollLinked ? 0 : clampSplit(initialSplit));
+  const baseSplitRef = React.useRef(scrollLinked ? 0 : clampSplit(initialSplit));
+  const [dragOffset, setDragOffset] = React.useState(0);
+  const split = clampSplit(baseSplit + dragOffset);
   const hasVideoCompare = Boolean(compare && compare.beforeSrc && compare.afterSrc);
   const tones = {
     "teal-orange": {
@@ -157,8 +163,48 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
     if (!wrapRef.current) return;
     const rect = wrapRef.current.getBoundingClientRect();
     const next = (clientX - rect.left) / rect.width;
-    setSplit(Math.max(0.08, Math.min(0.92, next)));
-  }, []);
+    setDragOffset(clampSplit(next) - baseSplitRef.current);
+  }, [clampSplit]);
+
+  React.useEffect(() => {
+    if (!scrollLinked) {
+      const nextBase = clampSplit(initialSplit);
+      baseSplitRef.current = nextBase;
+      setBaseSplit(nextBase);
+      return undefined;
+    }
+
+    let frame = null;
+    const updateBaseSplit = () => {
+      frame = null;
+      if (!wrapRef.current) return;
+      const rect = wrapRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+      if (!viewportHeight) return;
+
+      const elementCenter = rect.top + (rect.height / 2);
+      const travel = viewportHeight + rect.height;
+      const nextBase = clampSplit((viewportHeight + (rect.height / 2) - elementCenter) / travel);
+
+      baseSplitRef.current = nextBase;
+      setBaseSplit(prev => Math.abs(prev - nextBase) > 0.001 ? nextBase : prev);
+    };
+
+    const requestUpdate = () => {
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(updateBaseSplit);
+    };
+
+    requestUpdate();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+
+    return () => {
+      if (frame !== null) window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+    };
+  }, [scrollLinked, initialSplit, clampSplit]);
 
   React.useEffect(() => {
     if (!hasVideoCompare) return undefined;
@@ -221,12 +267,16 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
       ref={wrapRef}
       onClick={interactive ? (e) => e.stopPropagation() : undefined}
       onPointerDown={interactive ? (e) => {
+        e.preventDefault();
         e.stopPropagation();
         updateSplit(e.clientX);
         e.currentTarget.setPointerCapture(e.pointerId);
       } : undefined}
       onPointerMove={interactive ? (e) => {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) updateSplit(e.clientX);
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+          e.preventDefault();
+          updateSplit(e.clientX);
+        }
       } : undefined}
       onPointerUp={interactive ? (e) => {
         if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
@@ -234,7 +284,7 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
       onPointerCancel={interactive ? (e) => {
         if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
       } : undefined}
-      style={{ position: 'absolute', inset: 0, overflow: 'hidden', touchAction: interactive ? 'none' : 'auto', cursor: interactive ? 'ew-resize' : 'default' }}
+      style={{ position: 'absolute', inset: 0, overflow: 'hidden', touchAction: interactive ? 'none' : 'auto', userSelect: interactive ? 'none' : 'auto', cursor: interactive ? 'ew-resize' : 'default' }}
     >
       {hasVideoCompare ? (
         <>

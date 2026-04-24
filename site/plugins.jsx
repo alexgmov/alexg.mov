@@ -29,8 +29,8 @@ const PLUGINS = [
   },
   {
     id: 'demonclipper',
-    name: 'DemonClipper',
-    oneline: 'A faster way to carve long sessions into usable selects. Coming soon.',
+    name: 'DemonClipper Coming Soon',
+    oneline: 'A faster way to carve long sessions into usable selects.',
     price: null,
     version: 'COMING SOON',
     badge: 'COMING SOON',
@@ -74,7 +74,12 @@ function PluginsList({ go }) {
       <div className="wrap">
         <div className="list-grid">
           {PLUGINS.map(p => (
-            <article key={p.id} className="card" onClick={() => go('plugin:' + p.id)} style={{ cursor: 'pointer' }}>
+            <article
+              key={p.id}
+              className="card"
+              onClick={p.status === 'released' ? () => go('plugin:' + p.id) : undefined}
+              style={{ cursor: p.status === 'released' ? 'pointer' : 'default' }}
+            >
               <div className="card-media"><PremiereScreenshot variant={p.variant} /></div>
               <div className="card-body">
                 <div className="card-eyebrow">
@@ -85,7 +90,9 @@ function PluginsList({ go }) {
                 <p className="card-desc">{p.oneline}</p>
                 <div className="card-foot">
                   <div className="card-price">{p.price != null ? `$${p.price}` : 'Soon'}</div>
-                  <span className="btn btn-secondary btn-sm">{p.status === 'released' ? 'View' : 'Preview'} <ArrowIcon /></span>
+                  {p.status === 'released'
+                    ? <span className="btn btn-secondary btn-sm">View <ArrowIcon /></span>
+                    : <span className="btn btn-secondary btn-sm">Coming Soon</span>}
                 </div>
               </div>
             </article>
@@ -120,7 +127,26 @@ function PluginsList({ go }) {
 
 function PluginDetail({ id, go }) {
   const [thumb, setThumb] = React.useState(0);
+  const [buying, setBuying] = React.useState(false);
+  const purchased = new URLSearchParams(location.search).get('purchased') === 'true';
   const p = PLUGINS.find(x => x.id === id) || PLUGINS[0];
+
+  async function handleBuy() {
+    setBuying(true);
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: p.id }),
+      });
+      const { url, error } = await res.json();
+      if (error) throw new Error(error);
+      window.location.href = url;
+    } catch {
+      alert('Something went wrong. Please try again or email alex@alexg.mov.');
+      setBuying(false);
+    }
+  }
   return (
     <div className="wrap">
       <div className="pd-crumbs">
@@ -164,14 +190,22 @@ function PluginDetail({ id, go }) {
           <h1>{p.name}</h1>
           <p className="pd-benefit">{p.oneline}</p>
 
+          {purchased && (
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 6, padding: '14px 16px', marginBottom: 20, fontSize: 14, lineHeight: 1.6 }}>
+              <strong style={{ color: 'var(--ink)' }}>Purchase confirmed.</strong>
+              <span style={{ color: 'var(--muted)' }}> Check your email for the download link (valid 48 hours). Check spam if it doesn't arrive within a few minutes.</span>
+            </div>
+          )}
           <div className="pd-price-row">
             <div className="pd-price">{p.price != null ? `$${p.price}` : 'Soon'}</div>
             <div className="pd-price-note">{p.status === 'released' ? 'ONE-TIME · LIFETIME DOWNLOAD' : 'IN DEVELOPMENT · LAUNCH LIST OPEN'}</div>
           </div>
           {p.status === 'released'
-            ? <button className="btn btn-primary btn-lg pd-buy"><DownloadIcon /> Buy &amp; Download</button>
+            ? <button className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
+                <DownloadIcon /> {buying ? 'Redirecting…' : 'Buy & Download'}
+              </button>
             : <button className="btn btn-secondary btn-lg pd-buy">Join Launch List</button>}
-          <div className="pd-reassure"><CheckIcon /> {p.status === 'released' ? 'Instant download · 24h support reply' : 'Shipping updates posted as development continues'}</div>
+          <div className="pd-reassure"><CheckIcon /> {p.status === 'released' ? 'Instant download via email · 24h support reply' : 'Shipping updates posted as development continues'}</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{p.what}</div></div>
