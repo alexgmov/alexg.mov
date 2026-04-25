@@ -197,7 +197,7 @@ function HologramGlobe({ locKey }) {
     let waitFrames = 0;
     let lastLayoutSignature = '';
     let fontsReady = !document.fonts || document.fonts.status === 'loaded';
-    const currentLocHorizontalBias = 32;
+    const currentLocHorizontalBias = 2;
 
     if (document.fonts && !fontsReady) {
       document.fonts.ready.then(() => { fontsReady = true; });
@@ -222,8 +222,8 @@ function HologramGlobe({ locKey }) {
       const drawHeight = baseHeight + (topBleed * 2);
       const globeVerticalLift = 72;
       const isDesktopTravelLayout = w > 1020;
-      const globeHorizontalShift = isDesktopTravelLayout ? Math.min(264, Math.max(192, w * 0.216)) : 0;
-      const globeRadiusScale = isDesktopTravelLayout ? 1.32 : 1.5;
+      const globeHorizontalShift = isDesktopTravelLayout ? Math.min(296, Math.max(224, w * 0.216 + 32)) : 16;
+      const globeRadiusScale = isDesktopTravelLayout ? 1.056 : 1.2;
       const cx = (w / 2) + globeHorizontalShift;
       const cy = (baseHeight / 2) + topBleed - globeVerticalLift;
       const padding = 28;
@@ -276,7 +276,11 @@ function HologramGlobe({ locKey }) {
 
       const d3  = window.d3;
       const geo = geoRef.current;
-      const liveBlue = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#6EC1FF';
+      const rootStyles = getComputedStyle(document.documentElement);
+      const liveBlue = rootStyles.getPropertyValue('--blue').trim() || '#6EC1FF';
+      const labelBg = rootStyles.getPropertyValue('--surface').trim()
+        || rootStyles.getPropertyValue('--bg').trim()
+        || '#0c0c0d';
 
       const projection = d3.geoOrthographic()
         .scale(R)
@@ -320,10 +324,22 @@ function HologramGlobe({ locKey }) {
         ctx.save();
         ctx.font = '500 12px Calibri, "Segoe UI", Arial, sans-serif';
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
+        ctx.textBaseline = 'middle';
         ctx.shadowBlur = 0;
+        const label = loc.city;
+        const labelY = py - 24;
+        const labelPadX = 7;
+        const labelHeight = 20;
+        const labelWidth = Math.ceil(ctx.measureText(label).width + labelPadX * 2);
+        const labelX = Math.round(px - (labelWidth / 2));
+        const labelTop = Math.round(labelY - (labelHeight / 2));
+        ctx.fillStyle = labelBg;
+        ctx.fillRect(labelX, labelTop, labelWidth, labelHeight);
+        ctx.strokeStyle = withAlpha(liveBlue, 0.5);
+        ctx.lineWidth = 1;
+        ctx.strokeRect(labelX + 0.5, labelTop + 0.5, labelWidth - 1, labelHeight - 1);
         ctx.fillStyle = withAlpha(liveBlue, 0.96);
-        ctx.fillText(loc.city, px, py - 18);
+        ctx.fillText(label, px, labelY);
 
         ctx.strokeStyle = withAlpha(liveBlue, 0.9 - (t * 0.45));
         ctx.lineWidth = 1.4;
@@ -458,16 +474,13 @@ const OMI_CASE_STUDY = {
   client: 'OMI',
   impactValue: '5.5',
   impactUnit: 'M VIEWS',
-  impactWindow: 'in 4 days',
-  label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2025',
+  label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2026',
+  teaserLabel: 'OMI LAUNCH FILM · FULL STACK VIDEO PRODUCTION · 2026',
+  teaserTitle: 'Shipped a 5.5M-view launch film.',
+  teaserSummary: 'Concept, production, edit, and product UI moments were built around one launch metric: reach.',
+  videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
   heroTitle: "Directed OMI's launch film end-to-end and drove 5.5M views in four days.",
   summary: 'OMI needed a launch asset built for reach. I owned the concept, script, direction, production, edit, and the product UI moments that made the assistant feel alive onscreen.',
-  highlightPoints: [
-    'Led a rapid creative pivot to a higher-stakes narrative designed to spark emotion and debate.',
-    'Ran overnight casting and produced a lean three-actor shoot in New York on a compressed timeline.',
-    'Cut the final film and engineered the voice and UI interactions that sold the assistant as real.',
-  ],
-  services: ['Brand Film', 'Video Editing', 'Motion Graphics'],
   detailSections: [
     {
       title: 'Brief',
@@ -488,18 +501,18 @@ function Home({ go }) {
   const actionsRef = useHeroScroll();
   const featuredLut = (window.LUTS || []).find(l => l.id === 'cinematic-01') || {
     id: 'cinematic-01',
-    name: 'Ochre No 1',
-    oneline: 'A warm, contrasty LUT for golden-hour footage, skin tones, and clean cinematic rolloff.',
+    name: 'Solène',
+    oneline: 'Sculpted for daylight, this look carves deep, luminous contrast across skin and landscape alike, kissing greens with a rich amber glow and surrendering to darkness with cinematic grace.',
     price: 9,
     badge: 'BESTSELLER',
     compare: {
-      title: 'Ochre No 1',
+      title: 'Solène',
       beforeLabel: 'Ungraded',
       afterLabel: 'Graded',
-      beforeTitle: 'Ochre No 1 ungraded preview',
-      afterTitle: 'Ochre No 1 graded preview',
-      beforeSrc: 'videos/Ochre No 1 Ungraded.mp4',
-      afterSrc: 'videos/Ochre No 1 Graded.mp4',
+      beforeTitle: 'Solène ungraded preview',
+      afterTitle: 'Solène graded preview',
+      beforeSrc: 'videos/Solène Ungraded.mp4',
+      afterSrc: 'videos/Solène Graded.mp4',
     },
   };
 
@@ -528,7 +541,7 @@ function Home({ go }) {
       </section>
 
       {/* About strip */}
-      <section className="section-sm">
+      <section className="section-sm about-strip">
         <div className="wrap">
           <div className="about-row">
             <p className="section-title">WHAT I DO</p>
@@ -556,15 +569,15 @@ function Home({ go }) {
           <p className="section-title">FEATURED · PLUGIN</p>
           <div className="card card-featured">
             <div className="card-media">
-              <PremiereScreenshot variant="youtube-dl" />
+              <PremiereScreenshot variant="ai-media-browser" />
             </div>
             <div className="card-body">
               <div className="card-eyebrow">
                 <span>v1.0.0 · PREMIERE 2024+</span>
                 <span style={{ color: 'var(--blue-ink)' }}>● RELEASED</span>
               </div>
-              <h3 className="card-title">FlowState</h3>
-              <p className="card-desc">Turn rough talking-head timelines into cleaner first cuts without leaving Premiere.</p>
+              <h3 className="card-title">AI Media Browser</h3>
+              <p className="card-desc">Analyze Premiere bin footage with AI, then search clips by meaning instead of filenames.</p>
               <div className="card-foot">
                 <div className="card-price">$19<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
                 <button className="btn btn-primary" onClick={() => go('plugin:flowstate')}>View <ArrowIcon /></button>
@@ -582,7 +595,7 @@ function Home({ go }) {
             <div className="card-media"><LutPreview tone="teal-orange" interactive compare={featuredLut.compare} scrollLinked /></div>
             <div className="card-body">
               <div className="card-eyebrow">
-                <span>INDIVIDUAL LUT · .CUBE + .LOOK</span>
+                <span>INDIVIDUAL LUT · .CUBE</span>
                 <span style={{ color: 'var(--orange-ink)' }}>★ {featuredLut.badge || 'BESTSELLER'}</span>
               </div>
               <h3 className="card-title">{featuredLut.name}</h3>
@@ -596,25 +609,38 @@ function Home({ go }) {
       </section>
 
       {/* Proof */}
-      <section className="section">
+      <section className="section-sm proof-section">
         <div className="wrap">
-          <p className="section-title">PROOF · FEATURED CASE STUDY</p>
+          <p className="section-title">PROOF · CASE STUDY</p>
           <div className="proof">
             <div className="proof-grid">
-              <div>
+              <div className="proof-stat">
                 <h2 className="proof-num">{OMI_CASE_STUDY.impactValue}<span className="unit">{OMI_CASE_STUDY.impactUnit}</span></h2>
-                <p className="proof-label">{OMI_CASE_STUDY.label}</p>
-                <p className="proof-subhead">{OMI_CASE_STUDY.impactWindow}</p>
+                <p className="proof-label">{OMI_CASE_STUDY.teaserLabel}</p>
               </div>
               <div className="proof-body">
-                <h3>{OMI_CASE_STUDY.heroTitle}</h3>
-                <p>{OMI_CASE_STUDY.summary}</p>
-                <div className="proof-points">
-                  {OMI_CASE_STUDY.highlightPoints.map((point) => (
-                    <p key={point} className="proof-point">{point}</p>
-                  ))}
+                <div className="proof-copy">
+                  <h3>{OMI_CASE_STUDY.teaserTitle}</h3>
+                  {OMI_CASE_STUDY.teaserSummary && <p className="proof-summary">{OMI_CASE_STUDY.teaserSummary}</p>}
                 </div>
-                <button className="btn btn-secondary btn-sm" onClick={() => go('services', { target: 'service-case-studies' })}>See the full case study <ArrowIcon /></button>
+                <div className="proof-video">
+                  <video
+                    src={OMI_CASE_STUDY.videoSrc}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    aria-label="OMI launch film"
+                    title="OMI launch film"
+                    disablePictureInPicture
+                    controlsList="nodownload nofullscreen noremoteplayback"
+                  />
+                </div>
+                <div className="proof-actions">
+                  <button className="btn btn-primary btn-sm proof-cta" onClick={() => go('services', { target: 'service-case-studies' })}>See the case study <ArrowIcon /></button>
+                  <p className="proof-cta-note">Full breakdown: brief, execution, outcome.</p>
+                </div>
               </div>
             </div>
           </div>

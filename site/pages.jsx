@@ -10,16 +10,16 @@ const PORTFOLIO_CATEGORIES = [
     intro: 'Launch films, founder-led announcements, and brand pieces built to land fast and feel premium on first view.',
   },
   {
-    id: 'business-promos',
-    label: 'Business Promos',
+    id: 'motion-graphics',
+    label: 'Motion Graphics',
     kicker: '02',
-    intro: 'Business-facing edits for restaurants, local brands, and other client work that needs to advertise clearly and still feel polished.',
+    intro: 'Typography, transitions, and designed movement that helps the message feel sharper without getting noisy.',
   },
   {
     id: 'ai-speed-ramp-edits',
-    label: 'AI Speed Ramp Edits',
+    label: 'Speed Ramp Edits',
     kicker: '03',
-    intro: 'Fast, stylized social edits built around punchy pacing, AI-assisted motion, and sharper visual acceleration.',
+    intro: 'Fast, stylized social edits built around punchy pacing, kinetic motion, and sharper visual acceleration.',
   },
   {
     id: 'real-estate',
@@ -28,206 +28,189 @@ const PORTFOLIO_CATEGORIES = [
     intro: 'Property promos, realtor-led spots, and high-end real estate edits designed to sell mood as much as square footage.',
   },
   {
-    id: 'motion-graphics',
-    label: 'Motion Graphics',
+    id: 'short-film',
+    label: 'Short Films',
     kicker: '05',
-    intro: 'Typography, transitions, and designed movement that helps the message feel sharper without getting noisy.',
+    intro: 'Widescreen edits with more room to breathe, focused on pacing, tone, and cinematic atmosphere.',
   },
   {
-    id: 'short-film',
-    label: 'Short Film',
+    id: 'business-promos',
+    label: 'Business Promos',
     kicker: '06',
-    intro: 'Widescreen edits with more room to breathe, focused on pacing, tone, and cinematic atmosphere.',
+    intro: 'Business-facing edits for restaurants, local brands, and other client work that needs to advertise clearly and still feel polished.',
   },
 ];
 
 const PORTFOLIO_VIDEOS = [
   {
+    id: 'omi-launch-film',
+    title: 'OMI launch film',
+    category: 'launchbrand',
+    kind: 'Product launch film',
+    blurb: 'A full-stack launch film that drove 5.5M views.',
+    source: 'alexg.mov',
+    sourceUrl: 'videos/portfolio/web/omi-launch-film.mp4',
+    src: 'videos/portfolio/web/omi-launch-film.mp4',
+    layout: 'feature',
+  },
+  {
     id: 'ekta-portrait',
     title: 'Ekta portrait cut',
     category: 'ai-speed-ramp-edits',
     kind: 'Portrait social reel',
-    role: 'Edit + polish',
-    blurb: 'A portrait reel posted by ekta.mp4 and cut to feel intimate, clean, and quietly cinematic in a vertical frame.',
+    blurb: 'A clean portrait reel with a quiet cinematic feel.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DMZNWMJRyu5/',
     src: 'videos/portfolio/web/ekta-portrait.mp4',
     layout: 'portrait offset-lg',
-    projectFileState: 'none',
   },
   {
     id: 'alexg-portrait',
     title: 'Alex Garrett social spot',
     category: 'ai-speed-ramp-edits',
     kind: 'Personal brand spot',
-    role: 'Edit + pacing',
-    blurb: 'An Instagram car-edit style spot built around pigeon imagery, Higgsfield energy, and a sharper After Effects-driven rhythm.',
+    blurb: 'A fast personal-brand spot with sharper visual rhythm.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DOyrMpyCXV0/',
     src: 'videos/portfolio/web/alexg-portrait.mp4',
     layout: 'portrait',
-    projectFileState: 'none',
   },
   {
     id: 'interview-coder-linkedin',
     title: 'Interview Coder launch film',
     category: 'launchbrand',
     kind: 'Product launch film',
-    role: 'Strategy + edit',
-    blurb: 'A launch film built around Interview Coder 2.0, emphasizing audio answers, deeper undetectability, and the product’s high-stakes rollout.',
+    blurb: 'A high-stakes launch film for Interview Coder 2.0.',
     source: 'LinkedIn',
     sourceUrl: 'https://www.linkedin.com/posts/abdulla007_i-spent-the-last-few-months-building-interview-activity-7389017263137366017-mnw5?utm_source=share&utm_medium=member_desktop&rcm=ACoAADxqsrkB2ELwiS4XdDkChEYtbz9dxTc-INc',
     src: 'videos/portfolio/web/interview-coder-linkedin.mp4',
     layout: 'feature',
     videoScale: 1.023,
-    projectFileState: 'planned',
   },
   {
     id: 'eldo-reel',
     title: 'Eldo reel',
     category: 'business-promos',
     kind: 'Restaurant promo',
-    role: 'Edit + social pacing',
-    blurb: 'A restaurant-led promo built around one hero dish: charred lamb chops, bright tzatziki, and a strong bestseller payoff.',
+    blurb: 'A punchy restaurant promo built around one hero dish.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reel/DJHzWMmoXz2/',
     src: 'videos/portfolio/web/eldo-reel.mp4',
     layout: 'portrait offset-sm',
-    projectFileState: 'none',
   },
   {
     id: 'abdulla-case-study',
     title: 'Abdulla case study',
     category: 'launchbrand',
     kind: 'Founder case study',
-    role: 'Edit + story shaping',
-    blurb: 'A founder-facing startup edit rooted in the post’s “winning life” tone, framed through ambition, momentum, and New York energy.',
+    blurb: 'A founder-facing startup edit with momentum and polish.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DVipr1igHR3/',
     src: 'videos/portfolio/web/abdulla-case-study.mp4',
     layout: 'portrait',
-    projectFileState: 'planned',
   },
   {
     id: 'motion-graphics-drive',
     title: 'Motion graphics build',
     category: 'motion-graphics',
     kind: 'Product UI motion piece',
-    role: 'Animation + compositing',
-    blurb: 'A Cluely product UI motion build focused on interface movement, graphic clarity, and a sharper software-demo feel.',
+    blurb: 'A clean UI motion piece with sharper demo energy.',
     source: 'Drive',
     sourceUrl: 'https://drive.google.com/file/d/17DS1xWMJFBe0rNCXQHvWcRSJ1y_vxUPv/view',
     src: 'videos/portfolio/web/motion-graphics-drive.mp4',
     layout: 'landscape-wide offset-md',
     videoScale: 1.023,
-    projectFileState: 'planned',
   },
   {
     id: 'abdulla-showcase',
     title: 'Abdulla showcase cut',
     category: 'launchbrand',
     kind: 'Showcase edit',
-    role: 'Edit + polish',
-    blurb: 'A locked-in build showcase centered on creating the Interview Coder 3.0 landing page, with more grind-mode momentum in the cut.',
+    blurb: 'A build showcase cut for Interview Coder 3.0.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DVrfbfvjkko/',
     src: 'videos/portfolio/web/abdulla-showcase.mp4',
     layout: 'portrait',
-    projectFileState: 'none',
   },
   {
     id: 'infiniteviews-real-estate',
     title: 'Real estate tour promo',
     category: 'real-estate',
     kind: 'Property tour promo',
-    role: 'Edit + vertical adaptation',
-    blurb: 'A real estate promo cut to make the walkthrough feel fast, polished, and premium inside a vertical frame.',
+    blurb: 'A polished vertical walkthrough with premium pacing.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DHqw-C_pAtq/',
     src: 'videos/portfolio/web/infiniteviews-real-estate.mp4',
     layout: 'portrait offset-lg',
-    projectFileState: 'planned',
   },
   {
     id: 'infiniteviews-marketing',
     title: 'Infinite Views marketing reel',
     category: 'real-estate',
     kind: 'Marketing reel',
-    role: 'Edit + brand pacing',
-    blurb: 'A brand-facing reel for a real estate team, built to combine marketability, polish, and quick visual proof.',
+    blurb: 'A fast brand reel for a real estate team.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DN3XI1IYksn/',
     src: 'videos/portfolio/web/infiniteviews-marketing.mp4',
     layout: 'portrait-wide',
-    projectFileState: 'none',
   },
   {
     id: 'pcg-luxury-real-estate',
     title: 'Luxury real estate promo',
     category: 'real-estate',
     kind: 'Luxury listing promo',
-    role: 'Edit + finish',
-    blurb: 'A luxury real estate cut focused on smooth movement, aspirational tone, and a polished sense of place.',
+    blurb: 'A smooth luxury listing edit with a polished finish.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DJ5J48LgmjQ/',
     src: 'videos/portfolio/web/pcg-luxury-real-estate.mp4',
     layout: 'portrait',
-    projectFileState: 'none',
   },
   {
     id: 'snowflakes-youtube',
     title: 'Snowflakes widescreen preview',
     category: 'short-film',
     kind: 'Widescreen short',
-    role: 'Edit + cinematic pacing',
-    blurb: 'A science-led short about avalanche prevention, following University of Utah researchers studying the physical properties of snowflakes to improve snow safety.',
+    blurb: 'A widescreen science short about avalanche prevention.',
     source: 'YouTube',
     sourceUrl: 'https://www.youtube.com/watch?v=RE6ahIf3kwA&t=61s',
     src: 'videos/portfolio/web/snowflakes-youtube.mp4',
     layout: 'landscape',
     videoScale: 1.023,
-    projectFileState: 'none',
   },
   {
     id: 'wide-youtube',
     title: 'Widescreen interview preview',
     category: 'short-film',
     kind: 'Interview short',
-    role: 'Edit + narrative rhythm',
-    blurb: 'An experimental short film about existentialism, busy lives, and the longing to escape into something more meaningful.',
+    blurb: 'An experimental short with a slower cinematic mood.',
     source: 'YouTube',
     sourceUrl: 'https://www.youtube.com/watch?v=xTR8c4j_DKk&t=13s',
     src: 'videos/portfolio/web/wide-youtube.mp4',
     layout: 'landscape-wide offset-sm',
     videoScale: 1.35,
-    projectFileState: 'planned',
   },
   {
     id: 'ashlie-realtor',
     title: 'Ashlie Brewer realtor reel',
     category: 'real-estate',
     kind: 'Realtor social reel',
-    role: 'Edit + social delivery',
-    blurb: 'A realtor-led reel shaped around clarity, intuition, and leveling up, tying personal growth language back to dream-home ambition.',
+    blurb: 'A realtor-led reel with a clear dream-home hook.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/C4gJ_6qut97/',
     src: 'videos/portfolio/web/ashlie-realtor.mp4',
     layout: 'portrait',
-    projectFileState: 'none',
   },
   {
     id: 'kaedim-linkedin',
     title: 'Kaedim launch post',
     category: 'motion-graphics',
     kind: '3D motion launch post',
-    role: 'Motion design + edit',
-    blurb: 'A launch asset for Secret Sauce 3D, framing Kaedim’s tool as an editable AI co-pilot built for real 3D production workflows.',
+    blurb: 'A 3D product launch asset with clean motion design.',
     source: 'LinkedIn',
     sourceUrl: 'https://www.linkedin.com/posts/kaedim_today-is-a-big-milestone-for-kaedim-for-activity-7434690563268018176--REi?utm_source=share&utm_medium=member_desktop&rcm=ACoAADxqsrkB2ELwiS4XdDkChEYtbz9dxTc-INc',
     src: 'videos/portfolio/web/kaedim-linkedin.mp4',
     layout: 'landscape',
     videoScale: 1.023,
-    projectFileState: 'none',
   },
 ];
 
@@ -244,6 +227,7 @@ const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2025',
   heroTitle: "Directed OMI's launch film end-to-end and drove 5.5M views in four days.",
   summary: 'OMI needed a launch asset built for reach. I owned the concept, script, direction, production, edit, and the product UI moments that made the assistant feel alive onscreen.',
+  videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
   services: ['Brand Film', 'Video Editing', 'Motion Graphics'],
   detailSections: [
     {
@@ -339,7 +323,6 @@ function PortfolioVideoTile({ item, priority = false }) {
       style={{ '--video-scale': item.videoScale || 1 }}
       data-portfolio-id={item.id}
       data-category={item.category}
-      data-project-file-state={item.projectFileState}
       data-source={item.source}
       data-source-url={item.sourceUrl}
       tabIndex={0}
@@ -364,10 +347,6 @@ function PortfolioVideoTile({ item, priority = false }) {
         </div>
         <div className="port-details">
           <p className="port-copy">{item.blurb}</p>
-          <div className="port-meta">
-            <span>{item.role}</span>
-            <span>{item.source}</span>
-          </div>
           <div className="port-actions">
             <a
               className="port-link"
@@ -376,11 +355,8 @@ function PortfolioVideoTile({ item, priority = false }) {
               rel="noreferrer"
               aria-label={`Watch ${item.title} on ${item.source}`}
             >
-              Watch on {item.source} <ArrowIcon size={12} />
+              Watch
             </a>
-            {item.projectFileState === 'planned' && (
-              <span className="port-link port-link-muted">Project file soon</span>
-            )}
           </div>
         </div>
       </div>
@@ -396,7 +372,6 @@ function PortfolioCategorySection({ category, priority = false }) {
       data-category={category.id}
     >
       <div className="portfolio-section-head">
-        <p className="section-title">CATEGORY · {category.kicker}</p>
         <div className="portfolio-section-copy">
           <div>
             <h2>{category.label}</h2>
@@ -451,10 +426,8 @@ function Portfolio({ go }) {
     <>
       <section className="list-head portfolio-head">
         <div className="wrap">
-          <h1>Selected video work.</h1>
-          <p>Grouped by category so people can jump straight to the work they care about, hover for the brief, and click through to watch each piece where it originally lived.</p>
+          <h1>Selected Video Work</h1>
           <div className="portfolio-jump-wrap">
-            <p className="section-title">JUMP TO</p>
             <div className="portfolio-jump-list" aria-label="Portfolio categories">
               {PORTFOLIO_SECTIONS.map((category) => (
                 <button
@@ -487,7 +460,7 @@ function Portfolio({ go }) {
 }
 
 const SERVICES = [
-  { n: '01', name: 'Brand Film', sub: 'Full Stack Video Production', desc: 'Launch or anthem film. Concept, shoot, edit, deliver. Best when you need one sharp hero asset.', price: 'from $5k', turnaround: '4–6 weeks' },
+  { n: '01', name: 'Brand Film', sub: 'Full Stack Video Production', desc: 'Launch or anthem film. Concept, shoot, edit, deliver. Best when you need one sharp hero asset.', price: 'from $10k', turnaround: '4–6 weeks' },
   { n: '02', name: 'Video Editing', desc: 'You shot it, I cut it. Bring camera originals and a reference. I deliver a polished cut and grade.', price: 'from $199', turnaround: '1–2 weeks' },
   { n: '03', name: 'Motion Graphics', desc: 'Title sequences, lower thirds, explainer overlays, logo animations. After Effects native.', price: 'from $1500', turnaround: '1–3 weeks' },
   { n: '04', name: 'Consulting', desc: 'Audit of your edit workflow, stack, or short-form strategy. 90 min call plus written notes.', price: '$90/hour', turnaround: '1 week' },
@@ -568,35 +541,51 @@ function getBriefMailtoHref() {
 }
 
 function ServiceCaseStudyCard({ study }) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
   return (
     <article className="svc-case-card">
-      <div className="svc-case-stat">
-        <div className="svc-case-stat-value">
-          {study.impactValue}
-          <span>{study.impactUnit}</span>
-        </div>
-        <p>{study.impactWindow}</p>
-      </div>
       <div className="svc-case-main">
         <div className="svc-case-head">
           <div>
             <p className="section-title">CASE STUDY · {study.client}</p>
             <h3>{study.heroTitle}</h3>
           </div>
-          <div className="svc-case-tags" aria-label="Services covered">
-            {study.services.map((service) => (
-              <span key={service}>{service}</span>
+        </div>
+        {study.videoSrc && (
+          <div className="svc-case-video">
+            <video
+              src={study.videoSrc}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label={`${study.client} launch film`}
+              title={`${study.client} launch film`}
+              disablePictureInPicture
+              controlsList="nodownload nofullscreen noremoteplayback"
+            />
+          </div>
+        )}
+        <p className="svc-case-summary">{study.summary}</p>
+        <button
+          className="svc-case-more"
+          type="button"
+          aria-expanded={isExpanded}
+          onClick={() => setIsExpanded((open) => !open)}
+        >
+          <span>See more</span>
+          <span className="svc-case-more-arrow" aria-hidden="true" />
+        </button>
+        <div className="svc-case-more-panel" data-open={isExpanded ? 'true' : 'false'}>
+          <div className="svc-case-more-copy">
+            {study.detailSections.map((section) => (
+              <section key={section.title} className="svc-case-detail">
+                <h4>{section.title}</h4>
+                <p>{section.body}</p>
+              </section>
             ))}
           </div>
-        </div>
-        <p className="svc-case-summary">{study.summary}</p>
-        <div className="svc-case-grid">
-          {study.detailSections.map((section) => (
-            <div key={section.title} className="svc-case-block">
-              <div className="svc-case-block-k">{section.title}</div>
-              <p>{section.body}</p>
-            </div>
-          ))}
         </div>
       </div>
     </article>
@@ -706,13 +695,6 @@ function Services({ go }) {
         </div>
 
         <section id="service-case-studies" className="svc-case-studies">
-          <div className="svc-case-intro">
-            <div>
-              <p className="section-title">CASE STUDIES</p>
-              <h2>Proof that the work performs when reach is the KPI.</h2>
-            </div>
-            <p>Specific examples of what the services above look like when the brief is real, the timeline is tight, and the launch actually has to travel.</p>
-          </div>
           <ServiceCaseStudyCard study={FEATURED_SERVICE_CASE_STUDY} />
         </section>
 

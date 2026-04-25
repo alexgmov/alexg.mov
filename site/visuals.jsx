@@ -1,7 +1,7 @@
 // Visual components. faked plausible screenshots/stills
 
 // Premiere-like panel chrome with a plugin visible in it
-function PremiereScreenshot({ variant = "youtube-dl", scale = 1 }) {
+function PremiereScreenshot({ variant = "ai-media-browser", scale = 1 }) {
   return (
     <div style={{
       position: 'absolute', inset: 0,
@@ -53,36 +53,36 @@ function PremiereScreenshot({ variant = "youtube-dl", scale = 1 }) {
             display: 'flex', alignItems: 'center', padding: `0 ${10 * scale}px`,
             fontFamily: '"Courier New", monospace', fontSize: 9 * scale, color: '#e4e4e4',
           }}>
-            {variant === 'youtube-dl' ? 'youtube_downloader.jsx' : 'alexg.toolkit.jsx'}
+            {variant === 'ai-media-browser' ? 'ai_media_browser.jsx' : 'alexg.toolkit.jsx'}
           </div>
           <div style={{ flex: 1, padding: `${12 * scale}px ${12 * scale}px`, display: 'flex', flexDirection: 'column', gap: 8 * scale }}>
-            {variant === 'youtube-dl' ? (
+            {variant === 'ai-media-browser' ? (
               <>
-                <div style={{ fontSize: 9 * scale, color: '#9b9b9b' }}>Paste URL</div>
+                <div style={{ fontSize: 9 * scale, color: '#9b9b9b' }}>Semantic Search</div>
                 <div style={{
                   background: '#0f0f10', border: '1px solid #2a2a2b', borderRadius: 3 * scale,
                   padding: `${6 * scale}px ${8 * scale}px`,
                   fontFamily: '"Courier New", monospace', fontSize: 9 * scale, color: '#6EC1FF',
-                }}>youtube.com/watch?v=dQw...</div>
+                }}>golden hour interview b-roll</div>
                 <div style={{ display: 'flex', gap: 6 * scale, marginTop: 4 * scale }}>
                   <div style={{
                     flex: 1, background: '#6EC1FF', color: '#08314d', textAlign: 'center',
                     fontSize: 9 * scale, fontWeight: 600, padding: `${5 * scale}px 0`, borderRadius: 3 * scale,
-                  }}>Download</div>
+                  }}>Analyze</div>
                   <div style={{
                     background: '#2a2a2b', color: '#c8c8c8', textAlign: 'center',
                     fontSize: 9 * scale, padding: `${5 * scale}px ${10 * scale}px`, borderRadius: 3 * scale,
-                  }}>Options</div>
+                  }}>Search</div>
                 </div>
-                <div style={{ marginTop: 8 * scale, fontSize: 8.5 * scale, color: '#6b6b6b', fontFamily: '"Courier New", monospace' }}>RECENT</div>
-                {['reference_shot_01.mp4', 'bts_clip.mp4', 'temp_voiceover.mp4'].map((n, i) => (
+                <div style={{ marginTop: 8 * scale, fontSize: 8.5 * scale, color: '#6b6b6b', fontFamily: '"Courier New", monospace' }}>MATCHES</div>
+                {['interview_keylight.mp4', 'office_broll_04.mp4', 'walkthrough_wide.mp4'].map((n, i) => (
                   <div key={i} style={{
                     display: 'flex', justifyContent: 'space-between',
                     fontFamily: '"Courier New", monospace', fontSize: 9 * scale, color: '#c8c8c8',
                     padding: `${3 * scale}px 0`, borderBottom: '1px dashed #2a2a2b',
                   }}>
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n}</span>
-                    <span style={{ color: '#6b6b6b' }}>1080p</span>
+                    <span style={{ color: '#6b6b6b' }}>{[92, 87, 81][i]}%</span>
                   </div>
                 ))}
               </>
@@ -133,6 +133,7 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
   const clampSplit = React.useCallback((next) => Math.max(splitMin, Math.min(splitMax, next)), [splitMin, splitMax]);
   const [baseSplit, setBaseSplit] = React.useState(scrollLinked ? 0 : clampSplit(initialSplit));
   const baseSplitRef = React.useRef(scrollLinked ? 0 : clampSplit(initialSplit));
+  const dragStartRef = React.useRef(null);
   const [dragOffset, setDragOffset] = React.useState(0);
   const split = clampSplit(baseSplit + dragOffset);
   const hasVideoCompare = Boolean(compare && compare.beforeSrc && compare.afterSrc);
@@ -159,12 +160,16 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
     },
   };
   const t = tones[tone] || tones["teal-orange"];
-  const updateSplit = React.useCallback((clientX) => {
-    if (!wrapRef.current) return;
+  const updateSplitFromDrag = React.useCallback((clientX) => {
+    if (!wrapRef.current || !dragStartRef.current) return;
     const rect = wrapRef.current.getBoundingClientRect();
-    const next = (clientX - rect.left) / rect.width;
+    if (!rect.width) return;
+    const next = dragStartRef.current.split + ((clientX - dragStartRef.current.clientX) / rect.width);
     setDragOffset(clampSplit(next) - baseSplitRef.current);
   }, [clampSplit]);
+  const nudgeSplit = React.useCallback((amount) => {
+    setDragOffset(clampSplit(split + amount) - baseSplitRef.current);
+  }, [clampSplit, split]);
 
   React.useEffect(() => {
     if (!scrollLinked) {
@@ -265,26 +270,7 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
   return (
     <div
       ref={wrapRef}
-      onClick={interactive ? (e) => e.stopPropagation() : undefined}
-      onPointerDown={interactive ? (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        updateSplit(e.clientX);
-        e.currentTarget.setPointerCapture(e.pointerId);
-      } : undefined}
-      onPointerMove={interactive ? (e) => {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-          e.preventDefault();
-          updateSplit(e.clientX);
-        }
-      } : undefined}
-      onPointerUp={interactive ? (e) => {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
-      } : undefined}
-      onPointerCancel={interactive ? (e) => {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
-      } : undefined}
-      style={{ position: 'absolute', inset: 0, overflow: 'hidden', touchAction: interactive ? 'none' : 'auto', userSelect: interactive ? 'none' : 'auto', cursor: interactive ? 'ew-resize' : 'default' }}
+      style={{ position: 'absolute', inset: 0, overflow: 'hidden', touchAction: 'auto', userSelect: interactive ? 'none' : 'auto', cursor: 'inherit' }}
     >
       {hasVideoCompare ? (
         <>
@@ -376,30 +362,85 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
             width: 1,
             background: 'rgba(255,255,255,0.95)',
             boxShadow: '0 0 0 1px rgba(0,0,0,0.08)',
+            pointerEvents: 'none',
           }} />
-          <div style={{
-            position: 'absolute',
-            left: `calc(${split * 100}% - ${15 * scale}px)`,
-            top: '50%',
-            width: 30 * scale,
-            height: 30 * scale,
-            marginTop: -15 * scale,
-            borderRadius: '999px',
-            background: 'rgba(255,255,255,0.12)',
-            border: '1px solid rgba(255,255,255,0.72)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
-          }}>
+          <div
+            role="slider"
+            aria-label="Compare graded and ungraded preview"
+            aria-valuemin={Math.round(splitMin * 100)}
+            aria-valuemax={Math.round(splitMax * 100)}
+            aria-valuenow={Math.round(split * 100)}
+            tabIndex={0}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onKeyDown={(e) => {
+              if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+              e.preventDefault();
+              e.stopPropagation();
+              nudgeSplit(e.key === 'ArrowLeft' ? -0.04 : 0.04);
+            }}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              dragStartRef.current = { clientX: e.clientX, split };
+              e.currentTarget.setPointerCapture(e.pointerId);
+            }}
+            onPointerMove={(e) => {
+              if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+              e.preventDefault();
+              e.stopPropagation();
+              updateSplitFromDrag(e.clientX);
+            }}
+            onPointerUp={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              dragStartRef.current = null;
+              if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+            }}
+            onPointerCancel={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              dragStartRef.current = null;
+              if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+            }}
+            style={{
+              position: 'absolute',
+              left: `calc(${split * 100}% - ${22 * scale}px)`,
+              top: 0,
+              bottom: 0,
+              width: 44 * scale,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 0,
+              padding: 0,
+              background: 'transparent',
+              cursor: 'ew-resize',
+              touchAction: 'none',
+            }}
+          >
             <div style={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: 10 * scale,
-              letterSpacing: '-0.08em',
-              color: 'rgba(255,255,255,0.9)',
-            }}>‹›</div>
+              width: 30 * scale,
+              height: 30 * scale,
+              borderRadius: '999px',
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.72)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+            }}>
+              <div style={{
+                fontFamily: '"Courier New", monospace',
+                fontSize: 10 * scale,
+                letterSpacing: 0,
+                color: 'rgba(255,255,255,0.9)',
+              }}>‹›</div>
+            </div>
           </div>
         </>
       ) : (

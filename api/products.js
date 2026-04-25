@@ -5,9 +5,9 @@
 
 const PRODUCTS = {
   flowstate: {
-    name: 'FlowState',
-    stripePriceId: process.env.STRIPE_PRICE_FLOWSTATE,
-    blobUrl: process.env.BLOB_URL_FLOWSTATE,
+    name: 'Solene',
+    stripePriceId: process.env.STRIPE_PRICE_SOLENE,
+    blobUrl: 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/LUTS/Sole%CC%80ne%20by%20alexg.zip',
   },
 };
 

@@ -1,6 +1,7 @@
 const Stripe = require('stripe');
 const { Resend } = require('resend');
 const { PRODUCTS } = require('./products');
+const { makeLink } = require('./download');
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -40,12 +41,16 @@ module.exports = async function handler(req, res) {
       return res.json({ received: true });
     }
 
+    const proto = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const downloadUrl = makeLink(`${proto}://${host}`, productId);
+
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: 'alexg.mov <downloads@alexg.mov>',
       to: email,
       subject: `Your ${product.name} download is ready`,
-      html: buildEmail(product.name, product.blobUrl),
+      html: buildEmail(product.name, downloadUrl),
     });
   }
 

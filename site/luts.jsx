@@ -3,40 +3,30 @@
 const LUTS = [
   {
     id: 'cinematic-01',
-    name: 'Ochre No 1',
-    oneline: 'A warm, contrasty LUT for golden-hour footage, skin tones, and clean cinematic rolloff.',
-    price: 9,
-    formats: '.CUBE · .LOOK',
+    name: 'Solène',
+    oneline: 'Sculpted for daylight, this look carves deep, luminous contrast across skin and landscape alike, kissing greens with a rich amber glow and surrendering to darkness with cinematic grace.',
+    price: 18,
+    formats: '.CUBE',
     badge: 'BESTSELLER',
     tone: 'teal-orange',
     available: true,
-    demoLabel: 'Ochre No 1',
+    demoLabel: 'Solène',
     compare: {
-      title: 'Ochre No 1',
+      title: 'Solène',
       beforeLabel: 'Ungraded',
       afterLabel: 'Graded',
-      beforeTitle: 'Ochre No 1 ungraded preview',
-      afterTitle: 'Ochre No 1 graded preview',
-      beforeSrc: 'videos/Ochre No 1 Ungraded.mp4',
-      afterSrc: 'videos/Ochre No 1 Graded.mp4',
+      beforeTitle: 'Solène ungraded preview',
+      afterTitle: 'Solène graded preview',
+      beforeSrc: 'videos/Solène Ungraded.mp4',
+      afterSrc: 'videos/Solène Graded.mp4',
     },
-  },
-  {
-    id: 'street-02',
-    name: 'Rainy Neon LUT',
-    oneline: 'A cool, contrasty street LUT built for documentary, b-roll, and night footage.',
-    price: 9,
-    formats: '.CUBE · .LOOK',
-    tone: 'moody-blue',
-    available: true,
-    demoLabel: 'Rainy Neon',
   },
   {
     id: 'interior-03',
     name: 'Soft Linen LUT',
     oneline: 'A softer interior-grade LUT for natural light, talking heads, and lifestyle footage.',
     price: null,
-    formats: '.CUBE · .LOOK',
+    formats: '.CUBE',
     badge: 'COMING SOON',
     tone: 'warm-film',
     available: false,
@@ -46,11 +36,20 @@ const LUTS = [
 ];
 
 function LutsList({ go }) {
+  const releasedCount = LUTS.filter(l => l.available).length;
+
   return (
     <>
       <section className="list-head">
         <div className="wrap">
-          <h1>LUTs that actually sit on the shot.</h1>
+          <h1>Looks for footage that already has a clean base.</h1>
+          <div className="list-meta">
+            <span>{releasedCount} RELEASED {releasedCount === 1 ? 'LOOK' : 'LOOKS'}</span>
+            <span>·</span>
+            <span>.CUBE FILES</span>
+            <span>·</span>
+            <span>PREMIERE, RESOLVE + FCP</span>
+          </div>
         </div>
       </section>
       <div className="wrap">
@@ -80,7 +79,6 @@ function LutsList({ go }) {
                   {l.badge && <span style={{ color: l.available ? 'var(--orange-ink)' : 'var(--muted)' }}>{l.available ? '★ ' : ''}{l.badge}</span>}
                 </div>
                 <h3 className="card-title">{l.name}</h3>
-                {l.available && <p className="card-desc">{l.oneline}</p>}
                 <div className="card-foot">
                   <div className="card-price">{l.available ? `$${l.price}` : l.release}</div>
                   {l.available ? <span className="btn btn-secondary btn-sm">View <ArrowIcon /></span> : null}
@@ -97,7 +95,7 @@ function LutsList({ go }) {
             <div className="how-item">
               <div className="how-num">01 / DOWNLOAD LUT</div>
               <h4 className="how-h">Get the LUT file</h4>
-              <p className="how-p">Download the LUT and unzip it. You’ll get the `.cube` file, the Premiere `.look`, and a quick usage note.</p>
+              <p className="how-p">Download the LUT and unzip it. You’ll get the `.cube` file and a quick usage note.</p>
             </div>
             <div className="how-item">
               <div className="how-num">02 / APPLY AFTER BASE GRADE</div>
@@ -141,21 +139,21 @@ function LutDetail({ id, go }) {
         </div>
 
         <div className="pd-info">
-          <div className="pd-tag"><span className="pd-tag-dot" style={{ background: 'var(--orange)' }} /> INDIVIDUAL LUT · .CUBE + .LOOK</div>
+          <div className="pd-tag"><span className="pd-tag-dot" style={{ background: 'var(--orange)' }} /> INDIVIDUAL LUT · .CUBE</div>
           <h1>{l.name}</h1>
           <p className="pd-benefit">{l.oneline}</p>
 
           <div className="pd-price-row">
             <div className="pd-price">${l.price}</div>
-            <div className="pd-price-note">ONE-TIME · BOTH FORMATS INCLUDED</div>
+            <div className="pd-price-note">ONE-TIME · .CUBE FILE INCLUDED</div>
           </div>
           <button className="btn btn-primary btn-lg pd-buy"><DownloadIcon /> Buy &amp; Download</button>
-          <div className="pd-reassure"><CheckIcon /> Instant download · ZIP · .cube + .look</div>
+          <div className="pd-reassure"><CheckIcon /> Instant download · ZIP · .cube</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">Gives you one finished look you can apply after your base correction, then tune with opacity and exposure.</div></div>
             <div className="pd-bullet"><div className="pd-bullet-k">WHO IT'S FOR</div><div className="pd-bullet-v">Editors and filmmakers who want one reliable LUT for a specific mood instead of a large bundle they will never fully use.</div></div>
-            <div className="pd-bullet"><div className="pd-bullet-k">WHAT YOU GET</div><div className="pd-bullet-v">1 × .CUBE · 1 × .LOOK · a short README with recommended use and base-grade notes.</div></div>
+            <div className="pd-bullet"><div className="pd-bullet-k">WHAT YOU GET</div><div className="pd-bullet-v">1 × .CUBE</div></div>
           </div>
         </div>
       </div>
@@ -166,19 +164,10 @@ function LutDetail({ id, go }) {
           <ol>
             <li>Unzip the download.</li>
             <li>Premiere → Lumetri Color panel → Creative → Look dropdown → Browse…</li>
-            <li>Point to the .look file. Done.</li>
+            <li>Point to the .cube file. Done.</li>
             <li>For DaVinci / Final Cut, copy the .cube file to your LUT library.</li>
-            <li>Apply on an adjustment layer. Tune opacity 40–100%.</li>
+            <li>Apply on an adjustment layer. Tune intensity 20–100%. I find the best results between 30 and 60% for most footage.</li>
           </ol>
-        </div>
-        <div className="pd-block">
-          <h3>Compatibility</h3>
-          <ul>
-            <li>Premiere Pro · Final Cut Pro · DaVinci Resolve</li>
-            <li>Works with .cube-compatible apps (AE, FCP, Resolve, Premiere)</li>
-            <li>Source profiles: S-Log3, V-Log, LOG-C, Rec.709</li>
-            <li>Best applied on correctly exposed footage</li>
-          </ul>
         </div>
       </div>
     </div>

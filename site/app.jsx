@@ -80,7 +80,7 @@ function App({ initialPage, embedded }) {
 
   return (
     <>
-      <Nav page={page.split(':')[0]} go={go} overlay={page === 'home'} />
+      <Nav page={page.split(':')[0]} go={go} />
       {content}
       <Footer go={go} />
       {!embedded && (
