@@ -3,7 +3,7 @@
 const LUTS = [
   {
     id: 'cinematic-01',
-    name: 'Solène',
+    name: 'Meridian',
     oneline: 'Sculpted for daylight, this look carves deep, luminous contrast across skin and landscape alike, kissing greens with a rich amber glow and surrendering to darkness with cinematic grace.',
     price: 18,
     formats: '.CUBE',
@@ -12,21 +12,21 @@ const LUTS = [
     available: true,
     checkoutProductId: 'solene',
     mockupSrc: 'mockups/ChatGPT Image Apr 25, 2026, 02_25_16 PM.png',
-    mockupAlt: 'Solène LUT mock-up',
-    demoLabel: 'Solène',
+    mockupAlt: 'Meridian LUT mock-up',
+    demoLabel: 'Meridian',
     compare: {
-      title: 'Solène',
+      title: 'Meridian',
       beforeLabel: 'Ungraded',
       afterLabel: 'Graded',
-      beforeTitle: 'Solène ungraded preview',
-      afterTitle: 'Solène graded preview',
+      beforeTitle: 'Meridian ungraded preview',
+      afterTitle: 'Meridian graded preview',
       beforeSrc: 'videos/Solène Ungraded.mp4',
       afterSrc: 'videos/Solène Graded.mp4',
     },
   },
   {
     id: 'interior-03',
-    name: 'Soft Linen LUT',
+    name: 'Haloclyne',
     oneline: 'A softer interior-grade LUT for natural light, talking heads, and lifestyle footage.',
     price: null,
     formats: '.CUBE',
@@ -34,7 +34,7 @@ const LUTS = [
     tone: 'warm-film',
     available: false,
     release: 'Q2',
-    demoLabel: 'Soft Linen',
+    demoLabel: 'Haloclyne',
   },
 ];
 

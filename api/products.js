@@ -5,17 +5,17 @@
 
 const PRODUCTS = {
   solene: {
-    name: 'Solene',
+    name: 'Meridian',
     stripePriceId: process.env.STRIPE_PRICE_SOLENE,
-    blobUrl: 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/LUTS/Solene%20by%20alexg.zip',
-    downloadFilename: 'Solene by alexg.zip',
+    blobUrl: 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/LUTS/MERIDIAN%20by%20alexg.zip',
+    downloadFilename: 'MERIDIAN by alexg.zip',
     page: 'lut:cinematic-01',
   },
   flowstate: {
-    name: 'Solene',
+    name: 'Meridian',
     stripePriceId: process.env.STRIPE_PRICE_SOLENE,
-    blobUrl: 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/LUTS/Solene%20by%20alexg.zip',
-    downloadFilename: 'Solene by alexg.zip',
+    blobUrl: 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/LUTS/MERIDIAN%20by%20alexg.zip',
+    downloadFilename: 'MERIDIAN by alexg.zip',
     page: 'plugin:flowstate',
   },
 };

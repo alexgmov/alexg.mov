@@ -501,16 +501,16 @@ function Home({ go }) {
   const actionsRef = useHeroScroll();
   const featuredLut = (window.LUTS || []).find(l => l.id === 'cinematic-01') || {
     id: 'cinematic-01',
-    name: 'Solène',
+    name: 'Meridian',
     oneline: 'Sculpted for daylight, this look carves deep, luminous contrast across skin and landscape alike, kissing greens with a rich amber glow and surrendering to darkness with cinematic grace.',
     price: 9,
     badge: 'BESTSELLER',
     compare: {
-      title: 'Solène',
+      title: 'Meridian',
       beforeLabel: 'Ungraded',
       afterLabel: 'Graded',
-      beforeTitle: 'Solène ungraded preview',
-      afterTitle: 'Solène graded preview',
+      beforeTitle: 'Meridian ungraded preview',
+      afterTitle: 'Meridian graded preview',
       beforeSrc: 'videos/Solène Ungraded.mp4',
       afterSrc: 'videos/Solène Graded.mp4',
     },
