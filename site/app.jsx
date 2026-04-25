@@ -13,6 +13,7 @@ function App({ initialPage, embedded }) {
   // Persist & restore
   React.useEffect(() => {
     if (embedded) return;
+    if (new URLSearchParams(location.search).get('page')) return;
     const saved = localStorage.getItem('alexgmov:page');
     if (saved) setPage(saved);
   }, []);
@@ -73,6 +74,7 @@ function App({ initialPage, embedded }) {
   else if (page === 'portfolio') content = <Portfolio go={go} />;
   else if (page === 'services') content = <Services go={go} />;
   else if (page === 'support') content = <Support go={go} />;
+  else if (page === 'success') content = <CheckoutSuccess go={go} />;
   else if (page === 'terms') content = <Terms />;
   else if (page === 'refund') content = <Refund />;
   else if (page.startsWith('plugin:')) content = <PluginDetail id={page.slice(7)} go={go} />;

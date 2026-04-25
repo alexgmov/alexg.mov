@@ -29,21 +29,21 @@ const PLUGINS = [
   },
   {
     id: 'demonclipper',
-    name: 'DemonClipper Coming Soon',
+    name: 'Demon Clip',
     oneline: 'A faster way to carve long sessions into usable selects.',
     price: null,
     version: 'COMING SOON',
     badge: 'COMING SOON',
     status: 'coming-soon',
     variant: 'toolkit',
-    what: 'DemonClipper is built for turning long raw sessions into tighter selects before the real edit begins.',
+    what: 'Demon Clip is built for turning long raw sessions into tighter selects before the real edit begins.',
     who: 'Editors working through interviews, multicam podcasts, and long-form creator shoots.',
     get: 'Premiere extension for Mac & Windows · early access for launch list subscribers.',
     install: [
       'Join the launch list.',
-      'Get the release email when DemonClipper ships.',
+      'Get the release email when Demon Clip ships.',
       'Download the installer for Mac or Windows.',
-      'Open Window → Extensions → DemonClipper in Premiere.',
+      'Open Window → Extensions → Demon Clip in Premiere.',
       'Start clipping down long sessions into selects.',
     ],
     specs: [
@@ -73,30 +73,40 @@ function PluginsList({ go }) {
       </section>
       <div className="wrap">
         <div className="list-grid">
-          {PLUGINS.map(p => (
-            <article
-              key={p.id}
-              className="card"
-              onClick={p.status === 'released' ? () => go('plugin:' + p.id) : undefined}
-              style={{ cursor: p.status === 'released' ? 'pointer' : 'default' }}
-            >
-              <div className="card-media"><PremiereScreenshot variant={p.variant} /></div>
-              <div className="card-body">
-                <div className="card-eyebrow">
-                  <span>v{p.version} · PLUGIN</span>
-                  {p.badge && <span style={{ color: p.status === 'released' ? 'var(--blue-ink)' : 'var(--orange-ink)' }}>● {p.badge}</span>}
-                </div>
-                <h3 className="card-title">{p.name}</h3>
-                <p className="card-desc">{p.oneline}</p>
-                <div className="card-foot">
-                  <div className="card-price">{p.price != null ? `$${p.price}` : 'Soon'}</div>
-                  {p.status === 'released'
-                    ? <span className="btn btn-secondary btn-sm">View <ArrowIcon /></span>
-                    : <span className="btn btn-secondary btn-sm">Coming Soon</span>}
-                </div>
-              </div>
-            </article>
-          ))}
+          {PLUGINS.map(p => {
+            const released = p.status === 'released';
+            return (
+              <article
+                key={p.id}
+                className={"card plugin-card" + (released ? '' : ' plugin-card-locked')}
+                onClick={released ? () => go('plugin:' + p.id) : undefined}
+                aria-disabled={released ? undefined : 'true'}
+              >
+                {released ? (
+                  <>
+                    <div className="card-media"><PremiereScreenshot variant={p.variant} /></div>
+                    <div className="card-body">
+                      <div className="card-eyebrow">
+                        <span>v{p.version} · PLUGIN</span>
+                        {p.badge && <span style={{ color: 'var(--blue-ink)' }}>● {p.badge}</span>}
+                      </div>
+                      <h3 className="card-title">{p.name}</h3>
+                      <p className="card-desc">{p.oneline}</p>
+                      <div className="card-foot">
+                        <div className="card-price">${p.price}</div>
+                        <span className="btn btn-secondary btn-sm">View <ArrowIcon /></span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="plugin-locked-content">
+                    <div className="plugin-locked-status">Coming Soon</div>
+                    <h3 className="plugin-locked-title">{p.name}</h3>
+                  </div>
+                )}
+              </article>
+            );
+          })}
         </div>
       </div>
       <section className="section-sm">

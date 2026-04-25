@@ -10,6 +10,9 @@ const LUTS = [
     badge: 'BESTSELLER',
     tone: 'teal-orange',
     available: true,
+    checkoutProductId: 'solene',
+    mockupSrc: 'mockups/ChatGPT Image Apr 25, 2026, 02_25_16 PM.png',
+    mockupAlt: 'Solène LUT mock-up',
     demoLabel: 'Solène',
     compare: {
       title: 'Solène',
@@ -116,10 +119,30 @@ function LutsList({ go }) {
 
 function LutDetail({ id, go }) {
   const l = LUTS.find(x => x.id === id) || LUTS[0];
+  const [buying, setBuying] = React.useState(false);
+  const purchased = new URLSearchParams(location.search).get('purchased') === 'true';
   React.useEffect(() => {
     if (!l.available) go('luts');
   }, [l.available, go]);
   if (!l.available) return null;
+
+  async function handleBuy() {
+    setBuying(true);
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: l.checkoutProductId || l.id }),
+      });
+      const { url, error } = await res.json();
+      if (error || !url) throw new Error(error || 'Missing checkout URL');
+      window.location.href = url;
+    } catch {
+      alert('Something went wrong. Please try again or email alex@alexg.mov.');
+      setBuying(false);
+    }
+  }
+
   return (
     <div className="wrap">
       <div className="pd-crumbs">
@@ -128,7 +151,12 @@ function LutDetail({ id, go }) {
         <span style={{ color: 'var(--ink)' }}>{l.name}</span>
       </div>
       <div className="pd-hero">
-        <div>
+        <div className="pd-media-stack">
+          {l.mockupSrc && (
+            <div className="lut-detail-mockup">
+              <img src={l.mockupSrc} alt={l.mockupAlt || `${l.name} LUT mock-up`} />
+            </div>
+          )}
           <div className="pd-media">
             <LutPreview tone={l.tone} scale={1.4} interactive compare={l.compare} />
             <div className="reel-meta">
@@ -143,11 +171,19 @@ function LutDetail({ id, go }) {
           <h1>{l.name}</h1>
           <p className="pd-benefit">{l.oneline}</p>
 
+          {purchased && (
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 6, padding: '14px 16px', marginBottom: 20, fontSize: 14, lineHeight: 1.6 }}>
+              <strong style={{ color: 'var(--ink)' }}>Purchase confirmed.</strong>
+              <span style={{ color: 'var(--muted)' }}> Check your email for the download link (valid 48 hours). Check spam if it doesn't arrive within a few minutes.</span>
+            </div>
+          )}
           <div className="pd-price-row">
             <div className="pd-price">${l.price}</div>
             <div className="pd-price-note">ONE-TIME · .CUBE FILE INCLUDED</div>
           </div>
-          <button className="btn btn-primary btn-lg pd-buy"><DownloadIcon /> Buy &amp; Download</button>
+          <button className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
+            <DownloadIcon /> {buying ? 'Redirecting…' : 'Buy & Download'}
+          </button>
           <div className="pd-reassure"><CheckIcon /> Instant download · ZIP · .cube</div>
 
           <div className="pd-bullets">

@@ -4,10 +4,17 @@
 // stripePriceId: copy from Stripe Dashboard → Products → [product] → Pricing.
 
 const PRODUCTS = {
+  solene: {
+    name: 'Solene',
+    stripePriceId: process.env.STRIPE_PRICE_SOLENE,
+    blobUrl: 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/LUTS/Sole%CC%80ne%20by%20alexg.zip',
+    page: 'lut:cinematic-01',
+  },
   flowstate: {
     name: 'Solene',
     stripePriceId: process.env.STRIPE_PRICE_SOLENE,
     blobUrl: 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/LUTS/Sole%CC%80ne%20by%20alexg.zip',
+    page: 'plugin:flowstate',
   },
 };
 

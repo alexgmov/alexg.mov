@@ -364,7 +364,23 @@ function PortfolioVideoTile({ item, priority = false }) {
   );
 }
 
+function isPortraitPortfolioItem(item) {
+  return item.layout.includes('portrait');
+}
+
 function PortfolioCategorySection({ category, priority = false }) {
+  const indexedItems = category.items.map((item, index) => ({ item, index }));
+  const railGroups = [
+    {
+      id: 'horizontal',
+      items: indexedItems.filter(({ item }) => !isPortraitPortfolioItem(item)),
+    },
+    {
+      id: 'portrait',
+      items: indexedItems.filter(({ item }) => isPortraitPortfolioItem(item)),
+    },
+  ].filter((group) => group.items.length);
+
   return (
     <section
       id={`portfolio-${category.id}`}
@@ -380,13 +396,20 @@ function PortfolioCategorySection({ category, priority = false }) {
           <span className="portfolio-count">{category.items.length} pieces</span>
         </div>
       </div>
-      <div className="portfolio-rail">
-        {category.items.map((item, index) => (
-          <PortfolioVideoTile
-            key={item.id}
-            item={item}
-            priority={priority && index < 2}
-          />
+      <div className="portfolio-rails">
+        {railGroups.map((group) => (
+          <div
+            key={group.id}
+            className={`portfolio-rail portfolio-rail-${group.id}`}
+          >
+            {group.items.map(({ item, index }) => (
+              <PortfolioVideoTile
+                key={item.id}
+                item={item}
+                priority={priority && index < 2}
+              />
+            ))}
+          </div>
         ))}
       </div>
     </section>
@@ -799,4 +822,77 @@ function Refund() {
   );
 }
 
-Object.assign(window, { Portfolio, Services, Support, Terms, Refund });
+function CheckoutSuccess({ go }) {
+  const [state, setState] = React.useState({ status: 'loading', email: '', productName: 'your files' });
+
+  React.useEffect(() => {
+    const sessionId = new URLSearchParams(location.search).get('session_id');
+    if (!sessionId) {
+      setState({ status: 'missing', email: '', productName: 'your files' });
+      return;
+    }
+
+    let cancelled = false;
+    fetch(`/api/checkout-session?session_id=${encodeURIComponent(sessionId)}`)
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => {
+        if (!cancelled) {
+          setState({
+            status: 'ready',
+            email: data.email || '',
+            productName: data.productName || 'your files',
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setState({ status: 'error', email: '', productName: 'your files' });
+      });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  const emailText = state.email || 'the email you used at checkout';
+  const downloadEmailText = state.productName === 'your files'
+    ? 'download email'
+    : `${state.productName} download email`;
+
+  return (
+    <main className="success-page">
+      <div className="success-confetti" aria-hidden="true">
+        {Array.from({ length: 28 }).map((_, i) => (
+          <span key={i} style={{
+            '--x': `${(i * 37) % 100}%`,
+            '--delay': `${(i % 9) * 90}ms`,
+            '--dur': `${1100 + (i % 7) * 120}ms`,
+            '--rot': `${(i * 29) % 180}deg`,
+          }} />
+        ))}
+      </div>
+
+      <section className="success-panel">
+        <div className="success-mark"><CheckIcon size={24} /></div>
+        <p className="success-kicker">Purchase complete</p>
+        <h1>Thank you.</h1>
+
+        {state.status === 'loading' ? (
+          <p className="success-copy">Confirming your order and preparing the download email.</p>
+        ) : (
+          <p className="success-copy">
+            Your {downloadEmailText} was sent to <strong>{emailText}</strong>.
+            Check your inbox, and peek at spam if it does not show up in a minute or two.
+          </p>
+        )}
+
+        {state.status === 'error' && (
+          <p className="success-note">The payment went through, but I could not load the email address here. The download email still sends automatically after checkout.</p>
+        )}
+
+        <button className="btn btn-primary btn-lg success-back" onClick={() => { window.location.href = '/'; }}>
+          Go back
+        </button>
+      </section>
+    </main>
+  );
+}
+
+Object.assign(window, { Portfolio, Services, Support, Terms, Refund, CheckoutSuccess });

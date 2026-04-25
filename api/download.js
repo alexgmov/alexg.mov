@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { Readable } = require('stream');
 const { PRODUCTS } = require('./products');
 
 function sign(productId, exp) {
@@ -26,9 +27,11 @@ module.exports = async function handler(req, res) {
   }
 
   const expected = sign(productId, exp);
-  if (!crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(expected, 'hex'))) {
-    return res.status(403).end();
-  }
+  let valid = false;
+  try {
+    valid = crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(expected, 'hex'));
+  } catch {}
+  if (!valid) return res.status(403).end();
 
   const product = PRODUCTS[productId];
   if (!product?.blobUrl) return res.status(404).end();
@@ -44,7 +47,6 @@ module.exports = async function handler(req, res) {
   res.setHeader('Content-Disposition', `attachment; filename="${decodeURIComponent(filename)}"`);
   res.setHeader('X-Content-Type-Options', 'nosniff');
 
-  const { Readable } = require('stream');
   Readable.fromWeb(upstream.body).pipe(res);
 };
 
