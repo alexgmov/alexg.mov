@@ -58,6 +58,14 @@ module.exports = async function handler(req, res) {
   const { productId } = body || {};
   const product = PRODUCTS[productId];
   if (!product) return res.status(400).json({ error: 'Unknown product' });
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error('STRIPE_SECRET_KEY is not configured');
+    return res.status(500).json({ error: 'Checkout is not configured' });
+  }
+  if (!product.stripePriceId) {
+    console.error('Stripe price is not configured', { productId });
+    return res.status(500).json({ error: 'Checkout product is not configured' });
+  }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const host = firstHeaderValue(req.headers['x-forwarded-host'] || req.headers.host);

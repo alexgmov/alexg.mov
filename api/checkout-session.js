@@ -14,6 +14,10 @@ module.exports = async function handler(req, res) {
   if (!sessionId) {
     return res.status(400).json({ error: 'Missing checkout session' });
   }
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error('STRIPE_SECRET_KEY is not configured');
+    return res.status(500).json({ error: 'Checkout is not configured' });
+  }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   let session;
