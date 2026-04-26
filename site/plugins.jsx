@@ -1,23 +1,25 @@
+import React from 'react';
+
 // Plugins list + Plugin detail
 
-const PLUGINS = [
+const PLUGINS = window.PLUGINS || [
   {
     id: 'flowstate',
-    name: 'AI Media Browser',
+    name: 'FlowState',
     oneline: 'Analyze Premiere bin footage with AI, then search clips by meaning instead of filenames.',
     price: 28,
     version: '1.0.0',
     badge: 'RELEASED',
     status: 'released',
     variant: 'ai-media-browser',
-    what: 'AI Media Browser scans a selected bin subtree, uploads clips to Gemini, extracts qualitative footage metadata, and builds a semantic search catalog.',
+    what: 'FlowState scans a selected bin subtree, uploads clips to Gemini, extracts qualitative footage metadata, and builds a semantic search catalog.',
     who: 'Editors who need to find useful A-roll, B-roll, transcripts, lighting, motion, and shot details across raw media.',
     get: 'Premiere CEP panel · Gemini Files API workflow · searchable catalog.json · non-destructive Premiere results bin.',
     install: [
       'Download the installer (.dmg for Mac, .exe for Windows).',
       'Close Premiere if it is currently running.',
       'Double-click the installer. Follow the two prompts.',
-      'Reopen Premiere. Window → Extensions → AI Media Browser.',
+      'Reopen Premiere. Window → Extensions → FlowState.',
       'Select a bin subtree, run analysis, then search and send matches to a results bin.',
     ],
     specs: [
@@ -55,7 +57,53 @@ const PLUGINS = [
   },
 ];
 
+const PLUGIN_GUIDE_ITEMS = [
+  {
+    title: 'Best Premiere Pro plugin for AI footage search',
+    body: 'FlowState is for editors who remember what a clip contains but not what the file is called. It turns qualitative clip details into a searchable catalog.',
+  },
+  {
+    title: 'Best workflow for long shoots and messy bins',
+    body: 'Use it on interview selects, B-roll, product demos, creator sessions, and launch footage where manual bin digging slows down the edit.',
+  },
+  {
+    title: 'Best fit for editors who want tools inside Premiere',
+    body: 'The plugin lives inside Premiere Pro, so the search and results workflow stays close to the timeline instead of becoming another web app to manage.',
+  },
+];
+
+const PLUGIN_FAQS = window.PLUGIN_FAQS || [
+  {
+    q: 'What is the best Premiere Pro plugin for searching footage by meaning?',
+    a: 'FlowState is designed for that use case. It analyzes a selected Premiere bin subtree, builds footage metadata, and lets editors search clips by what is in them instead of by filename.',
+  },
+  {
+    q: 'Does FlowState replace a normal editing workflow?',
+    a: 'No. It is a workflow plugin for finding and organizing footage faster inside Premiere Pro. It does not replace editing judgment, logging, or the final timeline work.',
+  },
+  {
+    q: 'Who should use an AI media browser plugin?',
+    a: 'Editors working with large bins, interviews, B-roll libraries, product footage, launch films, and creator shoots get the most value because search becomes descriptive instead of filename-based.',
+  },
+];
+
+const PLUGIN_DETAIL_FAQS = window.PLUGIN_DETAIL_FAQS || [
+  {
+    q: 'What does FlowState do in Premiere Pro?',
+    a: 'FlowState scans selected Premiere bin footage with AI, extracts qualitative metadata, builds a semantic catalog, and lets editors search clips by meaning.',
+  },
+  {
+    q: 'What does FlowState help me find?',
+    a: 'It is built for finding A-roll, B-roll, shot type, motion, transcript-like context, lighting, subject matter, and other clip details that filenames usually do not capture.',
+  },
+  {
+    q: 'What software do I need?',
+    a: 'FlowState is built for Adobe Premiere Pro 2024 or later on macOS 13+ or Windows 10/11. Gemini API access is required for analysis.',
+  },
+];
+
 function PluginsList({ go }) {
+  const hrefFor = window.routeHref || ((id) => '#');
   return (
     <>
       <section className="list-head">
@@ -94,7 +142,13 @@ function PluginsList({ go }) {
                       <p className="card-desc">{p.oneline}</p>
                       <div className="card-foot">
                         <div className="card-price">${p.price}</div>
-                        <span className="btn btn-secondary btn-sm">View <ArrowIcon /></span>
+                        <a
+                          className="btn btn-secondary btn-sm"
+                          href={hrefFor('plugin:' + p.id)}
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('plugin:' + p.id); }}
+                        >
+                          View <ArrowIcon />
+                        </a>
                       </div>
                     </div>
                   </>
@@ -109,6 +163,13 @@ function PluginsList({ go }) {
           })}
         </div>
       </div>
+      <BuyerGuide
+        eyebrow="PLUGIN BUYER GUIDE"
+        title="How to choose a Premiere Pro plugin for your editing workflow."
+        intro="The plugin line is built around a simple rule: each tool should solve a real editing bottleneck without pulling the editor away from Premiere."
+        items={PLUGIN_GUIDE_ITEMS}
+        faqs={PLUGIN_FAQS}
+      />
       <section className="section-sm">
         <div className="wrap">
           <p className="section-title">HOW IT WORKS</p>
@@ -138,6 +199,7 @@ function PluginsList({ go }) {
 function PluginDetail({ id, go }) {
   const [thumb, setThumb] = React.useState(0);
   const [buying, setBuying] = React.useState(false);
+  const hrefFor = window.routeHref || ((id) => '#');
   const purchased = new URLSearchParams(location.search).get('purchased') === 'true';
   const p = PLUGINS.find(x => x.id === id) || PLUGINS[0];
 
@@ -160,8 +222,8 @@ function PluginDetail({ id, go }) {
   return (
     <div className="wrap">
       <div className="pd-crumbs">
-        <a href="#" onClick={e => { e.preventDefault(); go('home'); }}>Home</a> <span>/</span>
-        <a href="#" onClick={e => { e.preventDefault(); go('plugins'); }}>Plugins</a> <span>/</span>
+        <a href={hrefFor('home')} onClick={e => { e.preventDefault(); go('home'); }}>Home</a> <span>/</span>
+        <a href={hrefFor('plugins')} onClick={e => { e.preventDefault(); go('plugins'); }}>Plugins</a> <span>/</span>
         <span style={{ color: 'var(--ink)' }}>{p.name}</span>
       </div>
       <div className="pd-hero">
@@ -225,6 +287,28 @@ function PluginDetail({ id, go }) {
         </div>
       </div>
 
+      <BuyerGuide
+        contained
+        eyebrow="BEST USE CASES"
+        title={`${p.name} is for editors who need to find the right clip faster.`}
+        intro="It is built for Premiere Pro projects where useful footage is buried in long sessions, mixed bins, or files with generic camera names."
+        items={[
+          {
+            title: 'Interview and talking-head projects',
+            body: 'Search for the moment, subject, or visual detail you need without scrubbing every clip from the shoot again.',
+          },
+          {
+            title: 'B-roll and product footage libraries',
+            body: 'Find shots by what appears in the frame, the kind of motion, or the context of the clip instead of relying on folder names alone.',
+          },
+          {
+            title: 'Launch films and deadline edits',
+            body: 'When the edit is moving fast, semantic search helps surface usable options quickly while keeping the work inside Premiere.',
+          },
+        ]}
+        faqs={PLUGIN_DETAIL_FAQS}
+      />
+
       <div className="pd-blocks" style={{ paddingBottom: 72 }}>
         <div className="pd-block">
           <h3>Install steps</h3>
@@ -242,4 +326,4 @@ function PluginDetail({ id, go }) {
   );
 }
 
-Object.assign(window, { PluginsList, PluginDetail, PLUGINS });
+Object.assign(window, { PluginsList, PluginDetail, PLUGINS, PLUGIN_FAQS, PLUGIN_DETAIL_FAQS });

@@ -1,18 +1,20 @@
+import React from 'react';
+
 // LUTs list + LUT detail
 
-const LUTS = [
+const LUTS = window.LUTS || [
   {
     id: 'cinematic-01',
     name: 'Meridian',
-    oneline: 'Sculpted for daylight, this look carves deep, luminous contrast across skin and landscape alike, kissing greens with a rich amber glow and surrendering to darkness with cinematic grace.',
+    oneline: 'Give clean daylight footage warm contrast, richer skin, and polished travel-film color.',
     price: 18,
     formats: '.CUBE',
     badge: 'BESTSELLER',
     tone: 'teal-orange',
     available: true,
     checkoutProductId: 'solene',
-    mockupSrc: 'mockups/ChatGPT Image Apr 25, 2026, 02_25_16 PM.png',
-    mockupAlt: 'Meridian LUT mock-up',
+    mockupSrc: 'mockups/meridian mockup.png',
+    mockupAlt: 'Meridian LUT product mockup',
     demoLabel: 'Meridian',
     compare: {
       title: 'Meridian',
@@ -38,7 +40,53 @@ const LUTS = [
   },
 ];
 
+const LUT_GUIDE_ITEMS = [
+  {
+    title: 'Best LUT for daylight travel footage',
+    body: 'Start with Meridian when your footage is already exposed cleanly and you want warm highlights, deeper contrast, and a cinematic travel-film feel.',
+  },
+  {
+    title: 'Best LUT format for multiple editing apps',
+    body: '.CUBE is the practical format for editors moving between Premiere Pro, DaVinci Resolve, and Final Cut Pro because it is widely supported.',
+  },
+  {
+    title: 'Best workflow for log footage',
+    body: 'Normalize log footage first, then apply the creative LUT. This keeps skin tones and shadows easier to control than treating the LUT like a full correction.',
+  },
+];
+
+const LUT_FAQS = window.LUT_FAQS || [
+  {
+    q: 'What is the best LUT for daylight travel footage?',
+    a: 'Meridian is the best fit in this shop for daylight travel, lifestyle, creator, and outdoor footage that already has a clean exposure and white balance.',
+  },
+  {
+    q: 'Do these LUTs work in Premiere Pro, DaVinci Resolve, and Final Cut Pro?',
+    a: 'Yes. The released LUTs ship as .CUBE files, which can be loaded in Adobe Premiere Pro, DaVinci Resolve, Final Cut Pro, and most modern color workflows.',
+  },
+  {
+    q: 'Should I apply a LUT before or after color correction?',
+    a: 'Apply the LUT after a base correction or log-to-Rec.709 transform. Then fine-tune intensity, exposure, and white balance per shot.',
+  },
+];
+
+const LUT_DETAIL_FAQS = window.LUT_DETAIL_FAQS || [
+  {
+    q: 'Who is Meridian best for?',
+    a: 'Meridian is best for editors, filmmakers, and creators who want one cinematic LUT for daylight, travel, lifestyle, and social video rather than a huge LUT bundle.',
+  },
+  {
+    q: 'What software can open Meridian?',
+    a: 'Meridian ships as a .CUBE LUT, so it can be used in Premiere Pro, DaVinci Resolve, Final Cut Pro, and other color tools that accept .CUBE files.',
+  },
+  {
+    q: 'How strong should the LUT be?',
+    a: 'For most shots, start around 30 to 60 percent intensity, then adjust exposure and white balance so the look feels intentional instead of crushed.',
+  },
+];
+
 function LutsList({ go }) {
+  const hrefFor = window.routeHref || ((id) => '#');
   const releasedCount = LUTS.filter(l => l.available).length;
 
   return (
@@ -46,6 +94,7 @@ function LutsList({ go }) {
       <section className="list-head">
         <div className="wrap">
           <h1>Looks for footage that already has a clean base.</h1>
+          <p>Cinematic .CUBE LUTs for editors working in Premiere Pro, DaVinci Resolve, and Final Cut Pro.</p>
           <div className="list-meta">
             <span>{releasedCount} RELEASED {releasedCount === 1 ? 'LOOK' : 'LOOKS'}</span>
             <span>·</span>
@@ -82,15 +131,31 @@ function LutsList({ go }) {
                   {l.badge && <span style={{ color: l.available ? 'var(--orange-ink)' : 'var(--muted)' }}>{l.available ? '★ ' : ''}{l.badge}</span>}
                 </div>
                 <h3 className="card-title">{l.name}</h3>
+                {l.available && <p className="card-desc">{l.oneline}</p>}
                 <div className="card-foot">
                   <div className="card-price">{l.available ? `$${l.price}` : l.release}</div>
-                  {l.available ? <span className="btn btn-secondary btn-sm">View <ArrowIcon /></span> : null}
+                  {l.available ? (
+                    <a
+                      className="btn btn-secondary btn-sm"
+                      href={hrefFor('lut:' + l.id)}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('lut:' + l.id); }}
+                    >
+                      View <ArrowIcon />
+                    </a>
+                  ) : null}
                 </div>
               </div>
             </article>
           ))}
         </div>
       </div>
+      <BuyerGuide
+        eyebrow="LUT BUYER GUIDE"
+        title="How to choose the right LUT for your footage."
+        intro="The best LUT depends on the footage, not the trend. These LUTs are designed as creative finishing looks after a clean technical base."
+        items={LUT_GUIDE_ITEMS}
+        faqs={LUT_FAQS}
+      />
       <section className="section-sm">
         <div className="wrap">
           <p className="section-title">HOW IT WORKS</p>
@@ -119,12 +184,33 @@ function LutsList({ go }) {
 
 function LutDetail({ id, go }) {
   const l = LUTS.find(x => x.id === id) || LUTS[0];
+  const hrefFor = window.routeHref || ((id) => '#');
   const [buying, setBuying] = React.useState(false);
+  const [activeMediaId, setActiveMediaId] = React.useState(l.mockupSrc ? 'mockup' : 'compare');
   const purchased = new URLSearchParams(location.search).get('purchased') === 'true';
   React.useEffect(() => {
     if (!l.available) go('luts');
   }, [l.available, go]);
+  React.useEffect(() => {
+    setActiveMediaId(l.mockupSrc ? 'mockup' : 'compare');
+  }, [l.id, l.mockupSrc]);
   if (!l.available) return null;
+
+  const mediaItems = [
+    l.mockupSrc ? {
+      id: 'mockup',
+      kind: 'image',
+      label: `${l.name} mockup`,
+      src: l.mockupSrc,
+      alt: l.mockupAlt || `${l.name} LUT mock-up`,
+    } : null,
+    l.compare ? {
+      id: 'compare',
+      kind: 'compare',
+      label: `${l.name} before and after preview`,
+    } : null,
+  ].filter(Boolean);
+  const activeMedia = mediaItems.find(item => item.id === activeMediaId) || mediaItems[0];
 
   async function handleBuy() {
     setBuying(true);
@@ -146,23 +232,48 @@ function LutDetail({ id, go }) {
   return (
     <div className="wrap">
       <div className="pd-crumbs">
-        <a href="#" onClick={e => { e.preventDefault(); go('home'); }}>Home</a> <span>/</span>
-        <a href="#" onClick={e => { e.preventDefault(); go('luts'); }}>LUTs</a> <span>/</span>
+        <a href={hrefFor('home')} onClick={e => { e.preventDefault(); go('home'); }}>Home</a> <span>/</span>
+        <a href={hrefFor('luts')} onClick={e => { e.preventDefault(); go('luts'); }}>LUTs</a> <span>/</span>
         <span style={{ color: 'var(--ink)' }}>{l.name}</span>
       </div>
       <div className="pd-hero">
-        <div className="pd-media-stack">
-          {l.mockupSrc && (
-            <div className="lut-detail-mockup">
-              <img src={l.mockupSrc} alt={l.mockupAlt || `${l.name} LUT mock-up`} />
-            </div>
-          )}
-          <div className="pd-media">
-            <LutPreview tone={l.tone} scale={1.4} interactive compare={l.compare} />
-            <div className="reel-meta">
-              <span>BEFORE / AFTER</span>
-              <span style={{ opacity: 0.6 }}>{l.demoLabel}</span>
-            </div>
+        <div className="pd-media-gallery" aria-label={`${l.name} media gallery`}>
+          <div className="pd-gallery-thumbs" role="list" aria-label={`${l.name} preview options`}>
+            {mediaItems.map(item => (
+              <button
+                key={item.id}
+                type="button"
+                className={"pd-gallery-thumb" + (activeMedia?.id === item.id ? ' active' : '')}
+                aria-label={`Show ${item.label}`}
+                aria-pressed={activeMedia?.id === item.id}
+                title={item.label}
+                onClick={() => setActiveMediaId(item.id)}
+              >
+                {item.kind === 'image' ? (
+                  <img src={item.src} alt="" />
+                ) : (
+                  <span className="pd-gallery-thumb-preview" aria-hidden="true">
+                    <LutPreview tone={l.tone} scale={0.55} compare={l.compare} showLabels={false} />
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div className="pd-gallery-main">
+            {activeMedia?.kind === 'image' ? (
+              <div className="lut-detail-mockup">
+                <img src={activeMedia.src} alt={activeMedia.alt} />
+              </div>
+            ) : (
+              <div className="pd-media">
+                <LutPreview tone={l.tone} scale={1.4} interactive compare={l.compare} />
+                <div className="reel-meta">
+                  <span>BEFORE / AFTER</span>
+                  <span style={{ opacity: 0.6 }}>{l.demoLabel}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -210,4 +321,4 @@ function LutDetail({ id, go }) {
   );
 }
 
-Object.assign(window, { LutsList, LutDetail, LUTS });
+Object.assign(window, { LutsList, LutDetail, LUTS, LUT_FAQS, LUT_DETAIL_FAQS });

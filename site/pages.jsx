@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Portfolio, Services, Support, Terms, Refund
 
 // Keep source links and per-project metadata on each tile so the next
@@ -501,6 +503,7 @@ const SVC_TESTIMONIALS = [
   {
     id: 'founder-launch',
     label: 'Sample founder quote',
+    avatar: { initials: 'CF', from: '#7fc8ff', to: '#ffb870' },
     quote: 'Alex took a moving launch brief and turned it into a film that felt sharp, expensive, and deliberate from the first second.',
     author: 'Consumer app founder',
     role: 'Launch film',
@@ -508,6 +511,7 @@ const SVC_TESTIMONIALS = [
   {
     id: 'product-marketing',
     label: 'Sample marketing quote',
+    avatar: { initials: 'PM', from: '#ffcd94', to: '#b9f2d5' },
     quote: 'He did more than cut footage. He found the story, tightened the hook, and made the product easier to understand immediately.',
     author: 'Product marketing lead',
     role: 'Software launch asset',
@@ -515,6 +519,7 @@ const SVC_TESTIMONIALS = [
   {
     id: 'creative-director',
     label: 'Sample creative quote',
+    avatar: { initials: 'CD', from: '#9fd5ff', to: '#d7b8ff' },
     quote: 'The turnaround was fast without ever feeling rushed. The pacing, motion details, and final polish all felt considered.',
     author: 'Creative director',
     role: 'Motion graphics sprint',
@@ -522,6 +527,7 @@ const SVC_TESTIMONIALS = [
   {
     id: 'real-estate',
     label: 'Sample client quote',
+    avatar: { initials: 'RE', from: '#ffd6a5', to: '#89c2d9' },
     quote: 'We handed over raw footage and a loose direction. What came back felt premium, clear, and much stronger than what we could have done internally.',
     author: 'Real estate team lead',
     role: 'Vertical property promo',
@@ -529,6 +535,7 @@ const SVC_TESTIMONIALS = [
   {
     id: 'restaurant',
     label: 'Sample hospitality quote',
+    avatar: { initials: 'HO', from: '#f5b7b1', to: '#f9e79f' },
     quote: 'Alex found the strongest visual moments immediately and turned them into something that actually made people stop scrolling.',
     author: 'Hospitality owner',
     role: 'Short-form social edit',
@@ -536,11 +543,39 @@ const SVC_TESTIMONIALS = [
   {
     id: 'operator',
     label: 'Sample operator quote',
+    avatar: { initials: 'SO', from: '#a3e4d7', to: '#f5cba7' },
     quote: 'Having one person who can write, direct, edit, and finish the piece removes a huge amount of overhead when the deadline is real.',
     author: 'Startup operator',
     role: 'Founder-led campaign',
   },
 ];
+
+function getTestimonialAvatarSrc(avatar) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+      <defs>
+        <linearGradient id="avatarGradient" x1="14" y1="12" x2="82" y2="86" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="${avatar.from}"/>
+          <stop offset="1" stop-color="${avatar.to}"/>
+        </linearGradient>
+        <filter id="grain">
+          <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/>
+          <feColorMatrix type="saturate" values="0"/>
+          <feComponentTransfer>
+            <feFuncA type="table" tableValues="0 .16"/>
+          </feComponentTransfer>
+        </filter>
+      </defs>
+      <rect width="96" height="96" rx="48" fill="url(#avatarGradient)"/>
+      <rect width="96" height="96" rx="48" filter="url(#grain)" opacity=".34"/>
+      <path d="M16 74c11-16 22-24 33-24 12 0 23 8 34 24v22H16V74Z" fill="rgba(12,12,13,.34)"/>
+      <circle cx="48" cy="35" r="18" fill="rgba(12,12,13,.24)"/>
+      <text x="48" y="57" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#fff">${avatar.initials}</text>
+    </svg>
+  `;
+
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
 
 function getBriefMailtoHref() {
   const subject = 'Project brief inquiry';
@@ -630,19 +665,26 @@ function ServiceTestimonials() {
           <article key={item.id} className="svc-testimonial" data-default-open={index === 0 ? 'true' : 'false'}>
             <div className="svc-testimonial-inner">
               <div className="svc-testimonial-top">
-                <span className="svc-testimonial-chip">{item.label}</span>
+                <div className="svc-testimonial-person">
+                  <img
+                    className="svc-testimonial-avatar"
+                    src={getTestimonialAvatarSrc(item.avatar)}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <div className="svc-testimonial-person-copy">
+                    <strong>{item.author}</strong>
+                    <span>{item.role}</span>
+                  </div>
+                </div>
                 <span className="svc-testimonial-index">{String(index + 1).padStart(2, '0')}</span>
               </div>
+              <span className="svc-testimonial-chip">{item.label}</span>
               <div className="svc-testimonial-full">
                 <blockquote>{item.quote}</blockquote>
-                <div className="svc-testimonial-author">
-                  <strong>{item.author}</strong>
-                  <span>{item.role}</span>
-                </div>
               </div>
               <div className="svc-testimonial-peek" aria-hidden="true">
-                <strong>{item.author}</strong>
-                <span>{item.role}</span>
+                <span>{item.quote}</span>
               </div>
             </div>
           </article>
@@ -732,7 +774,7 @@ function Services({ go }) {
   );
 }
 
-const FAQS = [
+const FAQS = window.FAQS || [
   { q: 'Do your plugins work on Windows?', a: 'Yes. Every plugin ships with a signed installer for Mac and Windows. Premiere Pro 2024 (24.0) or later.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
   { q: 'Do you offer refunds?', a: 'No. These are digital downloads. Once the files hit your machine, there is no way to un-deliver them. If you hit an install bug or something is broken on my end, email me and I will fix it or replace the file.' },
@@ -895,4 +937,4 @@ function CheckoutSuccess({ go }) {
   );
 }
 
-Object.assign(window, { Portfolio, Services, Support, Terms, Refund, CheckoutSuccess });
+Object.assign(window, { Portfolio, Services, Support, Terms, Refund, CheckoutSuccess, FAQS });

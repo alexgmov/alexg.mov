@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Home page. personal site first, shop second
 
 // Location database. each location carries a wireframe map profile
@@ -140,24 +142,77 @@ const ITINERARY = window.ALEXG_TRAVEL;
 
 // Module-level geo-data cache — fetched once, shared across mounts
 let _geoCache = null;
-let _geoPending = [];
-function loadGeo(cb) {
-  if (_geoCache) { cb(_geoCache); return; }
-  _geoPending.push(cb);
-  if (_geoPending.length > 1) return; // already in-flight
-  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
-    .then(r => r.json())
-    .then(world => {
-      const topo = window.topojson;
-      const d3   = window.d3;
-      _geoCache = {
-        land:      topo.feature(world, world.objects.land),
-        borders:   topo.mesh(world, world.objects.countries, (a, b) => a !== b),
-        sphere:    { type: 'Sphere' },
+let _geoPromise = null;
+let _geoDepsPromise = null;
+const GEO_SCRIPT_URLS = [
+  'https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js',
+  'https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js',
+];
+const _scriptPromises = {};
+
+function loadScriptOnce(src) {
+  if (src.includes('/d3@') && window.d3) return Promise.resolve();
+  if (src.includes('/topojson-client@') && window.topojson) return Promise.resolve();
+
+  if (!_scriptPromises[src]) {
+    _scriptPromises[src] = new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${src}"]`);
+      const script = existing || document.createElement('script');
+
+      script.src = src;
+      script.async = true;
+      script.onload = () => {
+        script.dataset.loaded = 'true';
+        resolve();
       };
-      _geoPending.forEach(fn => fn(_geoCache));
-      _geoPending = [];
+      script.onerror = () => {
+        delete _scriptPromises[src];
+        reject(new Error(`Failed to load ${src}`));
+      };
+
+      if (existing?.dataset.loaded === 'true') resolve();
+      else if (!existing) document.head.appendChild(script);
     });
+  }
+
+  return _scriptPromises[src];
+}
+
+function loadGeoDeps() {
+  if (window.d3 && window.topojson) return Promise.resolve();
+  if (!_geoDepsPromise) {
+    _geoDepsPromise = Promise.all(GEO_SCRIPT_URLS.map(loadScriptOnce))
+      .catch(err => {
+        _geoDepsPromise = null;
+        throw err;
+      });
+  }
+  return _geoDepsPromise;
+}
+
+function loadGeo() {
+  if (_geoCache) return Promise.resolve(_geoCache);
+  if (!_geoPromise) {
+    _geoPromise = loadGeoDeps()
+      .then(() => fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'))
+      .then(r => r.json())
+      .then(world => {
+        const topo = window.topojson;
+        const d3   = window.d3;
+        _geoCache = {
+          land:      topo.feature(world, world.objects.land),
+          borders:   topo.mesh(world, world.objects.countries, (a, b) => a !== b),
+          sphere:    { type: 'Sphere' },
+        };
+        return _geoCache;
+      })
+      .catch(err => {
+        _geoPromise = null;
+        throw err;
+      });
+  }
+
+  return _geoPromise;
 }
 
 function withAlpha(color, alpha) {
@@ -178,12 +233,31 @@ function withAlpha(color, alpha) {
 
 function HologramGlobe({ locKey }) {
   const canvasRef = React.useRef(null);
-  const geoRef    = React.useRef(null);
+  const geoRef    = React.useRef(_geoCache);
+  const [depsReady, setDepsReady] = React.useState(Boolean(window.d3 && window.topojson));
+  const [geoReady, setGeoReady] = React.useState(Boolean(_geoCache));
   const loc = LOCATIONS[locKey];
 
-  React.useEffect(() => { loadGeo(data => { geoRef.current = data; }); }, []);
+  React.useEffect(() => {
+    let alive = true;
+
+    loadGeoDeps()
+      .then(() => {
+        if (alive) setDepsReady(true);
+        return loadGeo();
+      })
+      .then(data => {
+        if (!alive) return;
+        geoRef.current = data;
+        setGeoReady(true);
+      })
+      .catch(err => console.error('Failed to load map data:', err));
+
+    return () => { alive = false; };
+  }, []);
 
   React.useEffect(() => {
+    if (!depsReady || !window.d3) return undefined;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -368,7 +442,7 @@ function HologramGlobe({ locKey }) {
 
     draw();
     return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(raf); };
-  }, [locKey]);
+  }, [locKey, depsReady, geoReady]);
 
   return <canvas ref={canvasRef} className="travel2-globe-canvas" style={{ display: 'block' }} />;
 }
@@ -470,6 +544,44 @@ function HeroTitle() {
   );
 }
 
+function HeroProductShortcut({ kind, name, type, href, onActivate, iconSrc }) {
+  const label = `${name} ${type}`;
+  return (
+    <a
+      className={`hero-product-shortcut hero-product-shortcut-${kind}`}
+      href={href}
+      aria-label={`View ${label}`}
+      onClick={(e) => {
+        e.preventDefault();
+        onActivate();
+      }}
+    >
+      <span className={`hero-product-glyph hero-product-glyph-${kind}${iconSrc ? ' hero-product-glyph-image' : ''}`} aria-hidden="true">
+        {iconSrc ? (
+          <img className="hero-product-icon-img" src={iconSrc} alt="" />
+        ) : kind === 'lut' ? (
+          <>
+            <span className="hero-lut-band hero-lut-band-a" />
+            <span className="hero-lut-band hero-lut-band-b" />
+            <span className="hero-lut-band hero-lut-band-c" />
+          </>
+        ) : (
+          <>
+            <span className="hero-plugin-panel hero-plugin-panel-a" />
+            <span className="hero-plugin-panel hero-plugin-panel-b" />
+            <span className="hero-plugin-dot" />
+          </>
+        )}
+      </span>
+      <span className="hero-product-copy">
+        <span className="hero-product-name">{name}</span>
+        <span className="hero-product-type">{type}</span>
+      </span>
+      <span className="hero-product-arrow" aria-hidden="true"><ArrowIcon size={13} /></span>
+    </a>
+  );
+}
+
 const OMI_CASE_STUDY = {
   client: 'OMI',
   impactValue: '5.5',
@@ -499,10 +611,21 @@ const OMI_CASE_STUDY = {
 
 function Home({ go }) {
   const actionsRef = useHeroScroll();
+  const hrefFor = window.routeHref || ((id) => '#');
+  const featuredPlugin = (window.PLUGINS || []).find(p => p.id === 'flowstate') || {
+    id: 'flowstate',
+    name: 'FlowState',
+    oneline: 'Analyze Premiere bin footage with AI, then search clips by meaning instead of filenames.',
+    price: 28,
+    version: '1.0.0',
+    badge: 'RELEASED',
+    status: 'released',
+    variant: 'ai-media-browser',
+  };
   const featuredLut = (window.LUTS || []).find(l => l.id === 'cinematic-01') || {
     id: 'cinematic-01',
     name: 'Meridian',
-    oneline: 'Sculpted for daylight, this look carves deep, luminous contrast across skin and landscape alike, kissing greens with a rich amber glow and surrendering to darkness with cinematic grace.',
+    oneline: 'Give clean daylight footage warm contrast, richer skin, and polished travel-film color.',
     price: 9,
     badge: 'BESTSELLER',
     compare: {
@@ -515,7 +638,20 @@ function Home({ go }) {
       afterSrc: 'videos/Solène Graded.mp4',
     },
   };
-
+  const homeProductGuide = [
+    {
+      title: 'Premiere Pro plugins for finding footage faster',
+      body: 'FlowState is built for editors with messy bins, long shoots, and footage that is easier to describe than to locate by filename.',
+    },
+    {
+      title: 'Cinematic LUTs for a finished color direction',
+      body: 'Meridian is a .CUBE LUT for editors who want a polished daylight look after the footage has a clean base correction.',
+    },
+    {
+      title: 'Digital products that stay inside the edit',
+      body: 'The shop is focused on tools that work in existing editing software: Premiere Pro extensions and LUT files for Premiere, Resolve, and Final Cut.',
+    },
+  ];
   return (
     <>
       <section className="hero hero-immersive">
@@ -523,13 +659,22 @@ function Home({ go }) {
         <div className="wrap hero-content hero-content-left">
           <HeroTitle />
         </div>
-        <div ref={actionsRef} className="hero-actions hero-title-block hero-title-enter" style={{ animationDelay: '300ms' }}>
-          <button className="btn btn-ghost-light btn-lg" onClick={() => go('plugins')}>
-            Shop Plugins
-          </button>
-          <button className="btn btn-ghost-light btn-lg" onClick={() => go('luts')}>
-            Shop LUTs
-          </button>
+        <div ref={actionsRef} className="hero-actions hero-product-actions hero-title-block hero-title-enter" style={{ animationDelay: '300ms' }}>
+          <HeroProductShortcut
+            kind="plugin"
+            name={featuredPlugin.name}
+            type="Plugin"
+            href={hrefFor('plugin:' + featuredPlugin.id)}
+            onActivate={() => go('plugin:' + featuredPlugin.id)}
+          />
+          <HeroProductShortcut
+            kind="lut"
+            name={featuredLut.name}
+            type="LUT"
+            href={hrefFor('lut:' + featuredLut.id)}
+            onActivate={() => go('lut:' + featuredLut.id)}
+            iconSrc={featuredLut.mockupSrc}
+          />
         </div>
       </section>
 
@@ -563,45 +708,45 @@ function Home({ go }) {
         </div>
       </section>
 
-      {/* Featured Plugin */}
-      <section className="section-sm">
-        <div className="wrap">
-          <p className="section-title">FEATURED · PLUGIN</p>
-          <div className="card card-featured">
-            <div className="card-media">
-              <PremiereScreenshot variant="ai-media-browser" />
-            </div>
-            <div className="card-body">
-              <div className="card-eyebrow">
-                <span>v1.0.0 · PREMIERE 2024+</span>
-                <span style={{ color: 'var(--blue-ink)' }}>● RELEASED</span>
-              </div>
-              <h3 className="card-title">AI Media Browser</h3>
-              <p className="card-desc">Analyze Premiere bin footage with AI, then search clips by meaning instead of filenames.</p>
-              <div className="card-foot">
-                <div className="card-price">$19<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
-                <button className="btn btn-primary" onClick={() => go('plugin:flowstate')}>View <ArrowIcon /></button>
+      {/* Featured Products */}
+      <section id="featured-products" className="section-sm featured-products">
+        <div className="wrap featured-products-stack">
+          <div>
+            <p className="section-title">FEATURED · LUT</p>
+            <div className="card card-featured" onClick={() => go('lut:' + featuredLut.id)} style={{ cursor: 'pointer' }}>
+              <div className="card-media"><LutPreview tone="teal-orange" interactive compare={featuredLut.compare} scrollLinked /></div>
+              <div className="card-body">
+                <div className="card-eyebrow">
+                  <span>INDIVIDUAL LUT · .CUBE</span>
+                  <span style={{ color: 'var(--orange-ink)' }}>★ {featuredLut.badge || 'BESTSELLER'}</span>
+                </div>
+                <h3 className="card-title">{featuredLut.name}</h3>
+                <p className="card-desc">{featuredLut.oneline}</p>
+                <div className="card-foot">
+                  <div className="card-price">${featuredLut.price}<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
+                  <a className="btn btn-primary" href={hrefFor('lut:' + featuredLut.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('lut:' + featuredLut.id); }}>View <ArrowIcon /></a>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Featured LUT */}
-      <section className="section-sm">
-        <div className="wrap">
-          <p className="section-title">FEATURED · LUT</p>
-          <div className="card card-featured" onClick={() => go('lut:' + featuredLut.id)} style={{ cursor: 'pointer' }}>
-            <div className="card-media"><LutPreview tone="teal-orange" interactive compare={featuredLut.compare} scrollLinked /></div>
-            <div className="card-body">
-              <div className="card-eyebrow">
-                <span>INDIVIDUAL LUT · .CUBE</span>
-                <span style={{ color: 'var(--orange-ink)' }}>★ {featuredLut.badge || 'BESTSELLER'}</span>
+          <div>
+            <p className="section-title">FEATURED · PLUGIN</p>
+            <div className="card card-featured">
+              <div className="card-media">
+                <PremiereScreenshot variant={featuredPlugin.variant || 'ai-media-browser'} />
               </div>
-              <h3 className="card-title">{featuredLut.name}</h3>
-              <p className="card-desc">{featuredLut.oneline}</p>
-              <div className="card-foot">
-                <div className="card-price">${featuredLut.price}<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
+              <div className="card-body">
+                <div className="card-eyebrow">
+                  <span>v{featuredPlugin.version} · PREMIERE 2024+</span>
+                  <span style={{ color: 'var(--blue-ink)' }}>● {featuredPlugin.badge || 'RELEASED'}</span>
+                </div>
+                <h3 className="card-title">{featuredPlugin.name}</h3>
+                <p className="card-desc">{featuredPlugin.oneline}</p>
+                <div className="card-foot">
+                  <div className="card-price">${featuredPlugin.price}<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
+                  <a className="btn btn-primary" href={hrefFor('plugin:' + featuredPlugin.id)} onClick={(e) => { e.preventDefault(); go('plugin:' + featuredPlugin.id); }}>View <ArrowIcon /></a>
+                </div>
               </div>
             </div>
           </div>
@@ -646,6 +791,13 @@ function Home({ go }) {
           </div>
         </div>
       </section>
+
+      <BuyerGuide
+        eyebrow="SEARCH GUIDE"
+        title="Editing tools for people searching by outcome, not product category."
+        intro="alexg.mov sells focused digital products for video editors: Premiere Pro plugins for workflow speed and cinematic LUTs for color grading in Premiere, DaVinci Resolve, and Final Cut Pro."
+        items={homeProductGuide}
+      />
 
 
     </>

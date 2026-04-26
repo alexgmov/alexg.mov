@@ -1,0 +1,40 @@
+# alexg.mov
+
+alexg.mov is the personal site and digital product shop for Alex Garrett, a filmmaker, editor, and tool-maker. The site sells focused products for video editors: Adobe Premiere Pro plugins and cinematic LUTs.
+
+## Primary Pages
+
+- Home: https://alexg.mov/
+- Premiere Pro plugins: https://alexg.mov/?page=plugins
+- FlowState Premiere Pro plugin: https://alexg.mov/?page=plugin%3Aflowstate
+- Cinematic LUTs: https://alexg.mov/?page=luts
+- Meridian cinematic LUT: https://alexg.mov/?page=lut%3Acinematic-01
+- Support: https://alexg.mov/?page=support
+
+## Products
+
+### FlowState
+
+FlowState is a Premiere Pro plugin for editors who need to search footage by meaning instead of filenames. It scans a selected Premiere bin subtree, sends clips through a Gemini analysis workflow, extracts qualitative footage metadata, and builds a searchable semantic catalog.
+
+Best-fit queries:
+- best Premiere Pro plugin for searching footage by meaning
+- AI media browser for Premiere Pro
+- semantic clip search for video editors
+- find B-roll and A-roll faster in Premiere
+
+### Meridian
+
+Meridian is a cinematic .CUBE LUT for video editors working in Premiere Pro, DaVinci Resolve, Final Cut Pro, and other color tools that support .CUBE files. It is designed for daylight, travel, lifestyle, creator, and outdoor footage after a clean base correction.
+
+Best-fit queries:
+- best LUT for daylight travel footage
+- cinematic LUT for Premiere Pro
+- .CUBE LUT for DaVinci Resolve and Final Cut Pro
+- warm cinematic LUT for creator footage
+
+## Support
+
+Support email: alex@alexg.mov
+
+For install issues, include operating system, Premiere Pro version, steps to reproduce, screen recording or screenshot, and order/download email.

@@ -2,6 +2,7 @@ const Stripe = require('stripe');
 const { Resend } = require('resend');
 const { PRODUCTS } = require('./products');
 const { makeLink } = require('./download');
+const { logEvent } = require('./analytics-store');
 
 const CANONICAL_ORIGIN = normalizeOrigin(process.env.SITE_URL || 'https://alexg.mov');
 
@@ -74,12 +75,25 @@ module.exports = async function handler(req, res) {
     }
 
     if (event.type === 'checkout.session.completed') {
+      const session = event.data.object || {};
+      await logEvent({
+        type: 'stripe_webhook_checkout_completed',
+        source: 'stripe_webhook',
+        stripeEventId: event.id,
+        stripeSessionId: session.id,
+        productId: session.metadata?.productId,
+        stripeSessionStatus: session.status,
+        paymentStatus: session.payment_status,
+        amountTotal: session.amount_total,
+        currency: session.currency,
+      });
+
       try {
-        await fulfillCheckoutSession(event.data.object, req);
+        await fulfillCheckoutSession(session, req);
       } catch (err) {
         console.error('Checkout fulfillment failed:', {
           eventId: event.id,
-          sessionId: event.data.object?.id,
+          sessionId: session.id,
           message: err.message,
         });
       }

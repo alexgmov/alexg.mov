@@ -1,11 +1,14 @@
 const Stripe = require('stripe');
 const { PRODUCTS } = require('./products');
+const { ensureVisitorIds, logEvent } = require('./analytics-store');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).end();
   }
+
+  const analyticsIds = ensureVisitorIds(req, res);
 
   const { session_id: sessionId } = Object.fromEntries(
     new URL(req.url, 'http://x').searchParams
@@ -28,11 +31,25 @@ module.exports = async function handler(req, res) {
     return res.status(404).json({ error: 'Checkout session not found' });
   }
 
+  const product = PRODUCTS[session.metadata?.productId];
+  await logEvent({
+    type: 'checkout_session_checked',
+    source: 'server',
+    stripeSessionId: session.id,
+    stripeSessionStatus: session.status,
+    paymentStatus: session.payment_status,
+    productId: session.metadata?.productId,
+    productName: product?.name,
+    amountTotal: session.amount_total,
+    currency: session.currency,
+    visitorId: analyticsIds.visitorId,
+    sessionId: analyticsIds.sessionId,
+    visitorHash: analyticsIds.visitorHash,
+  });
+
   if (session.payment_status !== 'paid') {
     return res.status(402).json({ error: 'Checkout session is not paid' });
   }
-
-  const product = PRODUCTS[session.metadata?.productId];
 
   res.json({
     email: session.customer_details?.email || session.customer_email || '',

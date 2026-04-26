@@ -1,5 +1,6 @@
 const Stripe = require('stripe');
 const { PRODUCTS } = require('./products');
+const { ensureVisitorIds, logEvent } = require('./analytics-store');
 
 const CANONICAL_ORIGIN = normalizeOrigin(process.env.SITE_URL || 'https://alexg.mov');
 
@@ -47,6 +48,8 @@ module.exports = async function handler(req, res) {
     return res.status(405).end();
   }
 
+  const analyticsIds = ensureVisitorIds(req, res);
+
   let body;
   try {
     const buf = await readBody(req);
@@ -85,6 +88,22 @@ module.exports = async function handler(req, res) {
     console.error('Stripe error:', err.message);
     return res.status(502).json({ error: 'Payment provider error. Please try again.' });
   }
+
+  await logEvent({
+    type: 'checkout_session_created',
+    source: 'server',
+    productId,
+    productName: product.name,
+    productPage: product.page,
+    stripeSessionId: session.id,
+    stripeSessionStatus: session.status,
+    paymentStatus: session.payment_status,
+    amountTotal: session.amount_total,
+    currency: session.currency,
+    visitorId: analyticsIds.visitorId,
+    sessionId: analyticsIds.sessionId,
+    visitorHash: analyticsIds.visitorHash,
+  });
 
   res.json({ url: session.url });
 };

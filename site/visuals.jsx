@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Visual components. faked plausible screenshots/stills
 
 // Premiere-like panel chrome with a plugin visible in it
@@ -124,7 +126,7 @@ function PremiereScreenshot({ variant = "ai-media-browser", scale = 1 }) {
 }
 
 // LUT preview. draggable before/after wipe for LUT demos.
-function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, initialSplit = 0.5, compare = null, scrollLinked = false }) {
+function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, initialSplit = 0.5, compare = null, scrollLinked = false, showLabels = true }) {
   const wrapRef = React.useRef(null);
   const baseVideoRef = React.useRef(null);
   const revealVideoRef = React.useRef(null);
@@ -304,32 +306,36 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </div>
-          <div style={{
-            position: 'absolute',
-            left: 10 * scale,
-            top: 10 * scale,
-            fontFamily: '"Courier New", monospace',
-            fontSize: 9 * scale,
-            color: 'rgba(255,255,255,0.9)',
-            padding: `${4 * scale}px ${8 * scale}px`,
-            background: 'rgba(0,0,0,0.45)',
-            borderRadius: 999,
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-          }}>{(compare.afterLabel || 'GRADED').toUpperCase()}</div>
-          <div style={{
-            position: 'absolute',
-            right: 10 * scale,
-            top: 10 * scale,
-            fontFamily: '"Courier New", monospace',
-            fontSize: 9 * scale,
-            color: 'rgba(255,255,255,0.76)',
-            padding: `${4 * scale}px ${8 * scale}px`,
-            background: 'rgba(0,0,0,0.35)',
-            borderRadius: 999,
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-          }}>{(compare.beforeLabel || 'UNGRADED').toUpperCase()}</div>
+          {showLabels && (
+            <>
+              <div style={{
+                position: 'absolute',
+                left: 10 * scale,
+                top: 10 * scale,
+                fontFamily: '"Courier New", monospace',
+                fontSize: 9 * scale,
+                color: 'rgba(255,255,255,0.9)',
+                padding: `${4 * scale}px ${8 * scale}px`,
+                background: 'rgba(0,0,0,0.45)',
+                borderRadius: 999,
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+              }}>{(compare.afterLabel || 'GRADED').toUpperCase()}</div>
+              <div style={{
+                position: 'absolute',
+                right: 10 * scale,
+                top: 10 * scale,
+                fontFamily: '"Courier New", monospace',
+                fontSize: 9 * scale,
+                color: 'rgba(255,255,255,0.76)',
+                padding: `${4 * scale}px ${8 * scale}px`,
+                background: 'rgba(0,0,0,0.35)',
+                borderRadius: 999,
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+              }}>{(compare.beforeLabel || 'UNGRADED').toUpperCase()}</div>
+            </>
+          )}
         </>
       ) : (
         <>

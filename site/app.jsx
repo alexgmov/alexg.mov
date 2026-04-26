@@ -1,31 +1,144 @@
+import React from 'react';
+
 // Main SPA shell. routing, tweaks, mounting
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "theme": "dark"
 }/*EDITMODE-END*/;
 
-function App({ initialPage, embedded }) {
+const routeChunkLoaders = {
+  home: () => import('./home.jsx'),
+  plugins: () => import('./plugins.jsx'),
+  luts: () => import('./luts.jsx'),
+  pages: () => import('./pages.jsx'),
+};
+
+const routeChunkCache = new Map();
+
+function loadRouteChunk(chunk) {
+  if (!routeChunkCache.has(chunk)) {
+    routeChunkCache.set(chunk, routeChunkLoaders[chunk]());
+  }
+  return routeChunkCache.get(chunk);
+}
+
+function routeForPage(page) {
+  if (page?.startsWith('plugin:')) {
+    return { chunk: 'plugins', componentName: 'PluginDetail', id: page.slice(7) };
+  }
+  if (page?.startsWith('lut:')) {
+    return { chunk: 'luts', componentName: 'LutDetail', id: page.slice(4) };
+  }
+
+  const routes = {
+    home: { chunk: 'home', componentName: 'Home' },
+    plugins: { chunk: 'plugins', componentName: 'PluginsList' },
+    luts: { chunk: 'luts', componentName: 'LutsList' },
+    portfolio: { chunk: 'pages', componentName: 'Portfolio' },
+    services: { chunk: 'pages', componentName: 'Services' },
+    support: { chunk: 'pages', componentName: 'Support' },
+    success: { chunk: 'pages', componentName: 'CheckoutSuccess' },
+    terms: { chunk: 'pages', componentName: 'Terms' },
+    refund: { chunk: 'pages', componentName: 'Refund' },
+  };
+
+  return routes[page] || routes.home;
+}
+
+function RouteContent({ page, go, onLoaded }) {
+  const route = React.useMemo(() => routeForPage(page), [page]);
+  const [state, setState] = React.useState({
+    page: null,
+    Component: null,
+    error: null,
+  });
+
+  React.useEffect(() => {
+    let alive = true;
+
+    setState(prev => (
+      prev.page === page && prev.Component
+        ? prev
+        : { page, Component: null, error: null }
+    ));
+
+    loadRouteChunk(route.chunk)
+      .then(() => {
+        const Component = window[route.componentName];
+        if (!Component) throw new Error(`Route component ${route.componentName} did not register`);
+        if (!alive) return;
+        setState({ page, Component, error: null });
+        onLoaded(page);
+      })
+      .catch(error => {
+        console.error(error);
+        if (alive) setState({ page, Component: null, error });
+      });
+
+    return () => { alive = false; };
+  }, [page, route.chunk, route.componentName, onLoaded]);
+
+  if (state.error) {
+    return (
+      <main className="route-state">
+        <div className="wrap">
+          <p>Something went wrong loading this page. Refresh and try again.</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!state.Component) {
+    return (
+      <main className="route-state" aria-live="polite">
+        <div className="wrap">
+          <p>Loading.</p>
+        </div>
+      </main>
+    );
+  }
+
+  return <state.Component id={route.id} go={go} />;
+}
+
+export function prefetchRoute(page) {
+  return loadRouteChunk(routeForPage(page).chunk);
+}
+
+export function App({ initialPage, embedded }) {
   const [page, setPage] = React.useState(initialPage || 'home');
   const [theme, setTheme] = React.useState(TWEAK_DEFAULTS.theme);
   const [editMode, setEditMode] = React.useState(false);
   const [pendingScrollTarget, setPendingScrollTarget] = React.useState(null);
+  const [loadedPage, setLoadedPage] = React.useState(null);
+  const handleRouteLoaded = React.useCallback((loaded) => setLoadedPage(loaded), []);
 
-  // Persist & restore
+  // Keep SPA state, URL, and metadata in sync for shareable/crawlable pages.
   React.useEffect(() => {
     if (embedded) return;
-    if (new URLSearchParams(location.search).get('page')) return;
-    const saved = localStorage.getItem('alexgmov:page');
-    if (saved) setPage(saved);
-  }, []);
+    const onPopState = () => {
+      const qs = new URLSearchParams(location.search);
+      setPage(qs.get('page') || 'home');
+      setPendingScrollTarget(location.hash ? location.hash.slice(1) : null);
+    };
+    window.addEventListener('popstate', onPopState);
+    if (location.hash) setPendingScrollTarget(location.hash.slice(1));
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [embedded]);
+
   React.useEffect(() => {
     if (!embedded) localStorage.setItem('alexgmov:page', page);
-  }, [page]);
+  }, [page, embedded]);
+  React.useEffect(() => {
+    if (!embedded && loadedPage === page && window.applyPageSeo) window.applyPageSeo(page);
+  }, [page, loadedPage, embedded]);
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     if (!embedded) localStorage.setItem('alexgmov:theme', theme);
   }, [theme]);
 
   React.useEffect(() => {
+    if (loadedPage !== page) return undefined;
     if (!pendingScrollTarget) return undefined;
     let rafA = 0;
     let rafB = 0;
@@ -40,7 +153,7 @@ function App({ initialPage, embedded }) {
       cancelAnimationFrame(rafA);
       cancelAnimationFrame(rafB);
     };
-  }, [page, pendingScrollTarget]);
+  }, [page, loadedPage, pendingScrollTarget]);
 
   // Tweaks
   React.useEffect(() => {
@@ -57,9 +170,15 @@ function App({ initialPage, embedded }) {
 
   const go = (p, options = {}) => {
     const [nextPage, inlineTarget] = String(p).split('#');
-    setPendingScrollTarget(options.target || inlineTarget || null);
+    const target = options.target || inlineTarget || null;
+    setPendingScrollTarget(target);
     setPage(nextPage);
-    window.scrollTo(0, 0);
+    if (!embedded && window.routeHref) {
+      const href = window.routeHref(nextPage, target);
+      const current = `${location.pathname}${location.search}${location.hash}`;
+      if (href !== current) history.pushState({ page: nextPage, target }, '', href);
+    }
+    if (!target) window.scrollTo(0, 0);
   };
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
@@ -67,23 +186,10 @@ function App({ initialPage, embedded }) {
     if (!embedded) window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: next } }, '*');
   };
 
-  let content = null;
-  if (page === 'home') content = <Home go={go} />;
-  else if (page === 'plugins') content = <PluginsList go={go} />;
-  else if (page === 'luts') content = <LutsList go={go} />;
-  else if (page === 'portfolio') content = <Portfolio go={go} />;
-  else if (page === 'services') content = <Services go={go} />;
-  else if (page === 'support') content = <Support go={go} />;
-  else if (page === 'success') content = <CheckoutSuccess go={go} />;
-  else if (page === 'terms') content = <Terms />;
-  else if (page === 'refund') content = <Refund />;
-  else if (page.startsWith('plugin:')) content = <PluginDetail id={page.slice(7)} go={go} />;
-  else if (page.startsWith('lut:')) content = <LutDetail id={page.slice(4)} go={go} />;
-
   return (
     <>
       <Nav page={page.split(':')[0]} go={go} />
-      {content}
+      <RouteContent page={page} go={go} onLoaded={handleRouteLoaded} />
       <Footer go={go} />
       {!embedded && (
         <div className={"tweaks " + (editMode ? 'on' : '')}>
@@ -99,12 +205,3 @@ function App({ initialPage, embedded }) {
 }
 
 Object.assign(window, { App });
-
-// Mount if #root exists on this page
-if (document.getElementById('root')) {
-  const qs = new URLSearchParams(location.search);
-  const initial = qs.get('page') || 'home';
-  const embedded = qs.get('embedded') === '1';
-  document.documentElement.setAttribute('data-theme', TWEAK_DEFAULTS.theme);
-  ReactDOM.createRoot(document.getElementById('root')).render(<App initialPage={initial} embedded={embedded} />);
-}
