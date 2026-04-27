@@ -317,16 +317,6 @@ function LutDetail({ id, go }) {
           </ol>
         </div>
       </div>
-
-      <div className="pd-mobile-buybar" aria-label={`${l.name} purchase bar`}>
-        <div className="pd-mobile-buybar-copy">
-          <strong>${l.price}</strong>
-          <span>{l.name} · instant .cube download</span>
-        </div>
-        <button className="btn btn-primary btn-sm" onClick={handleBuy} disabled={buying}>
-          {buying ? 'Redirecting...' : 'Buy'}
-        </button>
-      </div>
     </div>
   );
 }

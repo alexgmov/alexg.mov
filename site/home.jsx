@@ -582,101 +582,6 @@ function HeroProductShortcut({ kind, name, type, href, onActivate, iconSrc }) {
   );
 }
 
-function useMobileLayout() {
-  const query = '(max-width: 720px)';
-  const [matches, setMatches] = React.useState(() => (
-    window.matchMedia ? window.matchMedia(query).matches : false
-  ));
-
-  React.useEffect(() => {
-    if (!window.matchMedia) return undefined;
-    const media = window.matchMedia(query);
-    const onChange = () => setMatches(media.matches);
-    onChange();
-    if (media.addEventListener) {
-      media.addEventListener('change', onChange);
-      return () => media.removeEventListener('change', onChange);
-    }
-    media.addListener(onChange);
-    return () => media.removeListener(onChange);
-  }, []);
-
-  return matches;
-}
-
-function MobileConversionPath({ featuredPlugin, featuredLut, go, hrefFor }) {
-  const productLinks = [
-    {
-      id: 'lut',
-      eyebrow: 'LUT',
-      title: featuredLut.name,
-      meta: `$${featuredLut.price} one-time`,
-      copy: 'Warm daylight color for Premiere, Resolve, and Final Cut.',
-      href: hrefFor('lut:' + featuredLut.id),
-      onActivate: () => go('lut:' + featuredLut.id),
-    },
-    {
-      id: 'plugin',
-      eyebrow: 'PLUGIN',
-      title: featuredPlugin.name,
-      meta: `$${featuredPlugin.price} one-time`,
-      copy: 'Find footage by meaning without leaving Premiere.',
-      href: hrefFor('plugin:' + featuredPlugin.id),
-      onActivate: () => go('plugin:' + featuredPlugin.id),
-    },
-    {
-      id: 'services',
-      eyebrow: 'SERVICES',
-      title: 'Video work',
-      meta: 'Inquire',
-      copy: 'Brand films, edits, and launch assets for teams.',
-      href: hrefFor('services'),
-      onActivate: () => go('services'),
-    },
-  ];
-
-  return (
-    <section className="mobile-conversion-path" aria-label="Shop and services">
-      <div className="wrap">
-        <div className="mobile-hero-video">
-          <video
-            src={OMI_CASE_STUDY.videoSrc}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            aria-label="Selected alexg.mov video work"
-            title="Selected alexg.mov video work"
-            disablePictureInPicture
-            controlsList="nodownload nofullscreen noremoteplayback"
-          />
-        </div>
-
-        <div className="mobile-funnel-tabs" role="list">
-          {productLinks.map(item => (
-            <a
-              key={item.id}
-              role="listitem"
-              className={`mobile-funnel-tab mobile-funnel-tab-${item.id}`}
-              href={item.href}
-              onClick={(e) => {
-                e.preventDefault();
-                item.onActivate();
-              }}
-            >
-              <span className="mobile-funnel-eyebrow">{item.eyebrow}</span>
-              <span className="mobile-funnel-title">{item.title}</span>
-              <span className="mobile-funnel-copy">{item.copy}</span>
-              <span className="mobile-funnel-meta">{item.meta} <ArrowIcon /></span>
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 const OMI_CASE_STUDY = {
   client: 'OMI',
   impactValue: '5.5',
@@ -706,7 +611,6 @@ const OMI_CASE_STUDY = {
 
 function Home({ go }) {
   const actionsRef = useHeroScroll();
-  const isMobileLayout = useMobileLayout();
   const hrefFor = window.routeHref || ((id) => '#');
   const featuredPlugin = (window.PLUGINS || []).find(p => p.id === 'flowstate') || {
     id: 'flowstate',
@@ -773,15 +677,6 @@ function Home({ go }) {
           />
         </div>
       </section>
-
-      {isMobileLayout && (
-        <MobileConversionPath
-          featuredPlugin={featuredPlugin}
-          featuredLut={featuredLut}
-          go={go}
-          hrefFor={hrefFor}
-        />
-      )}
 
       {/* Travel log */}
       <section className="section-xs">

@@ -322,18 +322,6 @@ function PluginDetail({ id, go }) {
           </div>
         </div>
       </div>
-
-      {p.status === 'released' && (
-        <div className="pd-mobile-buybar" aria-label={`${p.name} purchase bar`}>
-          <div className="pd-mobile-buybar-copy">
-            <strong>${p.price}</strong>
-            <span>{p.name} · Premiere plugin</span>
-          </div>
-          <button className="btn btn-primary btn-sm" onClick={handleBuy} disabled={buying}>
-            {buying ? 'Redirecting...' : 'Buy'}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
