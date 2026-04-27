@@ -54,7 +54,8 @@ function Nav({ page, go, overlay }) {
           ))}
         </div>
         <a className="nav-cta" href={hrefFor('home', 'featured-products')} onClick={handleProductsClick}>
-          Shop products <span style={{ opacity: 0.65 }}><ShoppingBagIcon /></span>
+          <span className="nav-cta-label">Shop products</span>
+          <span className="nav-cta-icon"><ShoppingBagIcon /></span>
         </a>
       </div>
     </nav>
