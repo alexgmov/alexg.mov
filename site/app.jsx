@@ -191,6 +191,7 @@ export function App({ initialPage, embedded }) {
       <Nav page={page.split(':')[0]} go={go} />
       <RouteContent page={page} go={go} onLoaded={handleRouteLoaded} />
       <Footer go={go} />
+      <MobileBottomNav page={page} go={go} />
       {!embedded && (
         <div className={"tweaks " + (editMode ? 'on' : '')}>
           <div className="tweaks-title">TWEAKS</div>

@@ -9,37 +9,37 @@ const PORTFOLIO_CATEGORIES = [
     id: 'launchbrand',
     label: 'Launch / Brand',
     kicker: '01',
-    intro: 'Launch films, founder-led announcements, and brand pieces built to land fast and feel premium on first view.',
+    intro: 'Launch films and brand pieces built to land quickly.',
   },
   {
     id: 'motion-graphics',
     label: 'Motion Graphics',
     kicker: '02',
-    intro: 'Typography, transitions, and designed movement that helps the message feel sharper without getting noisy.',
+    intro: 'Typography, transitions, and motion that make the message clearer.',
   },
   {
     id: 'ai-speed-ramp-edits',
     label: 'Speed Ramp Edits',
     kicker: '03',
-    intro: 'Fast, stylized social edits built around punchy pacing, kinetic motion, and sharper visual acceleration.',
+    intro: 'Fast social edits with punchy pacing and kinetic movement.',
   },
   {
     id: 'real-estate',
     label: 'Real Estate',
     kicker: '04',
-    intro: 'Property promos, realtor-led spots, and high-end real estate edits designed to sell mood as much as square footage.',
+    intro: 'Property promos and realtor-led edits with a premium finish.',
   },
   {
     id: 'short-film',
     label: 'Short Films',
     kicker: '05',
-    intro: 'Widescreen edits with more room to breathe, focused on pacing, tone, and cinematic atmosphere.',
+    intro: 'Widescreen edits focused on pacing, tone, and atmosphere.',
   },
   {
     id: 'business-promos',
     label: 'Business Promos',
     kicker: '06',
-    intro: 'Business-facing edits for restaurants, local brands, and other client work that needs to advertise clearly and still feel polished.',
+    intro: 'Client edits that advertise clearly and still feel polished.',
   },
 ];
 
@@ -49,7 +49,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'OMI launch film',
     category: 'launchbrand',
     kind: 'Product launch film',
-    blurb: 'A full-stack launch film that drove 5.5M views.',
+    blurb: 'Launch film with 5.5M views.',
     source: 'alexg.mov',
     sourceUrl: 'videos/portfolio/web/omi-launch-film.mp4',
     src: 'videos/portfolio/web/omi-launch-film.mp4',
@@ -60,7 +60,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Ekta portrait cut',
     category: 'ai-speed-ramp-edits',
     kind: 'Portrait social reel',
-    blurb: 'A clean portrait reel with a quiet cinematic feel.',
+    blurb: 'Clean portrait reel with a quiet cinematic feel.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DMZNWMJRyu5/',
     src: 'videos/portfolio/web/ekta-portrait.mp4',
@@ -71,7 +71,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Alex Garrett social spot',
     category: 'ai-speed-ramp-edits',
     kind: 'Personal brand spot',
-    blurb: 'A fast personal-brand spot with sharper visual rhythm.',
+    blurb: 'Fast personal-brand spot with sharper rhythm.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DOyrMpyCXV0/',
     src: 'videos/portfolio/web/alexg-portrait.mp4',
@@ -82,7 +82,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Interview Coder launch film',
     category: 'launchbrand',
     kind: 'Product launch film',
-    blurb: 'A high-stakes launch film for Interview Coder 2.0.',
+    blurb: 'Launch film for Interview Coder 2.0.',
     source: 'LinkedIn',
     sourceUrl: 'https://www.linkedin.com/posts/abdulla007_i-spent-the-last-few-months-building-interview-activity-7389017263137366017-mnw5?utm_source=share&utm_medium=member_desktop&rcm=ACoAADxqsrkB2ELwiS4XdDkChEYtbz9dxTc-INc',
     src: 'videos/portfolio/web/interview-coder-linkedin.mp4',
@@ -94,7 +94,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Eldo reel',
     category: 'business-promos',
     kind: 'Restaurant promo',
-    blurb: 'A punchy restaurant promo built around one hero dish.',
+    blurb: 'Restaurant promo built around one hero dish.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reel/DJHzWMmoXz2/',
     src: 'videos/portfolio/web/eldo-reel.mp4',
@@ -105,7 +105,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Abdulla case study',
     category: 'launchbrand',
     kind: 'Founder case study',
-    blurb: 'A founder-facing startup edit with momentum and polish.',
+    blurb: 'Founder-facing startup edit with momentum.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DVipr1igHR3/',
     src: 'videos/portfolio/web/abdulla-case-study.mp4',
@@ -116,7 +116,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Motion graphics build',
     category: 'motion-graphics',
     kind: 'Product UI motion piece',
-    blurb: 'A clean UI motion piece with sharper demo energy.',
+    blurb: 'UI motion piece with crisp demo energy.',
     source: 'Drive',
     sourceUrl: 'https://drive.google.com/file/d/17DS1xWMJFBe0rNCXQHvWcRSJ1y_vxUPv/view',
     src: 'videos/portfolio/web/motion-graphics-drive.mp4',
@@ -139,7 +139,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Real estate tour promo',
     category: 'real-estate',
     kind: 'Property tour promo',
-    blurb: 'A polished vertical walkthrough with premium pacing.',
+    blurb: 'Polished vertical walkthrough.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DHqw-C_pAtq/',
     src: 'videos/portfolio/web/infiniteviews-real-estate.mp4',
@@ -161,7 +161,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Luxury real estate promo',
     category: 'real-estate',
     kind: 'Luxury listing promo',
-    blurb: 'A smooth luxury listing edit with a polished finish.',
+    blurb: 'Smooth listing edit with a clean finish.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DJ5J48LgmjQ/',
     src: 'videos/portfolio/web/pcg-luxury-real-estate.mp4',
@@ -172,7 +172,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Snowflakes widescreen preview',
     category: 'short-film',
     kind: 'Widescreen short',
-    blurb: 'A widescreen science short about avalanche prevention.',
+    blurb: 'Widescreen science short on avalanche prevention.',
     source: 'YouTube',
     sourceUrl: 'https://www.youtube.com/watch?v=RE6ahIf3kwA&t=61s',
     src: 'videos/portfolio/web/snowflakes-youtube.mp4',
@@ -184,7 +184,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Widescreen interview preview',
     category: 'short-film',
     kind: 'Interview short',
-    blurb: 'An experimental short with a slower cinematic mood.',
+    blurb: 'Slow, cinematic interview short.',
     source: 'YouTube',
     sourceUrl: 'https://www.youtube.com/watch?v=xTR8c4j_DKk&t=13s',
     src: 'videos/portfolio/web/wide-youtube.mp4',
@@ -207,7 +207,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Kaedim launch post',
     category: 'motion-graphics',
     kind: '3D motion launch post',
-    blurb: 'A 3D product launch asset with clean motion design.',
+    blurb: '3D product launch asset with clean motion.',
     source: 'LinkedIn',
     sourceUrl: 'https://www.linkedin.com/posts/kaedim_today-is-a-big-milestone-for-kaedim-for-activity-7434690563268018176--REi?utm_source=share&utm_medium=member_desktop&rcm=ACoAADxqsrkB2ELwiS4XdDkChEYtbz9dxTc-INc',
     src: 'videos/portfolio/web/kaedim-linkedin.mp4',
@@ -227,22 +227,22 @@ const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
   impactUnit: 'M VIEWS',
   impactWindow: 'in 4 days',
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2025',
-  heroTitle: "Directed OMI's launch film end-to-end and drove 5.5M views in four days.",
-  summary: 'OMI needed a launch asset built for reach. I owned the concept, script, direction, production, edit, and the product UI moments that made the assistant feel alive onscreen.',
+  heroTitle: "Directed OMI's launch film and drove 5.5M views in four days.",
+  summary: 'OMI needed a launch film built for reach. I handled concept, script, production, edit, and onscreen product moments.',
   videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
   services: ['Brand Film', 'Video Editing', 'Motion Graphics'],
   detailSections: [
     {
       title: 'Brief',
-      body: 'OMI needed a launch film with one clear KPI: reach. I produced and directed the project end-to-end, owning the concept, scripting, and full creative execution from first idea through final delivery.',
+      body: 'OMI needed a launch film with one KPI: reach. I led the concept, script, production, edit, and delivery.',
     },
     {
       title: 'Execution',
-      body: 'To maximize distribution, I led a rapid pivot to a higher-stakes narrative designed to create emotion and debate without losing polish. I built a fast shoot plan, ran casting overnight, assembled a three-actor lineup, and managed lean production in New York City under intense time pressure.',
+      body: 'I pivoted to a sharper narrative, ran overnight casting, and managed a lean New York shoot under a tight timeline.',
     },
     {
       title: 'Post + outcome',
-      body: 'In post, I cut the final spot and engineered the voice and on-screen product moments that made the assistant feel alive. The launch broke out quickly, driving 5.5M views across X and Instagram in four days.',
+      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 5.5M views across X and Instagram in four days.',
     },
   ],
 };
@@ -485,17 +485,17 @@ function Portfolio({ go }) {
 }
 
 const SERVICES = [
-  { n: '01', name: 'Brand Film', sub: 'Full Stack Video Production', desc: 'Launch or anthem film. Concept, shoot, edit, deliver. Best when you need one sharp hero asset.', price: 'from $10k', turnaround: '4–6 weeks' },
+  { n: '01', name: 'Brand Film', sub: 'Full Stack Video Production', desc: 'Concept, shoot, edit, and delivery for one sharp hero asset.', price: 'from $10k', turnaround: '4–6 weeks' },
   { n: '02', name: 'Video Editing', desc: 'You shot it, I cut it. Bring camera originals and a reference. I deliver a polished cut and grade.', price: 'from $199', turnaround: '1–2 weeks' },
-  { n: '03', name: 'Motion Graphics', desc: 'Title sequences, lower thirds, explainer overlays, logo animations. After Effects native.', price: 'from $1500', turnaround: '1–3 weeks' },
-  { n: '04', name: 'Consulting', desc: 'Audit of your edit workflow, stack, or short-form strategy. 90 min call plus written notes.', price: '$90/hour', turnaround: '1 week' },
+  { n: '03', name: 'Motion Graphics', desc: 'Titles, lower thirds, explainers, and logo motion. After Effects native.', price: 'from $1500', turnaround: '1–3 weeks' },
+  { n: '04', name: 'Consulting', desc: 'Workflow, stack, or short-form strategy audit. 90-minute call plus notes.', price: '$90/hour', turnaround: '1 week' },
 ];
 
 const SVC_PROCESS = [
-  { k: '01', h: 'Brief', p: 'You email a brief. I reply in 24 hours with fit, scope, and a timeline.' },
-  { k: '02', h: 'Kickoff', p: '30-min call to lock creative direction. I send a written scope and invoice.' },
-  { k: '03', h: 'Build', p: 'I work in small loops. Daily progress in a shared folder. Two revision rounds baked in.' },
-  { k: '04', h: 'Deliver', p: 'Final masters in your preferred specs. Project file included if you want it.' },
+  { k: '01', h: 'Brief', p: 'Email a brief. I reply within 24 hours with fit, scope, and timeline.' },
+  { k: '02', h: 'Kickoff', p: '30-minute call, written scope, and invoice.' },
+  { k: '03', h: 'Build', p: 'Small work loops, shared progress, and two revision rounds.' },
+  { k: '04', h: 'Deliver', p: 'Final masters in your specs. Project file available on request.' },
 ];
 
 const SVC_CLIENTS = ['OMI', 'Cluely', 'Starbucks', 'InterviewCoder', 'Fazm', 'University of Utah', 'Kaedim'];
@@ -504,7 +504,7 @@ const SVC_TESTIMONIALS = [
     id: 'founder-launch',
     label: 'Sample founder quote',
     avatar: { initials: 'CF', from: '#7fc8ff', to: '#ffb870' },
-    quote: 'Alex took a moving launch brief and turned it into a film that felt sharp, expensive, and deliberate from the first second.',
+    quote: 'Alex turned a moving launch brief into a sharp film from the first second.',
     author: 'Consumer app founder',
     role: 'Launch film',
   },
@@ -512,7 +512,7 @@ const SVC_TESTIMONIALS = [
     id: 'product-marketing',
     label: 'Sample marketing quote',
     avatar: { initials: 'PM', from: '#ffcd94', to: '#b9f2d5' },
-    quote: 'He did more than cut footage. He found the story, tightened the hook, and made the product easier to understand immediately.',
+    quote: 'He found the story, tightened the hook, and made the product clear.',
     author: 'Product marketing lead',
     role: 'Software launch asset',
   },
@@ -520,7 +520,7 @@ const SVC_TESTIMONIALS = [
     id: 'creative-director',
     label: 'Sample creative quote',
     avatar: { initials: 'CD', from: '#9fd5ff', to: '#d7b8ff' },
-    quote: 'The turnaround was fast without ever feeling rushed. The pacing, motion details, and final polish all felt considered.',
+    quote: 'Fast turnaround, clean pacing, and polished motion.',
     author: 'Creative director',
     role: 'Motion graphics sprint',
   },
@@ -528,7 +528,7 @@ const SVC_TESTIMONIALS = [
     id: 'real-estate',
     label: 'Sample client quote',
     avatar: { initials: 'RE', from: '#ffd6a5', to: '#89c2d9' },
-    quote: 'We handed over raw footage and a loose direction. What came back felt premium, clear, and much stronger than what we could have done internally.',
+    quote: 'We sent raw footage and a loose direction. The final cut felt clear and premium.',
     author: 'Real estate team lead',
     role: 'Vertical property promo',
   },
@@ -536,7 +536,7 @@ const SVC_TESTIMONIALS = [
     id: 'restaurant',
     label: 'Sample hospitality quote',
     avatar: { initials: 'HO', from: '#f5b7b1', to: '#f9e79f' },
-    quote: 'Alex found the strongest visual moments immediately and turned them into something that actually made people stop scrolling.',
+    quote: 'Alex found the strongest moments fast and made people stop scrolling.',
     author: 'Hospitality owner',
     role: 'Short-form social edit',
   },
@@ -544,7 +544,7 @@ const SVC_TESTIMONIALS = [
     id: 'operator',
     label: 'Sample operator quote',
     avatar: { initials: 'SO', from: '#a3e4d7', to: '#f5cba7' },
-    quote: 'Having one person who can write, direct, edit, and finish the piece removes a huge amount of overhead when the deadline is real.',
+    quote: 'Writing, directing, editing, and finishing in one place made the deadline lighter.',
     author: 'Startup operator',
     role: 'Founder-led campaign',
   },
@@ -656,9 +656,9 @@ function ServiceTestimonials() {
       <div className="svc-testimonials-intro">
         <div>
           <p className="section-title">TESTIMONIALS</p>
-          <h2>Quick proof from the people on the other end of the deadline.</h2>
+          <h2>Proof from the other end of the deadline.</h2>
         </div>
-        <p>Hover across the panels to preview the different quotes. These are sample placeholders for the final testimonial section.</p>
+        <p>Sample placeholders for the final testimonial section.</p>
       </div>
       <div className="svc-testimonial-rail" aria-label="Sample testimonial panels">
         {SVC_TESTIMONIALS.map((item, index) => (
@@ -700,6 +700,7 @@ function Services({ go }) {
       <div className="wrap">
         <div className="svc-intro">
           <h1>Services.</h1>
+          <p className="svc-mobile-intro-copy">Launch films, edits, and motion work with a clear brief, fast feedback loops, and direct email access.</p>
         </div>
 
         {/* Availability strip */}
@@ -720,6 +721,7 @@ function Services({ go }) {
             <div className="svc-avail-v">Within 24 hours</div>
           </div>
         </div>
+        <a className="btn btn-primary btn-lg svc-mobile-brief-cta" href={getBriefMailtoHref()}>Email a brief</a>
 
         <div className="svc-list">
           {SERVICES.map(s => (
@@ -777,8 +779,8 @@ function Services({ go }) {
 const FAQS = window.FAQS || [
   { q: 'Do your plugins work on Windows?', a: 'Yes. Every plugin ships with a signed installer for Mac and Windows. Premiere Pro 2024 (24.0) or later.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
-  { q: 'Do you offer refunds?', a: 'No. These are digital downloads. Once the files hit your machine, there is no way to un-deliver them. If you hit an install bug or something is broken on my end, email me and I will fix it or replace the file.' },
-  { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Often same-day. Include your OS, Premiere version, and a screen recording. It cuts debugging time in half.' },
+  { q: 'Do you offer refunds?', a: 'No. These are digital downloads, so all sales are final. If something is broken on my end, email me and I will fix or replace it.' },
+  { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Include your OS, Premiere version, and a screen recording if possible.' },
 ];
 
 function Support({ go }) {
@@ -795,7 +797,7 @@ function Support({ go }) {
         <div className="sup-grid">
           <div className="sup-card">
             <h3>Email me directly.</h3>
-            <p style={{ color: 'var(--muted)', margin: '0 0 4px' }}>The only support channel. No ticket system, no forms. Goes straight to my inbox.</p>
+            <p style={{ color: 'var(--muted)', margin: '0 0 4px' }}>No ticket system, no forms. Straight to my inbox.</p>
             <a className="sup-email" href="mailto:alex@alexg.mov">
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--blue)' }} />
               alex@alexg.mov
@@ -839,11 +841,11 @@ function Terms() {
       <h1 style={{ fontFamily: 'var(--serif)', fontSize: 44, fontWeight: 500, letterSpacing: '-0.02em', margin: '0 0 32px' }}>Terms.</h1>
       <div style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--ink-soft)' }}>
         <h3 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: 22, marginTop: 32, marginBottom: 8 }}>License</h3>
-        <p>You get a personal + commercial license to use the files on your projects, for yourself or your clients. Don't redistribute the files, don't resell them, don't include them in bundles.</p>
+        <p>You can use the files on personal and client projects. Don't redistribute, resell, or bundle them.</p>
         <h3 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: 22, marginTop: 32, marginBottom: 8 }}>Updates</h3>
         <p>Free updates for 12 months from the purchase date. After that, upgrades are offered at a reduced price.</p>
         <h3 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: 22, marginTop: 32, marginBottom: 8 }}>Liability</h3>
-        <p>Software is provided as-is. Test on non-critical projects first. I will fix bugs promptly but cannot be liable for project-level losses.</p>
+        <p>Software is provided as-is. Test on non-critical projects first. I will fix bugs promptly, but cannot cover project-level losses.</p>
       </div>
     </div>
   );
@@ -856,8 +858,8 @@ function Refund() {
       <h1 style={{ fontFamily: 'var(--serif)', fontSize: 44, fontWeight: 500, letterSpacing: '-0.02em', margin: '0 0 16px' }}>Refund policy.</h1>
       <p style={{ fontFamily: 'var(--serif)', fontSize: 22, color: 'var(--muted)', fontStyle: 'italic', margin: '0 0 40px' }}>All sales are final. Broken files get fixed or replaced.</p>
       <div style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--ink-soft)' }}>
-        <p>All sales are final. These are digital downloads. Once the files are on your machine there is no way to un-deliver them.</p>
-        <p>If something is broken (install bug, missing file, LUT that will not load) email <a href="mailto:alex@alexg.mov" style={{ fontFamily: 'var(--mono)' }}>alex@alexg.mov</a> within 14 days. I will fix it or replace the file.</p>
+        <p>All sales are final because these are digital downloads.</p>
+        <p>If something is broken, email <a href="mailto:alex@alexg.mov" style={{ fontFamily: 'var(--mono)' }}>alex@alexg.mov</a> within 14 days. I will fix it or replace the file.</p>
         <p>If you bought the wrong product by mistake, email me and I will swap it for the right one.</p>
       </div>
     </div>

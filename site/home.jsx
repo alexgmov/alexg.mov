@@ -293,15 +293,15 @@ function HologramGlobe({ locKey }) {
       const styles = getComputedStyle(canvas);
       const baseHeight = parseFloat(styles.getPropertyValue('--travel2-globe-base-height')) || h;
       const topBleed = Math.abs(parseFloat(styles.top) || 0);
-      const drawHeight = baseHeight + (topBleed * 2);
-      const globeVerticalLift = 72;
       const isDesktopTravelLayout = w > 1020;
-      const globeHorizontalShift = isDesktopTravelLayout ? Math.min(296, Math.max(224, w * 0.216 + 32)) : 16;
+      const drawHeight = baseHeight + (topBleed * 2);
+      const globeVerticalLift = isDesktopTravelLayout ? 4 : 72;
+      const globeHorizontalShift = isDesktopTravelLayout ? Math.min(296, Math.max(224, w * 0.216 + 32)) * -1 : 16;
       const globeRadiusScale = isDesktopTravelLayout ? 1.056 : 1.2;
-      const cx = (w / 2) + globeHorizontalShift;
       const cy = (baseHeight / 2) + topBleed - globeVerticalLift;
       const padding = 28;
       const R  = Math.max(0, Math.min((w / 2) - padding, (drawHeight / 2) - padding) * globeRadiusScale);
+      const cx = isDesktopTravelLayout ? R : (w / 2) + globeHorizontalShift;
 
       if (baselineRotLng == null) {
         const rect = canvas.getBoundingClientRect();
@@ -450,6 +450,7 @@ function HologramGlobe({ locKey }) {
 
 function TravelLog() {
   const currentKey = ITINERARY.find(i => i.status === 'here').key;
+  const currentLoc = LOCATIONS[currentKey];
   const scrollRef = React.useRef(null);
   const hereRef = React.useRef(null);
 
@@ -469,6 +470,10 @@ function TravelLog() {
         </div>
       </div>
       <div className="travel2-list">
+        <div className="travel2-mobile-title">
+          <span>WHERE I AM</span>
+          <strong>{currentLoc.city}<em>, {currentLoc.country}</em></strong>
+        </div>
         <div className="travel2-scroll-cue" aria-hidden="true">
           <span className="travel2-scroll-cue-icon">
             <span />
@@ -492,22 +497,108 @@ function TravelLog() {
   );
 }
 
-function HeroReel() {
-  // Autoplay b-roll. cycles through cinematic stills as a placeholder for real video
-  const [frame, setFrame] = React.useState(0);
-  React.useEffect(() => {
-    const t = setInterval(() => setFrame(f => (f + 1) % 8), 3200);
-    return () => clearInterval(t);
-  }, []);
+function TravelSection({ deferred = false }) {
   return (
-    <div className="hero-bg">
-      <div className="hero-bg-inner">
-        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
-          <div key={i} className={"hero-bg-frame " + (frame === i ? 'on' : '')}>
-            <PortfolioStill seed={i} />
-          </div>
-        ))}
+    <section className={"section-xs" + (deferred ? " travel-mobile-deferred" : "")} data-home-scroll-blur>
+      <div className="wrap">
+        <TravelLog />
       </div>
+    </section>
+  );
+}
+
+function useMobileViewport(query = '(max-width: 720px)') {
+  const [matches, setMatches] = React.useState(() => (
+    typeof window !== 'undefined' && window.matchMedia(query).matches
+  ));
+
+  React.useEffect(() => {
+    const media = window.matchMedia(query);
+    const onChange = () => setMatches(media.matches);
+    onChange();
+    if (media.addEventListener) media.addEventListener('change', onChange);
+    else media.addListener(onChange);
+    return () => {
+      if (media.removeEventListener) media.removeEventListener('change', onChange);
+      else media.removeListener(onChange);
+    };
+  }, [query]);
+
+  return matches;
+}
+
+const HOME_SCROLL_BLUR_MAX = 14;
+const HOME_SCROLL_BLUR_SELECTOR = '[data-home-scroll-blur]';
+const HOME_SCROLL_BLUR_START_VIEWPORT_RATIO = 0.4;
+
+function useHomeScrollBlur(refreshKey) {
+  React.useEffect(() => {
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let raf = 0;
+
+    const getElements = () => Array.from(document.querySelectorAll(HOME_SCROLL_BLUR_SELECTOR));
+    const setBlur = (element, value) => {
+      element.style.setProperty('--home-scroll-blur', `${value.toFixed(2)}px`);
+    };
+    const update = () => {
+      raf = 0;
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;
+      const blurStartLine = viewportHeight * HOME_SCROLL_BLUR_START_VIEWPORT_RATIO;
+      const reduceMotion = motionQuery.matches;
+
+      getElements().forEach((element) => {
+        if (reduceMotion) {
+          setBlur(element, 0);
+          return;
+        }
+
+        const rect = element.getBoundingClientRect();
+        const progress = Math.max(0, Math.min(1, (blurStartLine - rect.bottom) / blurStartLine));
+        const eased = progress * progress * (3 - (2 * progress));
+        setBlur(element, eased * HOME_SCROLL_BLUR_MAX);
+      });
+    };
+    const requestUpdate = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(update);
+    };
+
+    requestUpdate();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+    if (motionQuery.addEventListener) motionQuery.addEventListener('change', requestUpdate);
+    else motionQuery.addListener(requestUpdate);
+
+    const resizeObserver = 'ResizeObserver' in window ? new ResizeObserver(requestUpdate) : null;
+    if (resizeObserver) getElements().forEach((element) => resizeObserver.observe(element));
+
+    return () => {
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+      if (motionQuery.removeEventListener) motionQuery.removeEventListener('change', requestUpdate);
+      else motionQuery.removeListener(requestUpdate);
+      if (resizeObserver) resizeObserver.disconnect();
+      if (raf) window.cancelAnimationFrame(raf);
+      getElements().forEach((element) => element.style.removeProperty('--home-scroll-blur'));
+    };
+  }, [refreshKey]);
+}
+
+function HeroReel() {
+  return (
+    <div className="hero-bg" data-home-scroll-blur>
+      <video
+        className="hero-bg-video"
+        src="videos/web%20showcase.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-hidden="true"
+        disablePictureInPicture
+        controlsList="nodownload nofullscreen noremoteplayback"
+      />
       <div className="hero-bg-grain" />
       <div className="hero-bg-vignette" />
       <div className="hero-bg-dim" />
@@ -515,29 +606,9 @@ function HeroReel() {
   );
 }
 
-function useHeroScroll() {
-  const ref = React.useRef(null);
-  React.useEffect(() => {
-    const onScroll = () => {
-      if (!ref.current) return;
-      const y = Math.max(0, window.scrollY);
-      const blurT = Math.min(1, y / 800);
-      const motionT = Math.min(1, y / 500);
-      ref.current.style.setProperty('--hero-scroll-blur', `${blurT * 14}px`);
-      ref.current.style.setProperty('--hero-scroll-opacity', `${1 - motionT * 0.85}`);
-      ref.current.style.setProperty('--hero-scroll-lift', `${-motionT * 40}px`);
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-  return ref;
-}
-
 function HeroTitle() {
-  const ref = useHeroScroll();
   return (
-    <div ref={ref} className="hero-title-block hero-title-enter">
+    <div className="hero-title-block hero-title-enter" data-home-scroll-blur>
       <h1 className="hero-h1 hero-h1-italic">Alex Garrett</h1>
       <p className="hero-role hero-role-lg">Filmmaker and tool-maker.</p>
     </div>
@@ -589,33 +660,34 @@ const OMI_CASE_STUDY = {
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2026',
   teaserLabel: 'OMI LAUNCH FILM · FULL STACK VIDEO PRODUCTION · 2026',
   teaserTitle: 'Shipped a 5.5M-view launch film.',
-  teaserSummary: 'Concept, production, edit, and product UI moments were built around one launch metric: reach.',
+  teaserSummary: 'Concept, production, edit, and UI moments tied to one metric: reach.',
   videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
-  heroTitle: "Directed OMI's launch film end-to-end and drove 5.5M views in four days.",
-  summary: 'OMI needed a launch asset built for reach. I owned the concept, script, direction, production, edit, and the product UI moments that made the assistant feel alive onscreen.',
+  heroTitle: "Directed OMI's launch film and drove 5.5M views in four days.",
+  summary: 'OMI needed a launch film built for reach. I handled concept, script, production, edit, and onscreen product moments.',
   detailSections: [
     {
       title: 'Brief',
-      body: 'OMI needed a launch film with one clear KPI: reach. I produced and directed the project end-to-end, owning the concept, scripting, and full creative execution from first idea through final delivery.',
+      body: 'OMI needed a launch film with one KPI: reach. I led the concept, script, production, edit, and delivery.',
     },
     {
       title: 'Execution',
-      body: 'To maximize distribution, I led a rapid pivot to a higher-stakes narrative designed to create emotion and debate without losing polish. I built a fast shoot plan, ran casting overnight, assembled a three-actor lineup, and managed lean production in New York City under intense time pressure.',
+      body: 'I pivoted to a sharper narrative, ran overnight casting, and managed a lean New York shoot under a tight timeline.',
     },
     {
       title: 'Post + outcome',
-      body: 'In post, I cut the final spot and engineered the voice and on-screen product moments that made the assistant feel alive. The launch broke out quickly, driving 5.5M views across X and Instagram in four days.',
+      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 5.5M views across X and Instagram in four days.',
     },
   ],
 };
 
 function Home({ go }) {
-  const actionsRef = useHeroScroll();
+  const deferTravel = useMobileViewport();
+  useHomeScrollBlur(deferTravel);
   const hrefFor = window.routeHref || ((id) => '#');
   const featuredPlugin = (window.PLUGINS || []).find(p => p.id === 'flowstate') || {
     id: 'flowstate',
     name: 'FlowState',
-    oneline: 'Analyze Premiere bin footage with AI, then search clips by meaning instead of filenames.',
+    oneline: 'Search Premiere footage by meaning, not filenames.',
     price: 28,
     version: '1.0.0',
     badge: 'RELEASED',
@@ -625,7 +697,7 @@ function Home({ go }) {
   const featuredLut = (window.LUTS || []).find(l => l.id === 'cinematic-01') || {
     id: 'cinematic-01',
     name: 'Meridian',
-    oneline: 'Give clean daylight footage warm contrast, richer skin, and polished travel-film color.',
+    oneline: 'Warm, polished color for footage shot in natural light.',
     price: 9,
     badge: 'BESTSELLER',
     compare: {
@@ -634,22 +706,22 @@ function Home({ go }) {
       afterLabel: 'Graded',
       beforeTitle: 'Meridian ungraded preview',
       afterTitle: 'Meridian graded preview',
-      beforeSrc: 'videos/Solène Ungraded.mp4',
-      afterSrc: 'videos/Solène Graded.mp4',
+      beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
+      afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
     },
   };
   const homeProductGuide = [
     {
       title: 'Premiere Pro plugins for finding footage faster',
-      body: 'FlowState is built for editors with messy bins, long shoots, and footage that is easier to describe than to locate by filename.',
+      body: 'FlowState helps editors search messy bins by meaning, not filenames.',
     },
     {
-      title: 'Cinematic LUTs for a finished color direction',
-      body: 'Meridian is a .CUBE LUT for editors who want a polished daylight look after the footage has a clean base correction.',
+      title: 'Cinematic LUTs for natural light',
+      body: 'Meridian adds a warm, polished look to footage shot in natural light.',
     },
     {
       title: 'Digital products that stay inside the edit',
-      body: 'The shop is focused on tools that work in existing editing software: Premiere Pro extensions and LUT files for Premiere, Resolve, and Final Cut.',
+      body: 'Premiere extensions and .CUBE LUTs for Premiere, Resolve, and Final Cut.',
     },
   ];
   return (
@@ -659,7 +731,7 @@ function Home({ go }) {
         <div className="wrap hero-content hero-content-left">
           <HeroTitle />
         </div>
-        <div ref={actionsRef} className="hero-actions hero-product-actions hero-title-block hero-title-enter" style={{ animationDelay: '300ms' }}>
+        <div className="hero-actions hero-product-actions hero-title-block hero-title-enter" style={{ animationDelay: '300ms' }} data-home-scroll-blur>
           <HeroProductShortcut
             kind="plugin"
             name={featuredPlugin.name}
@@ -675,43 +747,17 @@ function Home({ go }) {
             onActivate={() => go('lut:' + featuredLut.id)}
             iconSrc={featuredLut.mockupSrc}
           />
+          <div className="hero-mobile-proof">Instant downloads · service replies within 24h</div>
         </div>
       </section>
 
       {/* Travel log */}
-      <section className="section-xs">
-        <div className="wrap">
-          <TravelLog />
-        </div>
-      </section>
-
-      {/* About strip */}
-      <section className="section-sm about-strip">
-        <div className="wrap">
-          <div className="about-row">
-            <p className="section-title">WHAT I DO</p>
-            <div className="about-grid">
-              <div>
-                <h3 className="about-h">Client work.</h3>
-                <p className="about-p">Brand films, motion graphics, and full-stack video production for startups and creators.</p>
-              </div>
-              <div>
-                <h3 className="about-h">Digital products.</h3>
-                <p className="about-p">Plugins and LUTs. Every tool comes out of a real edit session.</p>
-              </div>
-              <div>
-                <h3 className="about-h">Systems.</h3>
-                <p className="about-p">Repeatable workflows. Templates. Fewer clicks. More finished work.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {!deferTravel && <TravelSection />}
 
       {/* Featured Products */}
       <section id="featured-products" className="section-sm featured-products">
         <div className="wrap featured-products-stack">
-          <div>
+          <div data-home-scroll-blur>
             <p className="section-title">FEATURED · LUT</p>
             <div className="card card-featured" onClick={() => go('lut:' + featuredLut.id)} style={{ cursor: 'pointer' }}>
               <div className="card-media"><LutPreview tone="teal-orange" interactive compare={featuredLut.compare} scrollLinked /></div>
@@ -730,7 +776,7 @@ function Home({ go }) {
             </div>
           </div>
 
-          <div>
+          <div data-home-scroll-blur>
             <p className="section-title">FEATURED · PLUGIN</p>
             <div className="card card-featured">
               <div className="card-media">
@@ -753,9 +799,32 @@ function Home({ go }) {
         </div>
       </section>
 
+      {/* About strip */}
+      <section className="section-sm about-strip">
+        <div className="wrap">
+          <div className="about-row" data-home-scroll-blur>
+            <p className="section-title">WHAT I DO</p>
+            <div className="about-grid">
+              <div>
+                <h3 className="about-h">Client work.</h3>
+                <p className="about-p">Brand films, motion graphics, and production for startups and creators.</p>
+              </div>
+              <div>
+                <h3 className="about-h">Digital products.</h3>
+                <p className="about-p">Plugins and LUTs. Every tool comes out of a real edit session.</p>
+              </div>
+              <div>
+                <h3 className="about-h">Systems.</h3>
+                <p className="about-p">Workflows, templates, fewer clicks, more finished work.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Proof */}
       <section className="section-sm proof-section">
-        <div className="wrap">
+        <div className="wrap" data-home-scroll-blur>
           <p className="section-title">PROOF · CASE STUDY</p>
           <div className="proof">
             <div className="proof-grid">
@@ -792,13 +861,7 @@ function Home({ go }) {
         </div>
       </section>
 
-      <BuyerGuide
-        eyebrow="SEARCH GUIDE"
-        title="Editing tools for people searching by outcome, not product category."
-        intro="alexg.mov sells focused digital products for video editors: Premiere Pro plugins for workflow speed and cinematic LUTs for color grading in Premiere, DaVinci Resolve, and Final Cut Pro."
-        items={homeProductGuide}
-      />
-
+      {deferTravel && <TravelSection deferred />}
 
     </>
   );

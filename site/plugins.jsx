@@ -6,15 +6,15 @@ const PLUGINS = window.PLUGINS || [
   {
     id: 'flowstate',
     name: 'FlowState',
-    oneline: 'Analyze Premiere bin footage with AI, then search clips by meaning instead of filenames.',
+    oneline: 'Search Premiere footage by meaning, not filenames.',
     price: 28,
     version: '1.0.0',
     badge: 'RELEASED',
     status: 'released',
     variant: 'ai-media-browser',
-    what: 'FlowState scans a selected bin subtree, uploads clips to Gemini, extracts qualitative footage metadata, and builds a semantic search catalog.',
-    who: 'Editors who need to find useful A-roll, B-roll, transcripts, lighting, motion, and shot details across raw media.',
-    get: 'Premiere CEP panel · Gemini Files API workflow · searchable catalog.json · non-destructive Premiere results bin.',
+    what: 'FlowState scans a bin, analyzes clips with Gemini, and builds a searchable catalog.',
+    who: 'Editors sorting A-roll, B-roll, transcripts, lighting, motion, and shot details across raw media.',
+    get: 'Premiere panel · Gemini workflow · searchable catalog.json · results bin.',
     install: [
       'Download the installer (.dmg for Mac, .exe for Windows).',
       'Close Premiere if it is currently running.',
@@ -38,9 +38,9 @@ const PLUGINS = window.PLUGINS || [
     badge: 'COMING SOON',
     status: 'coming-soon',
     variant: 'toolkit',
-    what: 'Demon Clip is built for turning long raw sessions into tighter selects before the real edit begins.',
-    who: 'Editors working through interviews, multicam podcasts, and long-form creator shoots.',
-    get: 'Premiere extension for Mac & Windows · early access for launch list subscribers.',
+    what: 'Demon Clip turns long raw sessions into tight selects before the edit.',
+    who: 'Editors cutting interviews, multicam podcasts, and long creator shoots.',
+    get: 'Premiere extension for Mac and Windows · launch list early access.',
     install: [
       'Join the launch list.',
       'Get the release email when Demon Clip ships.',
@@ -52,49 +52,49 @@ const PLUGINS = window.PLUGINS || [
       'Premiere Pro 2024 (24.0)+',
       'macOS 13+ / Windows 10/11',
       'Release timing: 2026',
-      'Launch build is in active development',
+      'In active development',
     ],
   },
 ];
 
 const PLUGIN_GUIDE_ITEMS = [
   {
-    title: 'Best Premiere Pro plugin for AI footage search',
-    body: 'FlowState is for editors who remember what a clip contains but not what the file is called. It turns qualitative clip details into a searchable catalog.',
+    title: 'Best for AI footage search',
+    body: 'Find clips by what is in them, not what they are called.',
   },
   {
-    title: 'Best workflow for long shoots and messy bins',
-    body: 'Use it on interview selects, B-roll, product demos, creator sessions, and launch footage where manual bin digging slows down the edit.',
+    title: 'Best for long shoots',
+    body: 'Use it on interviews, B-roll, product demos, creator sessions, and launch edits.',
   },
   {
-    title: 'Best fit for editors who want tools inside Premiere',
-    body: 'The plugin lives inside Premiere Pro, so the search and results workflow stays close to the timeline instead of becoming another web app to manage.',
+    title: 'Best for Premiere-first workflows',
+    body: 'Search stays inside Premiere, close to the timeline.',
   },
 ];
 
 const PLUGIN_FAQS = window.PLUGIN_FAQS || [
   {
     q: 'What is the best Premiere Pro plugin for searching footage by meaning?',
-    a: 'FlowState is designed for that use case. It analyzes a selected Premiere bin subtree, builds footage metadata, and lets editors search clips by what is in them instead of by filename.',
+    a: 'FlowState analyzes selected bins, builds clip metadata, and lets editors search by content instead of filename.',
   },
   {
     q: 'Does FlowState replace a normal editing workflow?',
-    a: 'No. It is a workflow plugin for finding and organizing footage faster inside Premiere Pro. It does not replace editing judgment, logging, or the final timeline work.',
+    a: 'No. It helps you find and organize footage faster. You still make the edit decisions.',
   },
   {
     q: 'Who should use an AI media browser plugin?',
-    a: 'Editors working with large bins, interviews, B-roll libraries, product footage, launch films, and creator shoots get the most value because search becomes descriptive instead of filename-based.',
+    a: 'Editors with large bins, interviews, B-roll, product footage, launches, and creator shoots.',
   },
 ];
 
 const PLUGIN_DETAIL_FAQS = window.PLUGIN_DETAIL_FAQS || [
   {
     q: 'What does FlowState do in Premiere Pro?',
-    a: 'FlowState scans selected Premiere bin footage with AI, extracts qualitative metadata, builds a semantic catalog, and lets editors search clips by meaning.',
+    a: 'It scans selected bins with AI and turns clip details into searchable metadata.',
   },
   {
     q: 'What does FlowState help me find?',
-    a: 'It is built for finding A-roll, B-roll, shot type, motion, transcript-like context, lighting, subject matter, and other clip details that filenames usually do not capture.',
+    a: 'A-roll, B-roll, shot type, motion, lighting, subject matter, and clip context.',
   },
   {
     q: 'What software do I need?',
@@ -109,7 +109,7 @@ function PluginsList({ go }) {
       <section className="list-head">
         <div className="wrap">
           <h1>Plugins that do one thing well.</h1>
-          <p>Small, focused tools that live inside Premiere. No round-tripping, no web apps. Built for editors on deadlines.</p>
+          <p>Small Premiere tools for deadlines. No round-trips, no web apps.</p>
           <div className="list-meta">
             <span>{PLUGINS.length} PLUGINS</span>
             <span>·</span>
@@ -165,8 +165,8 @@ function PluginsList({ go }) {
       </div>
       <BuyerGuide
         eyebrow="PLUGIN BUYER GUIDE"
-        title="How to choose a Premiere Pro plugin for your editing workflow."
-        intro="The plugin line is built around a simple rule: each tool should solve a real editing bottleneck without pulling the editor away from Premiere."
+        title="Choose the right Premiere plugin."
+        intro="Each plugin solves one editing bottleneck inside Premiere."
         items={PLUGIN_GUIDE_ITEMS}
         faqs={PLUGIN_FAQS}
       />
@@ -199,6 +199,8 @@ function PluginsList({ go }) {
 function PluginDetail({ id, go }) {
   const [thumb, setThumb] = React.useState(0);
   const [buying, setBuying] = React.useState(false);
+  const buyButtonRef = React.useRef(null);
+  const showStickyCta = useStickyCta(buyButtonRef);
   const hrefFor = window.routeHref || ((id) => '#');
   const purchased = new URLSearchParams(location.search).get('purchased') === 'true';
   const p = PLUGINS.find(x => x.id === id) || PLUGINS[0];
@@ -273,8 +275,10 @@ function PluginDetail({ id, go }) {
             <div className="pd-price-note">{p.status === 'released' ? 'ONE-TIME · LIFETIME DOWNLOAD' : 'IN DEVELOPMENT · LAUNCH LIST OPEN'}</div>
           </div>
           {p.status === 'released'
-            ? <button className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
-                <DownloadIcon /> {buying ? 'Redirecting…' : 'Buy & Download'}
+            ? <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
+                <DownloadIcon />
+                <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy & Download'}</span>
+                <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Download Now'}</span>
               </button>
             : <button className="btn btn-secondary btn-lg pd-buy">Join Launch List</button>}
           <div className="pd-reassure"><CheckIcon /> {p.status === 'released' ? 'Instant download via email · 24h support reply' : 'Shipping updates posted as development continues'}</div>
@@ -290,20 +294,20 @@ function PluginDetail({ id, go }) {
       <BuyerGuide
         contained
         eyebrow="BEST USE CASES"
-        title={`${p.name} is for editors who need to find the right clip faster.`}
-        intro="It is built for Premiere Pro projects where useful footage is buried in long sessions, mixed bins, or files with generic camera names."
+        title={`${p.name} helps you find the right clip faster.`}
+        intro="Built for long sessions, mixed bins, and generic camera names."
         items={[
           {
             title: 'Interview and talking-head projects',
-            body: 'Search for the moment, subject, or visual detail you need without scrubbing every clip from the shoot again.',
+            body: 'Search by moment, subject, or visual detail without scrubbing the shoot again.',
           },
           {
             title: 'B-roll and product footage libraries',
-            body: 'Find shots by what appears in the frame, the kind of motion, or the context of the clip instead of relying on folder names alone.',
+            body: 'Find shots by frame content, motion, or context.',
           },
           {
             title: 'Launch films and deadline edits',
-            body: 'When the edit is moving fast, semantic search helps surface usable options quickly while keeping the work inside Premiere.',
+            body: 'Surface usable options quickly without leaving Premiere.',
           },
         ]}
         faqs={PLUGIN_DETAIL_FAQS}
@@ -318,10 +322,19 @@ function PluginDetail({ id, go }) {
           <h3>Compatibility</h3>
           <ul>{p.specs.map((s, i) => <li key={i}>{s}</li>)}</ul>
           <div style={{ marginTop: 18, padding: 14, background: 'var(--surface)', borderRadius: 6, fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>
-            Hit an install bug? Email <a href="mailto:alex@alexg.mov" style={{ color: 'var(--ink)', fontFamily: 'var(--mono)' }}>alex@alexg.mov</a>. Reply within 24 hours.
+          Hit an install bug? Email <a href="mailto:alex@alexg.mov" style={{ color: 'var(--ink)', fontFamily: 'var(--mono)' }}>alex@alexg.mov</a>. Reply within 24 hours.
           </div>
         </div>
       </div>
+      <MobileProductStickyCta
+        active={p.status === 'released' && showStickyCta && !purchased}
+        productName={p.name}
+        productMeta="Premiere plugin · instant email"
+        price={p.price != null ? `$${p.price}` : 'Soon'}
+        actionLabel={buying ? 'Redirecting…' : 'Download Now'}
+        onAction={handleBuy}
+        disabled={buying}
+      />
     </div>
   );
 }

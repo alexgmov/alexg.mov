@@ -6,7 +6,7 @@ const LUTS = window.LUTS || [
   {
     id: 'cinematic-01',
     name: 'Meridian',
-    oneline: 'Give clean daylight footage warm contrast, richer skin, and polished travel-film color.',
+    oneline: 'Warm, polished color for footage shot in natural light.',
     price: 18,
     formats: '.CUBE',
     badge: 'BESTSELLER',
@@ -22,14 +22,14 @@ const LUTS = window.LUTS || [
       afterLabel: 'Graded',
       beforeTitle: 'Meridian ungraded preview',
       afterTitle: 'Meridian graded preview',
-      beforeSrc: 'videos/Solène Ungraded.mp4',
-      afterSrc: 'videos/Solène Graded.mp4',
+      beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
+      afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
     },
   },
   {
     id: 'interior-03',
     name: 'Haloclyne',
-    oneline: 'A softer interior-grade LUT for natural light, talking heads, and lifestyle footage.',
+    oneline: 'Soft interior color for natural light, interviews, and lifestyle footage.',
     price: null,
     formats: '.CUBE',
     badge: 'COMING SOON',
@@ -42,46 +42,46 @@ const LUTS = window.LUTS || [
 
 const LUT_GUIDE_ITEMS = [
   {
-    title: 'Best LUT for daylight travel footage',
-    body: 'Start with Meridian when your footage is already exposed cleanly and you want warm highlights, deeper contrast, and a cinematic travel-film feel.',
+    title: 'Best LUT for footage shot in natural light',
+    body: 'Use Meridian when the shot is clean and you want warm contrast, richer skin, and a finished look.',
   },
   {
     title: 'Best LUT format for multiple editing apps',
-    body: '.CUBE is the practical format for editors moving between Premiere Pro, DaVinci Resolve, and Final Cut Pro because it is widely supported.',
+    body: '.CUBE works across Premiere Pro, DaVinci Resolve, Final Cut Pro, and most modern color workflows.',
   },
   {
     title: 'Best workflow for log footage',
-    body: 'Normalize log footage first, then apply the creative LUT. This keeps skin tones and shadows easier to control than treating the LUT like a full correction.',
+    body: 'Normalize log first, then apply the creative LUT. Keep exposure and white balance adjustable.',
   },
 ];
 
 const LUT_FAQS = window.LUT_FAQS || [
   {
-    q: 'What is the best LUT for daylight travel footage?',
-    a: 'Meridian is the best fit in this shop for daylight travel, lifestyle, creator, and outdoor footage that already has a clean exposure and white balance.',
+    q: 'What footage works best with Meridian?',
+    a: 'Meridian performs best with footage shot in natural light that already has clean exposure and white balance.',
   },
   {
     q: 'Do these LUTs work in Premiere Pro, DaVinci Resolve, and Final Cut Pro?',
-    a: 'Yes. The released LUTs ship as .CUBE files, which can be loaded in Adobe Premiere Pro, DaVinci Resolve, Final Cut Pro, and most modern color workflows.',
+    a: 'Yes. The LUTs ship as .CUBE files for Premiere Pro, DaVinci Resolve, Final Cut Pro, and most modern color workflows.',
   },
   {
     q: 'Should I apply a LUT before or after color correction?',
-    a: 'Apply the LUT after a base correction or log-to-Rec.709 transform. Then fine-tune intensity, exposure, and white balance per shot.',
+    a: 'Apply the LUT after a base correction or log-to-Rec.709 transform, then fine-tune each shot.',
   },
 ];
 
 const LUT_DETAIL_FAQS = window.LUT_DETAIL_FAQS || [
   {
     q: 'Who is Meridian best for?',
-    a: 'Meridian is best for editors, filmmakers, and creators who want one cinematic LUT for daylight, travel, lifestyle, and social video rather than a huge LUT bundle.',
+    a: 'Editors who want one warm, polished LUT for lifestyle, creator, and social footage shot in natural light.',
   },
   {
     q: 'What software can open Meridian?',
-    a: 'Meridian ships as a .CUBE LUT, so it can be used in Premiere Pro, DaVinci Resolve, Final Cut Pro, and other color tools that accept .CUBE files.',
+    a: 'Any editor that accepts .CUBE files, including Premiere Pro, DaVinci Resolve, and Final Cut Pro.',
   },
   {
     q: 'How strong should the LUT be?',
-    a: 'For most shots, start around 30 to 60 percent intensity, then adjust exposure and white balance so the look feels intentional instead of crushed.',
+    a: 'Start around 30 to 60 percent, then adjust exposure and white balance.',
   },
 ];
 
@@ -93,8 +93,8 @@ function LutsList({ go }) {
     <>
       <section className="list-head">
         <div className="wrap">
-          <h1>Looks for footage that already has a clean base.</h1>
-          <p>Cinematic .CUBE LUTs for editors working in Premiere Pro, DaVinci Resolve, and Final Cut Pro.</p>
+          <h1>Looks for clean, natural light.</h1>
+          <p>Cinematic .CUBE LUTs for Premiere, Resolve, and Final Cut.</p>
           <div className="list-meta">
             <span>{releasedCount} RELEASED {releasedCount === 1 ? 'LOOK' : 'LOOKS'}</span>
             <span>·</span>
@@ -151,8 +151,8 @@ function LutsList({ go }) {
       </div>
       <BuyerGuide
         eyebrow="LUT BUYER GUIDE"
-        title="How to choose the right LUT for your footage."
-        intro="The best LUT depends on the footage, not the trend. These LUTs are designed as creative finishing looks after a clean technical base."
+        title="Choose the right LUT for your footage."
+        intro="Use these after a clean base correction. Let the footage lead."
         items={LUT_GUIDE_ITEMS}
         faqs={LUT_FAQS}
       />
@@ -163,17 +163,17 @@ function LutsList({ go }) {
             <div className="how-item">
               <div className="how-num">01 / DOWNLOAD LUT</div>
               <h4 className="how-h">Get the LUT file</h4>
-              <p className="how-p">Download the LUT and unzip it. You’ll get the `.cube` file and a quick usage note.</p>
+              <p className="how-p">Download and unzip the .cube file. A quick usage note is included.</p>
             </div>
             <div className="how-item">
               <div className="how-num">02 / APPLY AFTER BASE GRADE</div>
               <h4 className="how-h">Drop it on normalized footage</h4>
-              <p className="how-p">Convert your log footage first or start from a clean Rec.709 base. Then apply the LUT on a clip or adjustment layer.</p>
+              <p className="how-p">Convert log first, or start from clean Rec.709. Apply the LUT on a clip or adjustment layer.</p>
             </div>
             <div className="how-item">
               <div className="how-num">03 / DIAL IT IN</div>
               <h4 className="how-h">Tune intensity shot by shot</h4>
-              <p className="how-p">Adjust exposure, white balance, and opacity so the look sits on the footage instead of crushing the image.</p>
+              <p className="how-p">Adjust exposure, white balance, and opacity until the look sits cleanly.</p>
             </div>
           </div>
         </div>
@@ -187,6 +187,8 @@ function LutDetail({ id, go }) {
   const hrefFor = window.routeHref || ((id) => '#');
   const [buying, setBuying] = React.useState(false);
   const [activeMediaId, setActiveMediaId] = React.useState(l.mockupSrc ? 'mockup' : 'compare');
+  const buyButtonRef = React.useRef(null);
+  const showStickyCta = useStickyCta(buyButtonRef);
   const purchased = new URLSearchParams(location.search).get('purchased') === 'true';
   React.useEffect(() => {
     if (!l.available) go('luts');
@@ -292,14 +294,16 @@ function LutDetail({ id, go }) {
             <div className="pd-price">${l.price}</div>
             <div className="pd-price-note">ONE-TIME · .CUBE FILE INCLUDED</div>
           </div>
-          <button className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
-            <DownloadIcon /> {buying ? 'Redirecting…' : 'Buy & Download'}
+          <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
+            <DownloadIcon />
+            <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy & Download'}</span>
+            <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Get Instant Access'}</span>
           </button>
           <div className="pd-reassure"><CheckIcon /> Instant download · ZIP · .cube</div>
 
           <div className="pd-bullets">
-            <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">Gives you one finished look you can apply after your base correction, then tune with opacity and exposure.</div></div>
-            <div className="pd-bullet"><div className="pd-bullet-k">WHO IT'S FOR</div><div className="pd-bullet-v">Editors and filmmakers who want one reliable LUT for a specific mood instead of a large bundle they will never fully use.</div></div>
+            <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">Adds a finished warm look after base correction. Tune with opacity and exposure.</div></div>
+            <div className="pd-bullet"><div className="pd-bullet-k">WHO IT'S FOR</div><div className="pd-bullet-v">Editors who want one focused LUT, not a giant bundle.</div></div>
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT YOU GET</div><div className="pd-bullet-v">1 × .CUBE</div></div>
           </div>
         </div>
@@ -313,10 +317,19 @@ function LutDetail({ id, go }) {
             <li>Premiere → Lumetri Color panel → Creative → Look dropdown → Browse…</li>
             <li>Point to the .cube file. Done.</li>
             <li>For DaVinci / Final Cut, copy the .cube file to your LUT library.</li>
-            <li>Apply on an adjustment layer. Tune intensity 20–100%. I find the best results between 30 and 60% for most footage.</li>
+            <li>Apply on an adjustment layer. Tune intensity 20–100%, usually 30–60%.</li>
           </ol>
         </div>
       </div>
+      <MobileProductStickyCta
+        active={showStickyCta && !purchased}
+        productName={l.name}
+        productMeta=".CUBE LUT · instant download"
+        price={`$${l.price}`}
+        actionLabel={buying ? 'Redirecting…' : 'Get Instant Access'}
+        onAction={handleBuy}
+        disabled={buying}
+      />
     </div>
   );
 }

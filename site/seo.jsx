@@ -155,7 +155,7 @@ function pageSeo(page) {
 
   const defaults = {
     title: 'alexg.mov | Premiere Pro Plugins & Cinematic LUTs for Editors',
-    description: 'Premiere Pro plugins and cinematic LUTs for video editors, filmmakers, and creators who want faster workflows and polished color.',
+    description: 'Premiere plugins and cinematic LUTs for faster edits and cleaner color.',
     canonical: absoluteRoute('home'),
     image: SITE_IMAGE,
     graph: baseGraph(),
@@ -179,7 +179,7 @@ function pageSeo(page) {
     return {
       ...defaults,
       title: 'Premiere Pro Plugins for Editors | FlowState AI Clip Search',
-      description: 'Small Premiere Pro plugins for editors, including FlowState: an AI media browser for searching footage by meaning instead of filenames.',
+      description: 'Small Premiere plugins, including FlowState: AI clip search by meaning, not filenames.',
       canonical: absoluteRoute('plugins'),
       graph: [...baseGraph(), itemList, faqSchema(window.PLUGIN_FAQS)].filter(Boolean),
     };
@@ -192,7 +192,7 @@ function pageSeo(page) {
       return {
         ...defaults,
         title: `${plugin.name} Premiere Pro Plugin | AI Footage Search for Editors`,
-        description: `${plugin.name} helps Premiere Pro editors search, organize, and reuse footage faster without leaving the edit.`,
+        description: `${plugin.name} helps Premiere editors find and reuse footage without leaving the edit.`,
         canonical: absoluteRoute(`plugin:${plugin.id}`),
         graph: [
           ...baseGraph(),
@@ -225,7 +225,7 @@ function pageSeo(page) {
     return {
       ...defaults,
       title: 'Cinematic LUTs for Premiere, Resolve & Final Cut | alexg.mov',
-      description: 'Cinematic .CUBE LUTs for video editors using Premiere Pro, DaVinci Resolve, and Final Cut Pro. Start with Meridian for warm daylight and travel footage.',
+      description: 'Cinematic .CUBE LUTs for Premiere, Resolve, and Final Cut. Meridian performs best with natural light.',
       canonical: absoluteRoute('luts'),
       graph: [...baseGraph(), itemList, faqSchema(window.LUT_FAQS)].filter(Boolean),
     };
@@ -238,7 +238,7 @@ function pageSeo(page) {
       return {
         ...defaults,
         title: `${lut.name} LUT | Cinematic .CUBE LUT for Premiere, Resolve & Final Cut`,
-        description: `${lut.name} is a cinematic .CUBE LUT for polished daylight, travel, lifestyle, and creator footage in Premiere Pro, DaVinci Resolve, and Final Cut Pro.`,
+        description: `${lut.name} is a .CUBE LUT for warm, polished color. It performs best with natural light and a clean base.`,
         canonical: absoluteRoute(`lut:${lut.id}`),
         image: imageUrl(lut.mockupSrc),
         graph: [
@@ -259,7 +259,7 @@ function pageSeo(page) {
     return {
       ...defaults,
       title: 'Video Portfolio | Launch Films, Reels & Motion Graphics',
-      description: 'Selected video work by Alex Garrett: launch films, social reels, real estate promos, motion graphics, and cinematic short-form edits.',
+      description: 'Selected video work by Alex Garrett: launch films, reels, real estate, motion graphics, and short-form edits.',
       canonical: absoluteRoute('portfolio'),
     };
   }
@@ -268,7 +268,7 @@ function pageSeo(page) {
     return {
       ...defaults,
       title: 'Video Production & Editing Services | alexg.mov',
-      description: 'Video production, editing, launch films, motion graphics, and content systems for startups, creators, and real estate teams.',
+      description: 'Video production, editing, launch films, motion graphics, and content systems for startups and creators.',
       canonical: absoluteRoute('services'),
     };
   }
@@ -277,7 +277,7 @@ function pageSeo(page) {
     return {
       ...defaults,
       title: 'Support for alexg.mov Plugins & LUTs',
-      description: 'Support for alexg.mov Premiere Pro plugins and LUTs. Email Alex with your OS, Premiere version, order email, and a screen recording.',
+      description: 'Support for alexg.mov plugins and LUTs. Email Alex with your OS, app version, order email, and a screen recording.',
       canonical: absoluteRoute('support'),
       graph: [...baseGraph(), faqSchema(window.FAQS)].filter(Boolean),
     };

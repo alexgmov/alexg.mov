@@ -77,13 +77,21 @@ module.exports = async function handler(req, res) {
 
   let session;
   try {
-    session = await stripe.checkout.sessions.create({
+    const checkoutParams = {
       mode: 'payment',
       line_items: [{ price: product.stripePriceId, quantity: 1 }],
       success_url: `${origin}/?page=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?page=${returnPage}`,
       metadata: { productId },
-    });
+    };
+
+    if (product.statementDescriptorSuffix) {
+      checkoutParams.payment_intent_data = {
+        statement_descriptor_suffix: product.statementDescriptorSuffix,
+      };
+    }
+
+    session = await stripe.checkout.sessions.create(checkoutParams);
   } catch (err) {
     console.error('Stripe error:', err.message);
     return res.status(502).json({ error: 'Payment provider error. Please try again.' });
