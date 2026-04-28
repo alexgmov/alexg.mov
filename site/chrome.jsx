@@ -98,7 +98,6 @@ function MobileBottomNav({ page, go }) {
                 go(item.id);
               }}
             >
-              <span className="mobile-bottom-nav-dot" aria-hidden="true" />
               <span className="mobile-bottom-nav-copy">
                 <span className="mobile-bottom-nav-label">{item.label}</span>
                 <span className="mobile-bottom-nav-helper">{item.helper}</span>
