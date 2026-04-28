@@ -1,7 +1,7 @@
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
-const { trackGetRequest } = require('./api/analytics-store');
+const { trackGetRequest } = require('./lib/analytics-store');
 
 const root = __dirname;
 const distRoot = path.join(root, 'dist');

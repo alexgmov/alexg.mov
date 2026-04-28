@@ -1,7 +1,7 @@
-const { PERSONA_DEFINITIONS, readEvents } = require('./analytics-store');
-const { denyNonLocal } = require('./analytics-dashboard-auth');
-const { getStripeSnapshot } = require('./stripe-analytics');
-const { PRODUCTS } = require('./products');
+const { PERSONA_DEFINITIONS, readEvents } = require('../lib/analytics-store');
+const { denyNonLocal } = require('../lib/analytics-dashboard-auth');
+const { getStripeSnapshot } = require('../lib/stripe-analytics');
+const { PRODUCTS } = require('../lib/products');
 
 const RANGE_MS = {
   '24h': 24 * 60 * 60 * 1000,

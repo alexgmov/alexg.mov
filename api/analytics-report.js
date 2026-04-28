@@ -1,7 +1,7 @@
 const {
   readEvents,
   summarizeEvents,
-} = require('./analytics-store');
+} = require('../lib/analytics-store');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {

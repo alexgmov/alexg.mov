@@ -1,8 +1,8 @@
 const Stripe = require('stripe');
 const { Resend } = require('resend');
-const { PRODUCTS } = require('./products');
+const { PRODUCTS } = require('../lib/products');
 const { makeLink } = require('./download');
-const { logEvent } = require('./analytics-store');
+const { logEvent } = require('../lib/analytics-store');
 
 const CANONICAL_ORIGIN = normalizeOrigin(process.env.SITE_URL || 'https://alexg.mov');
 

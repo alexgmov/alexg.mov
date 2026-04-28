@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { PRODUCTS } = require('./products');
+const { PRODUCTS } = require('../lib/products');
 
 function sign(productId, exp) {
   return crypto

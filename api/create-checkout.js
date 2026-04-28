@@ -1,6 +1,6 @@
 const Stripe = require('stripe');
-const { PRODUCTS } = require('./products');
-const { ensureVisitorIds, logEvent } = require('./analytics-store');
+const { PRODUCTS } = require('../lib/products');
+const { ensureVisitorIds, logEvent } = require('../lib/analytics-store');
 
 const CANONICAL_ORIGIN = normalizeOrigin(process.env.SITE_URL || 'https://alexg.mov');
 

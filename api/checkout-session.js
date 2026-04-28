@@ -1,6 +1,6 @@
 const Stripe = require('stripe');
-const { PRODUCTS } = require('./products');
-const { ensureVisitorIds, logEvent } = require('./analytics-store');
+const { PRODUCTS } = require('../lib/products');
+const { ensureVisitorIds, logEvent } = require('../lib/analytics-store');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {

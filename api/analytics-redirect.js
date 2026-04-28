@@ -1,4 +1,4 @@
-const { denyNonLocal } = require('./analytics-dashboard-auth');
+const { denyNonLocal } = require('../lib/analytics-dashboard-auth');
 
 module.exports = async function handler(req, res) {
   if (denyNonLocal(req, res)) return;
