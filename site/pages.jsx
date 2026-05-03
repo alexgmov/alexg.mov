@@ -12,34 +12,34 @@ const PORTFOLIO_CATEGORIES = [
     intro: 'Launch films and brand pieces built to land quickly.',
   },
   {
+    id: 'talking-heads',
+    label: 'Talking Heads',
+    kicker: '02',
+    intro: 'Founder, realtor, and hospitality-led reels built around people on camera.',
+  },
+  {
     id: 'motion-graphics',
     label: 'Motion Graphics',
-    kicker: '02',
+    kicker: '03',
     intro: 'Typography, transitions, and motion that make the message clearer.',
   },
   {
     id: 'ai-speed-ramp-edits',
     label: 'Speed Ramp Edits',
-    kicker: '03',
+    kicker: '04',
     intro: 'Fast social edits with punchy pacing and kinetic movement.',
   },
   {
     id: 'real-estate',
     label: 'Real Estate',
-    kicker: '04',
+    kicker: '05',
     intro: 'Property promos and realtor-led edits with a premium finish.',
   },
   {
     id: 'short-film',
     label: 'Short Films',
-    kicker: '05',
-    intro: 'Widescreen edits focused on pacing, tone, and atmosphere.',
-  },
-  {
-    id: 'business-promos',
-    label: 'Business Promos',
     kicker: '06',
-    intro: 'Client edits that advertise clearly and still feel polished.',
+    intro: 'Widescreen edits focused on pacing, tone, and atmosphere.',
   },
 ];
 
@@ -49,6 +49,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'OMI launch film',
     category: 'launchbrand',
     kind: 'Product launch film',
+    client: 'OMI',
     blurb: 'Launch film with 5.5M views.',
     source: 'alexg.mov',
     sourceUrl: 'videos/portfolio/web/omi-launch-film.mp4',
@@ -60,6 +61,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Ekta portrait cut',
     category: 'ai-speed-ramp-edits',
     kind: 'Portrait social reel',
+    client: 'Ekta',
     blurb: 'Clean portrait reel with a quiet cinematic feel.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DMZNWMJRyu5/',
@@ -71,6 +73,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Alex Garrett social spot',
     category: 'ai-speed-ramp-edits',
     kind: 'Personal brand spot',
+    client: 'Alex Garrett',
     blurb: 'Fast personal-brand spot with sharper rhythm.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DOyrMpyCXV0/',
@@ -78,10 +81,23 @@ const PORTFOLIO_VIDEOS = [
     layout: 'portrait',
   },
   {
+    id: 'alexg-tiktok-speed-ramp-7556166361496440077',
+    title: 'Higgsfield speed ramp edit',
+    category: 'ai-speed-ramp-edits',
+    kind: 'Speed ramp social edit',
+    client: 'Higgsfield',
+    blurb: 'Speed ramp edit built around AI-generated action.',
+    source: 'TikTok',
+    sourceUrl: 'https://www.tiktok.com/@alexg.mov/video/7556166361496440077',
+    src: 'videos/portfolio/web/alexg-tiktok-speed-ramp-7556166361496440077.mp4',
+    layout: 'portrait offset-sm',
+  },
+  {
     id: 'interview-coder-linkedin',
     title: 'Interview Coder launch film',
     category: 'launchbrand',
     kind: 'Product launch film',
+    client: 'Interview Coder',
     blurb: 'Launch film for Interview Coder 2.0.',
     source: 'LinkedIn',
     sourceUrl: 'https://www.linkedin.com/posts/abdulla007_i-spent-the-last-few-months-building-interview-activity-7389017263137366017-mnw5?utm_source=share&utm_medium=member_desktop&rcm=ACoAADxqsrkB2ELwiS4XdDkChEYtbz9dxTc-INc',
@@ -90,11 +106,38 @@ const PORTFOLIO_VIDEOS = [
     videoScale: 1.023,
   },
   {
+    id: 'kaedim-launch-post-featured',
+    title: 'Kaedim launch post',
+    category: 'launchbrand',
+    kind: '3D motion launch post',
+    client: 'Kaedim',
+    blurb: '3D product launch asset with clean motion.',
+    source: 'LinkedIn',
+    sourceUrl: 'https://www.linkedin.com/posts/kaedim_today-is-a-big-milestone-for-kaedim-for-activity-7434690563268018176--REi?utm_source=share&utm_medium=member_desktop&rcm=ACoAADxqsrkB2ELwiS4XdDkChEYtbz9dxTc-INc',
+    src: 'videos/portfolio/web/kaedim-linkedin.mp4',
+    layout: 'landscape',
+    videoScale: 1.023,
+  },
+  {
+    id: 'cluely-launch-motion-featured',
+    title: 'Cluely launch motion graphics',
+    category: 'launchbrand',
+    kind: 'Product launch motion piece',
+    client: 'Cluely',
+    blurb: 'UI motion piece with crisp demo energy.',
+    source: 'Drive',
+    sourceUrl: 'https://drive.google.com/file/d/17DS1xWMJFBe0rNCXQHvWcRSJ1y_vxUPv/view',
+    src: 'videos/portfolio/web/motion-graphics-drive.mp4',
+    layout: 'landscape-wide',
+    videoScale: 1.023,
+  },
+  {
     id: 'eldo-reel',
     title: 'Eldo reel',
-    category: 'business-promos',
-    kind: 'Restaurant promo',
-    blurb: 'Restaurant promo built around one hero dish.',
+    category: 'talking-heads',
+    kind: 'Restaurant talking head',
+    client: 'Eldo',
+    blurb: 'Hospitality reel built around a clear on-camera hook.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reel/DJHzWMmoXz2/',
     src: 'videos/portfolio/web/eldo-reel.mp4',
@@ -103,9 +146,10 @@ const PORTFOLIO_VIDEOS = [
   {
     id: 'abdulla-case-study',
     title: 'Abdulla case study',
-    category: 'launchbrand',
-    kind: 'Founder case study',
-    blurb: 'Founder-facing startup edit with momentum.',
+    category: 'talking-heads',
+    kind: 'Founder talking head',
+    client: 'Abdulla',
+    blurb: 'Founder-facing startup reel with momentum.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DVipr1igHR3/',
     src: 'videos/portfolio/web/abdulla-case-study.mp4',
@@ -113,9 +157,10 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'motion-graphics-drive',
-    title: 'Motion graphics build',
+    title: 'Cluely motion graphics build',
     category: 'motion-graphics',
     kind: 'Product UI motion piece',
+    client: 'Cluely',
     blurb: 'UI motion piece with crisp demo energy.',
     source: 'Drive',
     sourceUrl: 'https://drive.google.com/file/d/17DS1xWMJFBe0rNCXQHvWcRSJ1y_vxUPv/view',
@@ -124,21 +169,11 @@ const PORTFOLIO_VIDEOS = [
     videoScale: 1.023,
   },
   {
-    id: 'abdulla-showcase',
-    title: 'Abdulla showcase cut',
-    category: 'launchbrand',
-    kind: 'Showcase edit',
-    blurb: 'A build showcase cut for Interview Coder 3.0.',
-    source: 'Instagram',
-    sourceUrl: 'https://www.instagram.com/p/DVrfbfvjkko/',
-    src: 'videos/portfolio/web/abdulla-showcase.mp4',
-    layout: 'portrait',
-  },
-  {
     id: 'infiniteviews-real-estate',
     title: 'Real estate tour promo',
     category: 'real-estate',
     kind: 'Property tour promo',
+    client: 'Infinite Views',
     blurb: 'Polished vertical walkthrough.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DHqw-C_pAtq/',
@@ -150,6 +185,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Infinite Views marketing reel',
     category: 'real-estate',
     kind: 'Marketing reel',
+    client: 'Infinite Views',
     blurb: 'A fast brand reel for a real estate team.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DN3XI1IYksn/',
@@ -161,6 +197,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Luxury real estate promo',
     category: 'real-estate',
     kind: 'Luxury listing promo',
+    client: 'PCG',
     blurb: 'Smooth listing edit with a clean finish.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DJ5J48LgmjQ/',
@@ -168,10 +205,35 @@ const PORTFOLIO_VIDEOS = [
     layout: 'portrait',
   },
   {
+    id: 'pcg-private-client-reel-domos8nkfiw',
+    title: 'Private Client Group reel',
+    category: 'real-estate',
+    kind: 'Luxury real estate reel',
+    client: 'Private Client Group',
+    blurb: 'Luxury real estate reel for Private Client Group.',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/reel/DOMoS8nkfiw/',
+    src: 'videos/portfolio/web/pcg-real-estate-domos8nkfiw.mp4',
+    layout: 'portrait offset-sm',
+  },
+  {
+    id: 'pcg-private-client-reel-diklq7kiksf',
+    title: 'Private Client Group property reel',
+    category: 'real-estate',
+    kind: 'Luxury real estate reel',
+    client: 'Private Client Group',
+    blurb: 'Luxury property reel for Private Client Group.',
+    source: 'Instagram',
+    sourceUrl: 'https://www.instagram.com/reel/DIkLq7kiKSF/',
+    src: 'videos/portfolio/web/pcg-real-estate-diklq7kiksf.mp4',
+    layout: 'portrait',
+  },
+  {
     id: 'snowflakes-youtube',
     title: 'Snowflakes widescreen preview',
     category: 'short-film',
     kind: 'Widescreen short',
+    client: 'Snowflakes',
     blurb: 'Widescreen science short on avalanche prevention.',
     source: 'YouTube',
     sourceUrl: 'https://www.youtube.com/watch?v=RE6ahIf3kwA&t=61s',
@@ -184,6 +246,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Widescreen interview preview',
     category: 'short-film',
     kind: 'Interview short',
+    client: 'Widescreen',
     blurb: 'Slow, cinematic interview short.',
     source: 'YouTube',
     sourceUrl: 'https://www.youtube.com/watch?v=xTR8c4j_DKk&t=13s',
@@ -194,8 +257,9 @@ const PORTFOLIO_VIDEOS = [
   {
     id: 'ashlie-realtor',
     title: 'Ashlie Brewer realtor reel',
-    category: 'real-estate',
-    kind: 'Realtor social reel',
+    category: 'talking-heads',
+    kind: 'Realtor talking head',
+    client: 'Ashlie Brewer',
     blurb: 'A realtor-led reel with a clear dream-home hook.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/C4gJ_6qut97/',
@@ -207,6 +271,7 @@ const PORTFOLIO_VIDEOS = [
     title: 'Kaedim launch post',
     category: 'motion-graphics',
     kind: '3D motion launch post',
+    client: 'Kaedim',
     blurb: '3D product launch asset with clean motion.',
     source: 'LinkedIn',
     sourceUrl: 'https://www.linkedin.com/posts/kaedim_today-is-a-big-milestone-for-kaedim-for-activity-7434690563268018176--REi?utm_source=share&utm_medium=member_desktop&rcm=ACoAADxqsrkB2ELwiS4XdDkChEYtbz9dxTc-INc',
@@ -344,22 +409,8 @@ function PortfolioVideoTile({ item, priority = false }) {
       />
       <div className="port-overlay">
         <div className="port-caption">
-          <p className="port-kicker">{item.kind}</p>
+          <p className="port-kicker">For {item.client || item.source}</p>
           <h3 className="port-title">{item.title}</h3>
-        </div>
-        <div className="port-details">
-          <p className="port-copy">{item.blurb}</p>
-          <div className="port-actions">
-            <a
-              className="port-link"
-              href={item.sourceUrl}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`Watch ${item.title} on ${item.source}`}
-            >
-              Watch
-            </a>
-          </div>
         </div>
       </div>
     </article>
@@ -411,6 +462,45 @@ function PortfolioCategorySection({ category, priority = false }) {
                 priority={priority && index < 2}
               />
             ))}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PortfolioAbout() {
+  const facts = [
+    {
+      label: 'Distribution',
+      value: 'Founder-led short-form systems',
+    },
+    {
+      label: 'Background',
+      value: 'Computer Science + a decade of production',
+    },
+    {
+      label: 'Focus',
+      value: 'Products, launches, and cultural moments',
+    },
+  ];
+
+  return (
+    <section className="portfolio-about" aria-labelledby="portfolio-about-title">
+      <div className="portfolio-about-intro">
+        <p className="portfolio-about-kicker">About Alex</p>
+        <div className="portfolio-about-copy">
+          <h2 id="portfolio-about-title">Creative direction for technical products that need attention to convert.</h2>
+          <p>
+            Alex Garrett is a creative director and software engineer obsessed with founder-led distribution. He's built viral videos for some of the most ambitious AI startups and creators of this generation, racking up tens of millions of views and turning technical products into cultural moments on short-form. With a Computer Science degree from the University of Victoria and a decade of video production experience, Alex sits at a rare intersection: he can read a product spec, produce the launch video, and build the funnel that converts the attention. He's spent the last two years quietly becoming one of the most effective shorts strategists working with founders, and he's now turning that playbook into products of his own.
+          </p>
+        </div>
+      </div>
+      <div className="portfolio-about-facts" aria-label="About Alex Garrett">
+        {facts.map((fact) => (
+          <div className="portfolio-about-fact" key={fact.label}>
+            <span>{fact.label}</span>
+            <strong>{fact.value}</strong>
           </div>
         ))}
       </div>
@@ -478,6 +568,7 @@ function Portfolio({ go }) {
               priority={index === 0}
             />
           ))}
+          <PortfolioAbout />
         </div>
       </div>
     </>

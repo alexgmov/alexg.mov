@@ -498,8 +498,10 @@ function TravelLog() {
 }
 
 function TravelSection({ deferred = false }) {
+  const className = "section-xs " + (deferred ? "travel-mobile-deferred" : "home-travel-overlap");
+
   return (
-    <section className={"section-xs" + (deferred ? " travel-mobile-deferred" : "")} data-home-scroll-blur>
+    <section className={className} data-home-scroll-blur>
       <div className="wrap">
         <TravelLog />
       </div>
@@ -589,7 +591,7 @@ function HeroReel() {
     <div className="hero-bg" data-home-scroll-blur>
       <video
         className="hero-bg-video"
-        src="videos/web%20showcase.mp4"
+        src="videos/website%20landing%20page.mp4"
         autoPlay
         muted
         loop
@@ -658,7 +660,7 @@ const OMI_CASE_STUDY = {
   impactValue: '5.5',
   impactUnit: 'M VIEWS',
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2026',
-  teaserLabel: 'OMI LAUNCH FILM · FULL STACK VIDEO PRODUCTION · 2026',
+  teaserLabelParts: ['OMI LAUNCH FILM', 'FULL STACK VIDEO PRODUCTION', '2026'],
   teaserTitle: 'Shipped a 5.5M-view launch film.',
   teaserSummary: 'Concept, production, edit, and UI moments tied to one metric: reach.',
   videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
@@ -680,26 +682,21 @@ const OMI_CASE_STUDY = {
   ],
 };
 
+const FEATURED_HOME_LUT_IDS = ['cinematic-01', 'onyx'];
+
 function Home({ go }) {
   const deferTravel = useMobileViewport();
   useHomeScrollBlur(deferTravel);
   const hrefFor = window.routeHref || ((id) => '#');
-  const featuredPlugin = (window.PLUGINS || []).find(p => p.id === 'flowstate') || {
-    id: 'flowstate',
-    name: 'FlowState',
-    oneline: 'Search Premiere footage by meaning, not filenames.',
-    price: 28,
-    version: '1.0.0',
-    badge: 'RELEASED',
-    status: 'released',
-    variant: 'ai-media-browser',
-  };
-  const featuredLut = (window.LUTS || []).find(l => l.id === 'cinematic-01') || {
+  const fallbackMeridian = {
     id: 'cinematic-01',
     name: 'Meridian',
     oneline: 'Warm, polished color for footage shot in natural light.',
-    price: 9,
+    price: 18,
+    formats: '.CUBE',
     badge: 'BESTSELLER',
+    tone: 'teal-orange',
+    mockupSrc: 'mockups/meridian mockup.png',
     compare: {
       title: 'Meridian',
       beforeLabel: 'Ungraded',
@@ -709,21 +706,58 @@ function Home({ go }) {
       beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
       afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
     },
+    compareScenes: [
+      {
+        id: 'scene-01',
+        label: 'Scene 01',
+        title: 'Meridian scene 01',
+        beforeLabel: 'Ungraded',
+        afterLabel: 'Graded',
+        beforeTitle: 'Meridian scene 01 ungraded preview',
+        afterTitle: 'Meridian scene 01 graded preview',
+        beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
+        afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
+      },
+      {
+        id: 'scene-02',
+        label: 'Scene 02',
+        title: 'Meridian scene 02',
+        beforeLabel: 'Ungraded',
+        afterLabel: 'Graded',
+        beforeTitle: 'Meridian scene 02 ungraded preview',
+        afterTitle: 'Meridian scene 02 graded preview',
+        beforeSrc: 'videos/lut showcase/meridian 2 ungraded.mp4',
+        afterSrc: 'videos/lut showcase/meridian 2 graded.mp4',
+      },
+    ],
   };
-  const homeProductGuide = [
-    {
-      title: 'Premiere Pro plugins for finding footage faster',
-      body: 'FlowState helps editors search messy bins by meaning, not filenames.',
+  const fallbackOnyx = {
+    id: 'onyx',
+    name: 'Onyx',
+    oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
+    price: 18,
+    formats: '.CUBE',
+    badge: 'NEW',
+    tone: 'onyx-night',
+    mockupSrc: 'mockups/onyx mockup.png',
+    compare: {
+      title: 'Onyx',
+      beforeLabel: 'Ungraded',
+      afterLabel: 'Graded',
+      beforeTitle: 'Onyx ungraded preview',
+      afterTitle: 'Onyx graded preview',
+      beforeSrc: 'videos/lut showcase/onyx 1 ungraded.mp4',
+      afterSrc: 'videos/lut showcase/onyx 1 graded.mp4',
     },
-    {
-      title: 'Cinematic LUTs for natural light',
-      body: 'Meridian adds a warm, polished look to footage shot in natural light.',
-    },
-    {
-      title: 'Digital products that stay inside the edit',
-      body: 'Premiere extensions and .CUBE LUTs for Premiere, Resolve, and Final Cut.',
-    },
-  ];
+  };
+  const luts = window.LUTS || [];
+  const fallbackLutsById = {
+    'cinematic-01': fallbackMeridian,
+    onyx: fallbackOnyx,
+  };
+  const featuredLuts = FEATURED_HOME_LUT_IDS
+    .map(id => luts.find(l => l.id === id) || fallbackLutsById[id])
+    .filter(Boolean);
   return (
     <>
       <section className="hero hero-immersive">
@@ -732,21 +766,17 @@ function Home({ go }) {
           <HeroTitle />
         </div>
         <div className="hero-actions hero-product-actions hero-title-block hero-title-enter" style={{ animationDelay: '300ms' }} data-home-scroll-blur>
-          <HeroProductShortcut
-            kind="plugin"
-            name={featuredPlugin.name}
-            type="Plugin"
-            href={hrefFor('plugin:' + featuredPlugin.id)}
-            onActivate={() => go('plugin:' + featuredPlugin.id)}
-          />
-          <HeroProductShortcut
-            kind="lut"
-            name={featuredLut.name}
-            type="LUT"
-            href={hrefFor('lut:' + featuredLut.id)}
-            onActivate={() => go('lut:' + featuredLut.id)}
-            iconSrc={featuredLut.mockupSrc}
-          />
+          {featuredLuts.map(lut => (
+            <HeroProductShortcut
+              key={lut.id}
+              kind="lut"
+              name={lut.name}
+              type="LUT"
+              href={hrefFor('lut:' + lut.id)}
+              onActivate={() => go('lut:' + lut.id)}
+              iconSrc={lut.mockupSrc}
+            />
+          ))}
           <div className="hero-mobile-proof">Instant downloads · service replies within 24h</div>
         </div>
       </section>
@@ -757,45 +787,26 @@ function Home({ go }) {
       {/* Featured Products */}
       <section id="featured-products" className="section-sm featured-products">
         <div className="wrap featured-products-stack">
-          <div data-home-scroll-blur>
-            <p className="section-title">FEATURED · LUT</p>
-            <div className="card card-featured" onClick={() => go('lut:' + featuredLut.id)} style={{ cursor: 'pointer' }}>
-              <div className="card-media"><LutPreview tone="teal-orange" interactive compare={featuredLut.compare} scrollLinked /></div>
-              <div className="card-body">
-                <div className="card-eyebrow">
-                  <span>INDIVIDUAL LUT · .CUBE</span>
-                  <span style={{ color: 'var(--orange-ink)' }}>★ {featuredLut.badge || 'BESTSELLER'}</span>
-                </div>
-                <h3 className="card-title">{featuredLut.name}</h3>
-                <p className="card-desc">{featuredLut.oneline}</p>
-                <div className="card-foot">
-                  <div className="card-price">${featuredLut.price}<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
-                  <a className="btn btn-primary" href={hrefFor('lut:' + featuredLut.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('lut:' + featuredLut.id); }}>View <ArrowIcon /></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div data-home-scroll-blur>
-            <p className="section-title">FEATURED · PLUGIN</p>
-            <div className="card card-featured">
-              <div className="card-media">
-                <PremiereScreenshot variant={featuredPlugin.variant || 'ai-media-browser'} />
-              </div>
-              <div className="card-body">
-                <div className="card-eyebrow">
-                  <span>v{featuredPlugin.version} · PREMIERE 2024+</span>
-                  <span style={{ color: 'var(--blue-ink)' }}>● {featuredPlugin.badge || 'RELEASED'}</span>
-                </div>
-                <h3 className="card-title">{featuredPlugin.name}</h3>
-                <p className="card-desc">{featuredPlugin.oneline}</p>
-                <div className="card-foot">
-                  <div className="card-price">${featuredPlugin.price}<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
-                  <a className="btn btn-primary" href={hrefFor('plugin:' + featuredPlugin.id)} onClick={(e) => { e.preventDefault(); go('plugin:' + featuredPlugin.id); }}>View <ArrowIcon /></a>
+          {featuredLuts.map(lut => (
+            <div key={lut.id} data-home-scroll-blur>
+              <p className="section-title">FEATURED · LUT</p>
+              <div className="card card-featured" onClick={() => go('lut:' + lut.id)} style={{ cursor: 'pointer' }}>
+                <div className="card-media"><LutPreview tone={lut.tone || 'teal-orange'} interactive compare={lut.compare} scrollLinked /></div>
+                <div className="card-body">
+                  <div className="card-eyebrow">
+                    <span>INDIVIDUAL LUT · {lut.formats || '.CUBE'}</span>
+                    <span style={{ color: 'var(--orange-ink)' }}>★ {lut.badge || 'BESTSELLER'}</span>
+                  </div>
+                  <h3 className="card-title">{lut.name}</h3>
+                  <p className="card-desc">{lut.oneline}</p>
+                  <div className="card-foot">
+                    <div className="card-price">${lut.price}<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
+                    <a className="btn btn-primary" href={hrefFor('lut:' + lut.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('lut:' + lut.id); }}>View <ArrowIcon /></a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -830,7 +841,11 @@ function Home({ go }) {
             <div className="proof-grid">
               <div className="proof-stat">
                 <h2 className="proof-num">{OMI_CASE_STUDY.impactValue}<span className="unit">{OMI_CASE_STUDY.impactUnit}</span></h2>
-                <p className="proof-label">{OMI_CASE_STUDY.teaserLabel}</p>
+                <p className="proof-label">
+                  {OMI_CASE_STUDY.teaserLabelParts.map(part => (
+                    <span key={part}>{part}</span>
+                  ))}
+                </p>
               </div>
               <div className="proof-body">
                 <div className="proof-copy">

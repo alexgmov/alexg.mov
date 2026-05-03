@@ -7,6 +7,7 @@ const LUTS = window.LUTS || [
     id: 'cinematic-01',
     name: 'Meridian',
     oneline: 'Warm, polished color for footage shot in natural light.',
+    seoDescription: 'Meridian is a .CUBE LUT for warm, polished color on footage shot in natural light.',
     price: 18,
     formats: '.CUBE',
     badge: 'BESTSELLER',
@@ -24,6 +25,59 @@ const LUTS = window.LUTS || [
       afterTitle: 'Meridian graded preview',
       beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
       afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
+    },
+    compareScenes: [
+      {
+        id: 'scene-01',
+        label: 'Scene 01',
+        title: 'Meridian scene 01',
+        beforeLabel: 'Ungraded',
+        afterLabel: 'Graded',
+        beforeTitle: 'Meridian scene 01 ungraded preview',
+        afterTitle: 'Meridian scene 01 graded preview',
+        beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
+        afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
+      },
+      {
+        id: 'scene-02',
+        label: 'Scene 02',
+        title: 'Meridian scene 02',
+        beforeLabel: 'Ungraded',
+        afterLabel: 'Graded',
+        beforeTitle: 'Meridian scene 02 ungraded preview',
+        afterTitle: 'Meridian scene 02 graded preview',
+        beforeSrc: 'videos/lut showcase/meridian 2 ungraded.mp4',
+        afterSrc: 'videos/lut showcase/meridian 2 graded.mp4',
+      },
+    ],
+  },
+  {
+    id: 'onyx',
+    name: 'Onyx',
+    oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
+    seoDescription: 'Onyx is a .CUBE LUT crafted for nighttime footage, deep shadows, luminous skin, and city light.',
+    price: 18,
+    formats: '.CUBE',
+    badge: 'NEW',
+    tone: 'onyx-night',
+    available: true,
+    checkoutProductId: 'onyx',
+    mockupSrc: 'mockups/onyx mockup.png',
+    mockupAlt: 'Onyx LUT product mockup',
+    demoLabel: 'Onyx',
+    details: {
+      whatItDoes: 'Shapes nighttime footage with deeper shadows, luminous skin, and controlled city-light glow.',
+      whoItsFor: 'Editors grading night streets, low-light portraits, events, and neon-lit creator footage.',
+      whatYouGet: '1 x .CUBE',
+    },
+    compare: {
+      title: 'Onyx',
+      beforeLabel: 'Ungraded',
+      afterLabel: 'Graded',
+      beforeTitle: 'Onyx ungraded preview',
+      afterTitle: 'Onyx graded preview',
+      beforeSrc: 'videos/lut showcase/onyx 1 ungraded.mp4',
+      afterSrc: 'videos/lut showcase/onyx 1 graded.mp4',
     },
   },
   {
@@ -46,19 +100,19 @@ const LUT_GUIDE_ITEMS = [
     body: 'Use Meridian when the shot is clean and you want warm contrast, richer skin, and a finished look.',
   },
   {
-    title: 'Best LUT format for multiple editing apps',
-    body: '.CUBE works across Premiere Pro, DaVinci Resolve, Final Cut Pro, and most modern color workflows.',
+    title: 'Best LUT for nighttime city footage',
+    body: 'Use Onyx when the scene needs deep shadows, luminous skin, and controlled neon or street-light color.',
   },
   {
-    title: 'Best workflow for log footage',
-    body: 'Normalize log first, then apply the creative LUT. Keep exposure and white balance adjustable.',
+    title: 'Best LUT format for multiple editing apps',
+    body: '.CUBE works across Premiere Pro, DaVinci Resolve, Final Cut Pro, and most modern color workflows.',
   },
 ];
 
 const LUT_FAQS = window.LUT_FAQS || [
   {
-    q: 'What footage works best with Meridian?',
-    a: 'Meridian performs best with footage shot in natural light that already has clean exposure and white balance.',
+    q: 'What footage works best with these LUTs?',
+    a: 'Meridian performs best with clean natural light. Onyx is built for nighttime footage, city lights, and deeper shadow work.',
   },
   {
     q: 'Do these LUTs work in Premiere Pro, DaVinci Resolve, and Final Cut Pro?',
@@ -72,11 +126,11 @@ const LUT_FAQS = window.LUT_FAQS || [
 
 const LUT_DETAIL_FAQS = window.LUT_DETAIL_FAQS || [
   {
-    q: 'Who is Meridian best for?',
-    a: 'Editors who want one warm, polished LUT for lifestyle, creator, and social footage shot in natural light.',
+    q: 'Who are these LUTs best for?',
+    a: 'Editors who want focused looks for specific lighting conditions instead of a giant bundle.',
   },
   {
-    q: 'What software can open Meridian?',
+    q: 'What software can open these LUTs?',
     a: 'Any editor that accepts .CUBE files, including Premiere Pro, DaVinci Resolve, and Final Cut Pro.',
   },
   {
@@ -93,7 +147,7 @@ function LutsList({ go }) {
     <>
       <section className="list-head">
         <div className="wrap">
-          <h1>Looks for clean, natural light.</h1>
+          <h1>Looks for clean color, day or night.</h1>
           <p>Cinematic .CUBE LUTs for Premiere, Resolve, and Final Cut.</p>
           <div className="list-meta">
             <span>{releasedCount} RELEASED {releasedCount === 1 ? 'LOOK' : 'LOOKS'}</span>
@@ -197,6 +251,20 @@ function LutDetail({ id, go }) {
     setActiveMediaId(l.mockupSrc ? 'mockup' : 'compare');
   }, [l.id, l.mockupSrc]);
   if (!l.available) return null;
+  const detailCopy = {
+    whatItDoes: l.details?.whatItDoes || 'Adds a finished warm look after base correction. Tune with opacity and exposure.',
+    whoItsFor: l.details?.whoItsFor || 'Editors who want one focused LUT, not a giant bundle.',
+    whatYouGet: l.details?.whatYouGet || '1 x .CUBE',
+  };
+  const compareScenes = (
+    Array.isArray(l.compareScenes) && l.compareScenes.length
+      ? l.compareScenes
+      : (l.compare ? [l.compare] : [])
+  ).map((compare, index) => ({
+    ...compare,
+    id: compare.id || `scene-${index + 1}`,
+    label: compare.label || `Scene ${String(index + 1).padStart(2, '0')}`,
+  }));
 
   const mediaItems = [
     l.mockupSrc ? {
@@ -206,11 +274,12 @@ function LutDetail({ id, go }) {
       src: l.mockupSrc,
       alt: l.mockupAlt || `${l.name} LUT mock-up`,
     } : null,
-    l.compare ? {
-      id: 'compare',
+    ...compareScenes.map((compare, index) => ({
+      id: `compare-${compare.id || index}`,
       kind: 'compare',
-      label: `${l.name} before and after preview`,
-    } : null,
+      label: `${l.name} ${compare.label} before and after preview`,
+      compare,
+    })),
   ].filter(Boolean);
   const activeMedia = mediaItems.find(item => item.id === activeMediaId) || mediaItems[0];
 
@@ -255,7 +324,7 @@ function LutDetail({ id, go }) {
                   <img src={item.src} alt="" />
                 ) : (
                   <span className="pd-gallery-thumb-preview" aria-hidden="true">
-                    <LutPreview tone={l.tone} scale={0.55} compare={l.compare} showLabels={false} />
+                    <LutPreview tone={l.tone} scale={0.55} compare={item.compare} showLabels={false} />
                   </span>
                 )}
               </button>
@@ -269,10 +338,10 @@ function LutDetail({ id, go }) {
               </div>
             ) : (
               <div className="pd-media">
-                <LutPreview tone={l.tone} scale={1.4} interactive compare={l.compare} />
+                <LutPreview tone={l.tone} scale={1.4} interactive compare={activeMedia.compare} />
                 <div className="reel-meta">
                   <span>BEFORE / AFTER</span>
-                  <span style={{ opacity: 0.6 }}>{l.demoLabel}</span>
+                  <span style={{ opacity: 0.6 }}>{activeMedia.compare?.label || l.demoLabel}</span>
                 </div>
               </div>
             )}
@@ -302,12 +371,38 @@ function LutDetail({ id, go }) {
           <div className="pd-reassure"><CheckIcon /> Instant download · ZIP · .cube</div>
 
           <div className="pd-bullets">
-            <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">Adds a finished warm look after base correction. Tune with opacity and exposure.</div></div>
-            <div className="pd-bullet"><div className="pd-bullet-k">WHO IT'S FOR</div><div className="pd-bullet-v">Editors who want one focused LUT, not a giant bundle.</div></div>
-            <div className="pd-bullet"><div className="pd-bullet-k">WHAT YOU GET</div><div className="pd-bullet-v">1 × .CUBE</div></div>
+            <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{detailCopy.whatItDoes}</div></div>
+            <div className="pd-bullet"><div className="pd-bullet-k">WHO IT'S FOR</div><div className="pd-bullet-v">{detailCopy.whoItsFor}</div></div>
+            <div className="pd-bullet"><div className="pd-bullet-k">WHAT YOU GET</div><div className="pd-bullet-v">{detailCopy.whatYouGet}</div></div>
           </div>
         </div>
       </div>
+
+      {compareScenes.length > 1 && (
+        <section className="pd-compare-showcase" aria-label={`${l.name} look tests`}>
+          <div className="pd-compare-heading">
+            <p className="section-title">LOOK TESTS</p>
+            <h2>{l.name} in different conditions.</h2>
+          </div>
+          <div className="pd-compare-stack">
+            {compareScenes.map((compare, index) => (
+              <article className="pd-compare-item" key={compare.id || index}>
+                <div className="pd-compare-head">
+                  <span>{compare.label}</span>
+                  <strong>{compare.title || `${l.name} scene ${index + 1}`}</strong>
+                </div>
+                <div className="pd-media pd-compare-media">
+                  <LutPreview tone={l.tone} scale={1.15} interactive compare={compare} />
+                  <div className="reel-meta">
+                    <span>BEFORE / AFTER</span>
+                    <span style={{ opacity: 0.6 }}>{compare.label}</span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="pd-blocks" style={{ paddingBottom: 72 }}>
         <div className="pd-block">

@@ -69,6 +69,10 @@ module.exports = async function handler(req, res) {
     console.error('Stripe price is not configured', { productId });
     return res.status(500).json({ error: 'Checkout product is not configured' });
   }
+  if (!product.blobUrl) {
+    console.error('Product download is not configured', { productId });
+    return res.status(500).json({ error: 'Checkout product is not configured' });
+  }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const host = firstHeaderValue(req.headers['x-forwarded-host'] || req.headers.host);

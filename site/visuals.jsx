@@ -156,6 +156,10 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
       a: "linear-gradient(135deg, #1a1a22 0%, #0a0a12 60%, #050508 100%)",
       b: "linear-gradient(135deg, #8a2c60 0%, #3a1a44 50%, #101030 100%)",
     },
+    "onyx-night": {
+      a: "linear-gradient(135deg, #12161c 0%, #07090d 55%, #010204 100%)",
+      b: "linear-gradient(135deg, #061522 0%, #09111c 38%, #151226 62%, #2f1024 100%)",
+    },
     "clean": {
       a: "linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 60%, #1a1a1a 100%)",
       b: "linear-gradient(135deg, #4a5a6a 0%, #3a4a58 50%, #1a2028 100%)",
