@@ -1,5 +1,6 @@
 import React from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // Main SPA shell. routing, tweaks, mounting
 
@@ -194,6 +195,7 @@ export function App({ initialPage, embedded }) {
       <Footer go={go} />
       <MobileBottomNav page={page} go={go} />
       {!embedded && <Analytics />}
+      {!embedded && <SpeedInsights />}
       {!embedded && (
         <div className={"tweaks " + (editMode ? 'on' : '')}>
           <div className="tweaks-title">TWEAKS</div>
