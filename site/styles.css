@@ -1734,13 +1734,44 @@ footer {
   justify-content: center;
 }
 .hero-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; background: transparent; }
+.hero-bg-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.12) 64%, rgba(0,0,0,0.52) 78%, rgba(0,0,0,0.92) 91%, #000 100%);
+}
+.hero-bg-visual {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  filter: blur(var(--home-scroll-blur, 0px));
+  will-change: filter;
+}
+.hero-bg-visual.is-fixed-parallax {
+  position: fixed;
+  top: var(--hero-video-fixed-top, 0px);
+  left: 0;
+  right: auto;
+  bottom: auto;
+  width: 100vw;
+  height: var(--hero-video-height, 100vh);
+  opacity: var(--hero-video-opacity, 1);
+  clip-path: inset(var(--hero-video-clip-top, 0px) 0 var(--hero-video-clip-bottom, 0px) 0);
+  -webkit-clip-path: inset(var(--hero-video-clip-top, 0px) 0 var(--hero-video-clip-bottom, 0px) 0);
+}
 .hero-bg-inner { position: absolute; inset: 0; }
 .hero-bg-video {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center center;
   opacity: 0.95;
+  pointer-events: none;
 }
 .hero-bg-frame {
   position: absolute; inset: 0;
@@ -2636,6 +2667,17 @@ footer {
 .home-travel-overlap {
   z-index: 2;
 }
+.home-travel-overlap::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -96px;
+  z-index: 1;
+  height: 132px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.82) 66%, #000 100%);
+}
 .home-travel-overlap .travel2-globe-canvas {
   --travel2-globe-bleed: clamp(112px, 10vw, 156px);
 }
@@ -2982,13 +3024,14 @@ footer {
   .mobile-bottom-nav-inner {
     position: relative;
     overflow: hidden;
+    isolation: isolate;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
     padding: 8px;
     border: 1px solid rgba(255,255,255,0.14);
     border-radius: 20px;
-    background: rgba(255,255,255,0.018);
+    background: color-mix(in srgb, var(--bg) 46%, transparent);
     backdrop-filter: blur(12px) saturate(142%) contrast(106%);
     -webkit-backdrop-filter: blur(12px) saturate(142%) contrast(106%);
     box-shadow:
@@ -3094,6 +3137,12 @@ footer {
     background: #050505;
     box-shadow: 0 18px 52px rgba(0,0,0,0.34);
   }
+  .hero-bg-visual {
+    border-radius: var(--radius);
+  }
+  .hero-bg-visual::after {
+    content: none;
+  }
   .hero-bg::after {
     content: "";
     position: absolute;
@@ -3105,6 +3154,10 @@ footer {
     pointer-events: none;
     background:
       linear-gradient(180deg, rgba(5,5,5,0) 0%, rgba(5,5,5,0.34) 30%, rgba(5,5,5,0.82) 62%, #050505 88%, #050505 100%);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    mask-image: none;
+    -webkit-mask-image: none;
   }
   .hero-bg-video {
     width: 100%;

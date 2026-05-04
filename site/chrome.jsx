@@ -32,8 +32,8 @@ function Nav({ page, go, overlay }) {
   const hrefFor = window.routeHref || ((id) => '#');
   const links = [
     { id: 'plugins', label: 'Plugins' },
-    { id: 'luts', label: 'LUTs' },
     { id: 'portfolio', label: 'Portfolio' },
+    { id: 'luts', label: 'LUTs' },
     { id: 'services', label: 'Services' },
     { id: 'support', label: 'Support' },
   ];
@@ -70,9 +70,9 @@ function MobileBottomNav({ page, go }) {
 
   const items = [
     { id: 'services', label: 'Services', helper: 'Brief' },
-    { id: 'portfolio', label: 'Portfolio', helper: 'Work' },
-    { id: 'plugins', label: 'Plugins', helper: 'Tools' },
     { id: 'luts', label: 'LUTs', helper: 'Color' },
+    { id: 'plugins', label: 'Plugins', helper: 'Tools' },
+    { id: 'portfolio', label: 'Portfolio', helper: 'Work' },
   ];
 
   return (

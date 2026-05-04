@@ -532,6 +532,9 @@ function useMobileViewport(query = '(max-width: 720px)') {
 const HOME_SCROLL_BLUR_MAX = 14;
 const HOME_SCROLL_BLUR_SELECTOR = '[data-home-scroll-blur]';
 const HOME_SCROLL_BLUR_START_VIEWPORT_RATIO = 0.4;
+const HERO_VIDEO_PARALLAX_DESKTOP_QUERY = '(min-width: 721px)';
+const HERO_VIDEO_PARALLAX_SCROLL_RATE = 0.22;
+const HERO_VIDEO_PARALLAX_CLIP_OVERLAP_PX = 2;
 
 function useHomeScrollBlur(refreshKey) {
   React.useEffect(() => {
@@ -586,24 +589,117 @@ function useHomeScrollBlur(refreshKey) {
   }, [refreshKey]);
 }
 
+function useHeroVideoParallax() {
+  const visualRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const visual = visualRef.current;
+    const section = visual?.closest('.hero-immersive');
+    if (!visual || !section) return undefined;
+
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const desktopQuery = window.matchMedia(HERO_VIDEO_PARALLAX_DESKTOP_QUERY);
+    let raf = 0;
+
+    const setBlur = (value) => {
+      visual.style.setProperty('--home-scroll-blur', `${value.toFixed(2)}px`);
+    };
+    const resetFixedLayer = () => {
+      visual.classList.remove('is-fixed-parallax');
+      visual.style.removeProperty('--hero-video-fixed-top');
+      visual.style.removeProperty('--hero-video-height');
+      visual.style.removeProperty('--hero-video-clip-top');
+      visual.style.removeProperty('--hero-video-clip-bottom');
+      visual.style.removeProperty('--hero-video-opacity');
+    };
+    const update = () => {
+      raf = 0;
+      const rect = section.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;
+      const reduceMotion = motionQuery.matches;
+
+      if (reduceMotion) {
+        setBlur(0);
+        resetFixedLayer();
+        return;
+      }
+
+      const blurStartLine = viewportHeight * HOME_SCROLL_BLUR_START_VIEWPORT_RATIO;
+      const blurProgress = Math.max(0, Math.min(1, (blurStartLine - rect.bottom) / blurStartLine));
+      const easedBlur = blurProgress * blurProgress * (3 - (2 * blurProgress));
+      setBlur(easedBlur * HOME_SCROLL_BLUR_MAX);
+
+      if (!desktopQuery.matches) {
+        resetFixedLayer();
+        return;
+      }
+
+      const visibleTop = Math.max(0, Math.min(viewportHeight, rect.top));
+      const visibleBottom = Math.max(0, Math.min(viewportHeight, rect.bottom));
+      const heroHeight = Math.max(1, section.offsetHeight || rect.height || 1);
+      const fixedTop = rect.top < 0 ? rect.top * HERO_VIDEO_PARALLAX_SCROLL_RATE : visibleTop;
+      const clipTop = Math.max(0, visibleTop - fixedTop - HERO_VIDEO_PARALLAX_CLIP_OVERLAP_PX);
+      const clipBottom = Math.max(0, (fixedTop + heroHeight) - visibleBottom - HERO_VIDEO_PARALLAX_CLIP_OVERLAP_PX);
+      const isVisible = visibleBottom > visibleTop;
+
+      visual.classList.add('is-fixed-parallax');
+      visual.style.setProperty('--hero-video-fixed-top', `${fixedTop.toFixed(2)}px`);
+      visual.style.setProperty('--hero-video-height', `${heroHeight.toFixed(2)}px`);
+      visual.style.setProperty('--hero-video-clip-top', `${clipTop.toFixed(2)}px`);
+      visual.style.setProperty('--hero-video-clip-bottom', `${clipBottom.toFixed(2)}px`);
+      visual.style.setProperty('--hero-video-opacity', isVisible ? '1' : '0');
+    };
+    const requestUpdate = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(update);
+    };
+
+    requestUpdate();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+    if (motionQuery.addEventListener) motionQuery.addEventListener('change', requestUpdate);
+    else motionQuery.addListener(requestUpdate);
+    if (desktopQuery.addEventListener) desktopQuery.addEventListener('change', requestUpdate);
+    else desktopQuery.addListener(requestUpdate);
+
+    return () => {
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+      if (motionQuery.removeEventListener) motionQuery.removeEventListener('change', requestUpdate);
+      else motionQuery.removeListener(requestUpdate);
+      if (desktopQuery.removeEventListener) desktopQuery.removeEventListener('change', requestUpdate);
+      else desktopQuery.removeListener(requestUpdate);
+      if (raf) window.cancelAnimationFrame(raf);
+      visual.style.removeProperty('--home-scroll-blur');
+      resetFixedLayer();
+    };
+  }, []);
+
+  return visualRef;
+}
+
 function HeroReel() {
+  const visualRef = useHeroVideoParallax();
+
   return (
-    <div className="hero-bg" data-home-scroll-blur>
-      <video
-        className="hero-bg-video"
-        src="videos/website%20landing%20page.mp4"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        aria-hidden="true"
-        disablePictureInPicture
-        controlsList="nodownload nofullscreen noremoteplayback"
-      />
-      <div className="hero-bg-grain" />
-      <div className="hero-bg-vignette" />
-      <div className="hero-bg-dim" />
+    <div className="hero-bg">
+      <div className="hero-bg-visual" ref={visualRef}>
+        <video
+          className="hero-bg-video"
+          src="videos/website%20landing%20page.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          disablePictureInPicture
+          controlsList="nodownload nofullscreen noremoteplayback"
+        />
+        <div className="hero-bg-grain" />
+        <div className="hero-bg-vignette" />
+        <div className="hero-bg-dim" />
+      </div>
     </div>
   );
 }
