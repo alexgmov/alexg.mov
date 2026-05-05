@@ -707,14 +707,14 @@ function HeroProductShortcut({ kind, name, type, href, onActivate, iconSrc }) {
 
 const OMI_CASE_STUDY = {
   client: 'OMI',
-  impactValue: '6M',
+  impactValue: '6 million',
   impactUnit: 'VIEWS',
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2026',
   teaserLabelParts: ['OMI LAUNCH FILM', 'FULL STACK VIDEO PRODUCTION', '2026'],
-  teaserTitle: 'Shipped a 6M-view launch film.',
+  teaserTitle: 'Shipped a launch film with 6 million views.',
   teaserSummary: 'Concept, production, edit, and UI moments tied to one metric: reach.',
   videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
-  heroTitle: "Directed OMI's launch film and drove 6M views in four days.",
+  heroTitle: "Directed OMI's launch film and drove 6 million views in four days.",
   summary: 'OMI needed a launch film built for reach. I handled concept, script, production, edit, and onscreen product moments.',
   detailSections: [
     {
@@ -727,7 +727,7 @@ const OMI_CASE_STUDY = {
     },
     {
       title: 'Post + outcome',
-      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 6M views across X and Instagram in four days.',
+      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 6 million views across X and Instagram in four days.',
     },
   ],
 };
@@ -909,7 +909,7 @@ function Home({ go }) {
           <div className="proof">
             <div className="proof-grid">
               <div className="proof-stat">
-                <h2 className="proof-num">{OMI_CASE_STUDY.impactValue}<span className="unit">{OMI_CASE_STUDY.impactUnit}</span></h2>
+                <h2 className="proof-num"><span className="value">{OMI_CASE_STUDY.impactValue}</span><span className="unit">{OMI_CASE_STUDY.impactUnit}</span></h2>
                 <p className="proof-label">
                   {OMI_CASE_STUDY.teaserLabelParts.map(part => (
                     <span key={part}>{part}</span>

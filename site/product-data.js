@@ -5,18 +5,19 @@ const PLUGINS = [
     id: 'flowstate',
     name: 'FlowState',
     oneline: 'Search Premiere footage by meaning, not filenames.',
-    price: null,
-    version: 'COMING SOON',
-    badge: 'COMING SOON',
-    status: 'coming-soon',
+    price: 18,
+    version: '1.0.0',
+    badge: 'LIVE',
+    status: 'released',
     variant: 'ai-media-browser',
+    visual: 'blank',
     what: 'FlowState scans a bin, analyzes clips with Gemini, and builds a searchable catalog.',
     who: 'Editors sorting A-roll, B-roll, transcripts, lighting, motion, and shot details across raw media.',
-    get: 'Premiere panel · Gemini workflow · searchable catalog.json · results bin · launch list early access.',
+    get: 'FlowState 1.0.0 ZXP · Premiere panel · Gemini workflow · searchable catalog.json · results bin · lifetime download.',
     install: [
-      'Join the launch list.',
-      'Get the release email when FlowState ships.',
-      'Download the installer for Mac or Windows.',
+      'Buy once and check your email for the FlowState download link.',
+      'Download FlowState-1.0.0.zxp on your editing computer.',
+      'Install the ZXP with your Adobe extension installer.',
       'Open Window → Extensions → FlowState in Premiere.',
       'Select a bin subtree, run analysis, then search and send matches to a results bin.',
     ],
@@ -24,8 +25,8 @@ const PLUGINS = [
       'Adobe Premiere Pro 2024 (24.0) or later',
       'macOS 13+ · Windows 10/11',
       'Gemini API access required',
-      'Release timing: 2026',
-      'In active development',
+      'ZXP extension package',
+      'Version 1.0.0',
     ],
   },
   {
@@ -83,6 +84,10 @@ const PLUGIN_DETAIL_FAQS = [
   {
     q: 'What software do I need?',
     a: 'FlowState is built for Adobe Premiere Pro 2024 or later on macOS 13+ or Windows 10/11. Gemini API access is required for analysis.',
+  },
+  {
+    q: 'How do I receive FlowState after checkout?',
+    a: 'The FlowState ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install it later on your editing computer.',
   },
 ];
 
@@ -231,7 +236,7 @@ const LUT_DETAIL_FAQS = [
 ];
 
 const FAQS = [
-  { q: 'Do your plugins work on Windows?', a: 'Yes. Every plugin ships with a signed installer for Mac and Windows. Premiere Pro 2024 (24.0) or later.' },
+  { q: 'Do your plugins work on Windows?', a: 'FlowState ships as a ZXP extension for Premiere Pro 2024 (24.0) or later on macOS 13+ and Windows 10/11. Gemini API access is required.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
   { q: 'Do you offer refunds?', a: 'No. These are digital downloads, so all sales are final. If something is broken on my end, email me and I will fix or replace it.' },
   { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Include your OS, Premiere version, and a screen recording if possible.' },

@@ -313,6 +313,7 @@ function LutDetail({ id, go }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: l.checkoutProductId || l.id,
+          offerCode: window.getFirstVisitOfferCode?.() || '',
           offerEmail: window.getFirstVisitOfferEmail?.() || '',
           offerToken: window.getFirstVisitOfferToken?.() || '',
         }),

@@ -26,6 +26,10 @@ function normalizeOrigin(origin) {
   return String(origin || '').replace(/\/+$/, '');
 }
 
+function normalizeOfferCode(value) {
+  return String(value || '').trim().toUpperCase();
+}
+
 function firstHeaderValue(value) {
   if (Array.isArray(value)) return value[0] || '';
   return String(value || '').split(',')[0].trim();
@@ -67,7 +71,7 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid request body' });
   }
 
-  const { productId, offerEmail, offerToken } = body || {};
+  const { productId, offerCode, offerEmail, offerToken } = body || {};
   const product = PRODUCTS[productId];
   if (!product) return res.status(400).json({ error: 'Unknown product' });
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -87,13 +91,24 @@ module.exports = async function handler(req, res) {
   const host = firstHeaderValue(req.headers['x-forwarded-host'] || req.headers.host);
   const origin = getCheckoutOrigin(req, host);
   const returnPage = encodeURIComponent(product.page || `plugin:${productId}`);
-  const claimedOffer = verifyOfferToken(offerToken);
-  const canApplyOffer = Boolean(claimedOffer && isOfferEligibleProduct(productId, product));
   const normalizedOfferEmail = normalizeEmail(offerEmail);
-  const canPrefillOfferEmail = Boolean(
+  const claimedOffer = verifyOfferToken(offerToken);
+  const tokenMatchesEmail = Boolean(
     claimedOffer &&
     isValidEmail(normalizedOfferEmail) &&
     hashEmail(normalizedOfferEmail) === claimedOffer.emailHash
+  );
+  const hasClientOfferClaim = Boolean(
+    normalizeOfferCode(offerCode) === OFFER_CODE &&
+    isValidEmail(normalizedOfferEmail)
+  );
+  const canApplyOffer = Boolean(
+    isOfferEligibleProduct(productId, product) &&
+    (claimedOffer || hasClientOfferClaim)
+  );
+  const canPrefillOfferEmail = Boolean(
+    isValidEmail(normalizedOfferEmail) &&
+    (tokenMatchesEmail || hasClientOfferClaim)
   );
 
   let session;

@@ -73,6 +73,11 @@ function getFirstVisitOfferToken() {
   return saved?.state === 'claimed' && saved.offerToken ? saved.offerToken : '';
 }
 
+function getFirstVisitOfferCode() {
+  const saved = readFirstVisitOffer();
+  return saved?.state === 'claimed' ? (saved.code || FIRST_VISIT_OFFER_CODE) : '';
+}
+
 function getFirstVisitOfferEmail() {
   const saved = readFirstVisitOffer();
   return saved?.state === 'claimed' && saved.email ? saved.email : '';
@@ -81,6 +86,26 @@ function getFirstVisitOfferEmail() {
 function isOfferSuppressed() {
   const saved = readFirstVisitOffer();
   return ['shown', 'dismissed', 'claimed'].includes(saved?.state);
+}
+
+function normalizeOfferEmail(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function isOfferEmailCandidate(value) {
+  const email = normalizeOfferEmail(value);
+  return Boolean(email && email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+}
+
+async function syncFirstVisitOfferClaim({ email, page, path, referrer }) {
+  const res = await fetch('/api/email-capture', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, page, path, referrer }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.offerToken) throw new Error(data.error || 'Could not save offer claim');
+  return data;
 }
 
 function CopyIcon({ size = 15 }) {
@@ -162,41 +187,53 @@ function FirstVisitOffer({ page }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    const value = email.trim();
+    const value = normalizeOfferEmail(email);
     if (!value) {
       setMessage('Enter your email first.');
       return;
     }
-
-    setStatus('loading');
-    setMessage('');
-
-    try {
-      const res = await fetch('/api/email-capture', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: value,
-          page,
-          path: `${location.pathname}${location.search}${location.hash}`,
-          referrer: document.referrer || '',
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.offerToken) throw new Error(data.error || 'Could not unlock offer');
-      writeFirstVisitOffer({
-        state: 'claimed',
-        claimedAt: Date.now(),
-        email: value,
-        offerToken: data.offerToken,
-      });
-      setStatus('claimed');
-      setMessage('');
-      copyCode();
-    } catch (err) {
-      setStatus('idle');
-      setMessage(err.message || 'Could not unlock offer. Try again.');
+    if (!isOfferEmailCandidate(value)) {
+      setMessage('Enter a valid email address.');
+      return;
     }
+
+    setMessage('');
+    writeFirstVisitOffer({
+      state: 'claimed',
+      claimedAt: Date.now(),
+      email: value,
+      offerToken: '',
+      captureStatus: 'pending',
+    });
+    setStatus('claimed');
+    void copyCode();
+
+    void syncFirstVisitOfferClaim({
+      email: value,
+      page,
+      path: `${location.pathname}${location.search}${location.hash}`,
+      referrer: document.referrer || '',
+    })
+      .then(data => {
+        writeFirstVisitOffer({
+          state: 'claimed',
+          email: value,
+          offerToken: data.offerToken,
+          captureStatus: 'synced',
+          captureSyncedAt: Date.now(),
+          storage: Array.isArray(data.storage) ? data.storage.join(',') : '',
+        });
+      })
+      .catch(err => {
+        writeFirstVisitOffer({
+          state: 'claimed',
+          email: value,
+          offerToken: '',
+          captureStatus: 'failed',
+          captureFailedAt: Date.now(),
+          captureError: String(err?.message || 'Could not save offer claim').slice(0, 180),
+        });
+      });
   }
 
   return (
@@ -217,12 +254,11 @@ function FirstVisitOffer({ page }) {
               placeholder="you@example.com"
               autoComplete="email"
               onChange={event => setEmail(event.target.value)}
-              disabled={status === 'loading'}
             />
           </label>
           {message && <p className="first-offer-error">{message}</p>}
-          <button type="submit" className="first-offer-submit" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Unlocking' : 'Unlock'}
+          <button type="submit" className="first-offer-submit">
+            Unlock
           </button>
         </form>
       ) : (
@@ -405,4 +441,4 @@ export function App({ initialPage, embedded }) {
   );
 }
 
-Object.assign(window, { App, getFirstVisitOfferEmail, getFirstVisitOfferToken });
+Object.assign(window, { App, getFirstVisitOfferCode, getFirstVisitOfferEmail, getFirstVisitOfferToken });

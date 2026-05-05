@@ -7,18 +7,19 @@ const PLUGINS = window.PLUGINS || [
     id: 'flowstate',
     name: 'FlowState',
     oneline: 'Search Premiere footage by meaning, not filenames.',
-    price: null,
-    version: 'COMING SOON',
-    badge: 'COMING SOON',
-    status: 'coming-soon',
+    price: 18,
+    version: '1.0.0',
+    badge: 'LIVE',
+    status: 'released',
     variant: 'ai-media-browser',
+    visual: 'blank',
     what: 'FlowState scans a bin, analyzes clips with Gemini, and builds a searchable catalog.',
     who: 'Editors sorting A-roll, B-roll, transcripts, lighting, motion, and shot details across raw media.',
-    get: 'Premiere panel · Gemini workflow · searchable catalog.json · results bin · launch list early access.',
+    get: 'FlowState 1.0.0 ZXP · Premiere panel · Gemini workflow · searchable catalog.json · results bin · lifetime download.',
     install: [
-      'Join the launch list.',
-      'Get the release email when FlowState ships.',
-      'Download the installer for Mac or Windows.',
+      'Buy once and check your email for the FlowState download link.',
+      'Download FlowState-1.0.0.zxp on your editing computer.',
+      'Install the ZXP with your Adobe extension installer.',
       'Open Window → Extensions → FlowState in Premiere.',
       'Select a bin subtree, run analysis, then search and send matches to a results bin.',
     ],
@@ -26,8 +27,8 @@ const PLUGINS = window.PLUGINS || [
       'Adobe Premiere Pro 2024 (24.0) or later',
       'macOS 13+ · Windows 10/11',
       'Gemini API access required',
-      'Release timing: 2026',
-      'In active development',
+      'ZXP extension package',
+      'Version 1.0.0',
     ],
   },
   {
@@ -101,7 +102,29 @@ const PLUGIN_DETAIL_FAQS = window.PLUGIN_DETAIL_FAQS || [
     q: 'What software do I need?',
     a: 'FlowState is built for Adobe Premiere Pro 2024 or later on macOS 13+ or Windows 10/11. Gemini API access is required for analysis.',
   },
+  {
+    q: 'How do I receive FlowState after checkout?',
+    a: 'The FlowState ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install it later on your editing computer.',
+  },
 ];
+
+function PluginVisual({ plugin, scale = 1 }) {
+  if (plugin.visual === 'blank') return <BlankPluginVisual scale={scale} />;
+  return <PremiereScreenshot variant={plugin.variant} scale={scale} />;
+}
+
+function BlankPluginVisual({ scale = 1 }) {
+  return (
+    <div className="plugin-blank-visual" style={{ '--blank-visual-scale': scale }} aria-hidden="true">
+      <span className="plugin-blank-grid" />
+      <span className="plugin-blank-frame">
+        <span className="plugin-blank-bar plugin-blank-bar-a" />
+        <span className="plugin-blank-bar plugin-blank-bar-b" />
+        <span className="plugin-blank-bar plugin-blank-bar-c" />
+      </span>
+    </div>
+  );
+}
 
 function PluginsList({ go }) {
   const hrefFor = window.routeHref || ((id) => '#');
@@ -133,7 +156,7 @@ function PluginsList({ go }) {
               >
                 {released ? (
                   <>
-                    <div className="card-media"><PremiereScreenshot variant={p.variant} /></div>
+                    <div className="card-media"><PluginVisual plugin={p} /></div>
                     <div className="card-body">
                       <div className="card-eyebrow">
                         <span>v{p.version} · PLUGIN</span>
@@ -178,17 +201,17 @@ function PluginsList({ go }) {
             <div className="how-item">
               <div className="how-num">01 / BUY ONCE</div>
               <h4 className="how-h">Instant checkout</h4>
-              <p className="how-p">No subscriptions. No seats. Pay once, download immediately.</p>
+              <p className="how-p">No subscriptions. No seats. Pay once, then get the download link by email.</p>
             </div>
             <div className="how-item">
               <div className="how-num">02 / INSTALL FAST</div>
-              <h4 className="how-h">Double-click installer</h4>
-              <p className="how-p">Signed installers for Mac and Windows. Under 60 seconds from download to open.</p>
+              <h4 className="how-h">Install the package</h4>
+              <p className="how-p">Download the ZXP on your editing computer and open the panel inside Premiere.</p>
             </div>
             <div className="how-item">
               <div className="how-num">03 / EDIT FASTER</div>
               <h4 className="how-h">Lives in your workflow</h4>
-              <p className="how-p">Tools dock inside Premiere. No web apps, no round-tripping, no account required.</p>
+              <p className="how-p">Tools dock inside Premiere. No extra web app, no round-tripping, no timeline detours.</p>
             </div>
           </div>
         </div>
@@ -205,6 +228,7 @@ function PluginDetail({ id, go }) {
   const hrefFor = window.routeHref || ((id) => '#');
   const purchased = new URLSearchParams(location.search).get('purchased') === 'true';
   const p = PLUGINS.find(x => x.id === id) || PLUGINS[0];
+  const hasBlankVisual = p.visual === 'blank';
 
   async function handleBuy() {
     setBuying(true);
@@ -214,6 +238,7 @@ function PluginDetail({ id, go }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: p.id,
+          offerCode: window.getFirstVisitOfferCode?.() || '',
           offerEmail: window.getFirstVisitOfferEmail?.() || '',
           offerToken: window.getFirstVisitOfferToken?.() || '',
         }),
@@ -236,9 +261,9 @@ function PluginDetail({ id, go }) {
       <div className="pd-hero">
         <div>
           <div className="pd-media">
-            <PremiereScreenshot variant={p.variant} scale={1.2} />
+            <PluginVisual plugin={p} scale={1.2} />
             {/* play overlay */}
-            {thumb === 0 && (
+            {!hasBlankVisual && thumb === 0 && (
               <div style={{
                 position: 'absolute', inset: 0, display: 'grid', placeItems: 'center',
                 background: 'linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.5))',
@@ -246,22 +271,22 @@ function PluginDetail({ id, go }) {
                 <div className="reel-play-btn" style={{ width: 56, height: 56 }}><PlayIcon size={20} /></div>
               </div>
             )}
-            <div className="reel-meta">
+            {!hasBlankVisual && <div className="reel-meta">
               <span>DEMO · 42s</span>
-            </div>
+            </div>}
           </div>
-          <div className="pd-thumbs">
+          {!hasBlankVisual && <div className="pd-thumbs">
             {[0, 1, 2, 3].map(i => (
               <div key={i} className={"pd-thumb " + (thumb === i ? 'active' : '')} onClick={() => setThumb(i)}>
                 <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                  {i === 0 && <PremiereScreenshot variant={p.variant} scale={0.4} />}
+                  {i === 0 && <PluginVisual plugin={p} scale={0.4} />}
                   {i === 1 && <LutPreview tone="clean" scale={0.4} />}
                   {i === 2 && <PortfolioStill seed={2} />}
                   {i === 3 && <PortfolioStill seed={6} />}
                 </div>
               </div>
             ))}
-          </div>
+          </div>}
         </div>
 
         <div className="pd-info">
@@ -282,11 +307,11 @@ function PluginDetail({ id, go }) {
           {p.status === 'released'
             ? <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
                 <DownloadIcon />
-                <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy & Download'}</span>
-                <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Download Now'}</span>
+                <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy & Email Link'}</span>
+                <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Email Link'}</span>
               </button>
             : <button className="btn btn-secondary btn-lg pd-buy">Join Launch List</button>}
-          <div className="pd-reassure"><CheckIcon /> {p.status === 'released' ? 'Instant download via email · 24h support reply' : 'Shipping updates posted as development continues'}</div>
+          <div className="pd-reassure"><CheckIcon /> {p.status === 'released' ? 'ZXP download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues'}</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{p.what}</div></div>
@@ -334,9 +359,9 @@ function PluginDetail({ id, go }) {
       <MobileProductStickyCta
         active={p.status === 'released' && showStickyCta && !purchased}
         productName={p.name}
-        productMeta="Premiere plugin · instant email"
+        productMeta="Premiere plugin · email link"
         price={p.price != null ? `$${p.price}` : 'Soon'}
-        actionLabel={buying ? 'Redirecting…' : 'Download Now'}
+        actionLabel={buying ? 'Redirecting…' : 'Email Link'}
         onAction={handleBuy}
         disabled={buying}
       />

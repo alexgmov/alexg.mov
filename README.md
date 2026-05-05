@@ -7,6 +7,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `site/main.jsx` boots the React app, first loading shared browser modules such as analytics, product data, SEO helpers, visuals, and chrome.
 - `site/app.jsx` owns the query-string router. Public pages are represented by `?page=...`, for example `?page=luts`, `?page=lut:cinematic-01`, and `?page=success`.
 - Route components are split into chunks: home, plugins, LUTs, and supporting pages.
+- `site/home.jsx` owns the homepage hero, featured product rail, and OMI proof teaser. `site/pages.jsx` owns portfolio/services pages and keeps the service case-study fallback copy.
 - `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, media paths, and product page metadata.
 - `lib/products.js` is the server-side commerce catalog. This is the only product catalog used for Stripe Checkout and fulfillment.
 - `api/*.js` files are Vercel-compatible CommonJS handlers. Locally, `server.js` maps those same files to `/api/...` routes and attaches small `res.status()`, `res.json()`, and `res.send()` helpers.
@@ -37,9 +38,11 @@ Commerce and fulfillment use these variables:
 - `STRIPE_PRICE_SOLENE`: Stripe Price ID for the MERIDIAN/Solene checkout product.
 - `STRIPE_PRICE_ONYX`: Stripe Price ID for the ONYX checkout product.
 - `STRIPE_PRICE_HALOCLYNE`: Stripe Price ID for the HALOCLYNE checkout product.
+- `STRIPE_PRICE_FLOWSTATE`: optional Stripe Price ID override for the FlowState plugin checkout product.
 - `MERIDIAN_BLOB_URL`: optional private Vercel Blob URL override for MERIDIAN.
 - `ONYX_BLOB_URL`: optional private Vercel Blob URL override for ONYX.
 - `HALOCLYNE_BLOB_URL`: optional private Vercel Blob URL override for HALOCLYNE.
+- `FLOWSTATE_BLOB_URL`: optional private Vercel Blob URL override for FlowState.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
 - `RESEND_API_KEY`: Resend key used by the webhook fulfillment email and first-visit promo code email.
@@ -47,11 +50,26 @@ Commerce and fulfillment use these variables:
 - `FIRST_VISIT_OFFER_REPLY_TO`: optional reply-to override for the promo code email. Defaults to `alex@alexg.mov`.
 - `FIRST_VISIT_OFFER_UNSUBSCRIBE_EMAIL`: optional unsubscribe reply address override. Defaults to `FIRST_VISIT_OFFER_REPLY_TO`.
 - `FIRST_VISIT_OFFER_EMAIL_ENABLED`: set to `0` to disable the promo code email while keeping the on-site code reveal active.
+- `FIRST_VISIT_OFFER_SECRET`: optional HMAC secret for first-visit offer tokens. Falls back to `DOWNLOAD_SECRET`, then `STRIPE_SECRET_KEY`, then the dev fallback in `lib/first-visit-offer.js`.
 - `EMAIL_POSTAL_ADDRESS` or `BUSINESS_POSTAL_ADDRESS`: footer address to include for commercial email compliance.
 - `ANALYTICS_LOG_DIR`: optional local analytics log directory.
 - `ANALYTICS_SALT`: optional visitor fingerprint salt. Falls back to `DOWNLOAD_SECRET`.
 
 Never expose Stripe secret keys, webhook secrets, Resend keys, Blob tokens, or `DOWNLOAD_SECRET` in frontend files.
+
+## First-Visit Promo Offer
+
+`site/app.jsx` renders the first-visit LUT promo prompt and stores its local state in `localStorage` under `alexgmov:firstVisitOffer:v1`.
+
+The `Unlock` button is intentionally instant:
+
+1. The browser validates the email format.
+2. The browser immediately saves `{ state: 'claimed', code: 'HIFRIEND', email, captureStatus: 'pending' }`, shows the code, and tries to copy it.
+3. `site/app.jsx` sends `POST /api/email-capture` in the background.
+4. `api/email-capture.js` stores the lead, sends the promo email when configured, creates the signed offer token, logs analytics, and returns `{ code, offerToken }`.
+5. When the background request succeeds, the browser updates the saved offer token and marks `captureStatus: 'synced'`. If it fails, the visible code remains usable and local state records `captureStatus: 'failed'`.
+
+Checkout buttons in `site/luts.jsx` and `site/plugins.jsx` pass `offerCode`, `offerEmail`, and `offerToken` from the browser helpers exposed by `site/app.jsx`. `api/create-checkout.js` only auto-applies `HIFRIEND` to eligible LUT products. It accepts either a valid server-signed token or the front-end saved code plus a valid email, so a fast buyer can click checkout immediately after unlock without waiting for Resend or Stripe lead storage. The Stripe Checkout Session still allows manual promotion codes as a fallback.
 
 ## Stripe Checkout Flow
 
@@ -93,17 +111,18 @@ Each sellable product entry must include:
 - `downloadFilename`: filename sent in the `Content-Disposition` download header.
 - `page`: SPA route used when checkout is canceled.
 
-The browser-side product entry must also point to the same server product key:
+The browser-side product entry must also point to the same server product key. LUT entries use `checkoutProductId`:
 
 ```js
 checkoutProductId: 'onyx'
 ```
 
-That value must match a key in `PRODUCTS`. The current LUT pattern is:
+That value must match a key in `PRODUCTS`. Plugin detail pages currently post `p.id`, so released plugin IDs must also match a server product key. The current commerce product mapping is:
 
 - Frontend page `lut:cinematic-01` -> checkout product `solene` -> MERIDIAN zip.
 - Frontend page `lut:onyx` -> checkout product `onyx` -> ONYX zip.
 - Frontend page `lut:haloclyne` -> checkout product `haloclyne` -> HALOCLYNE zip.
+- Frontend page `plugin:flowstate` -> checkout product `flowstate` -> FlowState ZXP.
 
 When adding a new product:
 
@@ -111,7 +130,7 @@ When adding a new product:
 2. Add a server product in `lib/products.js`.
 3. Add the Stripe Price ID, and add a Blob URL environment variable if you do not want to use the checked-in fallback URL.
 4. Add or update the public product data in `site/product-data.js` and the matching route data in the route file if needed.
-5. Make sure the frontend `checkoutProductId` matches the server catalog key.
+5. Make sure the frontend `checkoutProductId` or released plugin `id` matches the server catalog key.
 6. Run a test Checkout Session and confirm that the webhook sends the email.
 7. Open the emailed link before and after expiration to confirm download and expiry behavior.
 
@@ -153,3 +172,9 @@ Download links are generated server-side only and are currently valid for 48 hou
 - `api/analytics-dashboard-data.js` combines local analytics with real Stripe Checkout Session lifecycle data from `lib/stripe-analytics.js`.
 
 Stripe-hosted Checkout does not expose internal Checkout page clicks, field focus, heatmaps, or page attention. The dashboard uses real Stripe Session lifecycle fields such as created, open, complete, expired, paid, amount, product metadata, and completion timing.
+
+## Recent Change Log
+
+- 2026-05-05: FlowState 1.0.0 is released on the plugins page with a blank visual placeholder, email-delivered ZXP fulfillment, a private Vercel Blob fallback URL, and a dedicated Stripe one-time price fallback.
+- 2026-05-05: OMI case-study proof copy now spells out `6 million` instead of `6M` across homepage, portfolio, and service fallback copy.
+- 2026-05-05: First-visit promo `Unlock` now reveals and copies `HIFRIEND` immediately after client-side email validation. Email capture, lead storage, promo email send, token creation, and analytics continue in the background. Checkout can auto-apply the LUT promo from the saved front-end claim so the button is not blocked by external API latency.
