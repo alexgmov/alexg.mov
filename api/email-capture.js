@@ -8,6 +8,11 @@ const {
   normalizeEmail,
 } = require('../lib/first-visit-offer');
 const {
+  buildOfferEmail,
+  getOfferEmailConfig,
+  offerEmailHeaders,
+} = require('../lib/first-visit-offer-email');
+const {
   ensureVisitorIds,
   logEvent,
   readBody,
@@ -45,6 +50,7 @@ module.exports = async function handler(req, res) {
   try {
     const storage = await storeLead(email, body);
     const offerToken = createOfferToken(email);
+    const emailDelivery = await sendOfferEmail(email, emailHash);
 
     await logEvent({
       type: 'first_visit_offer_claimed',
@@ -53,6 +59,8 @@ module.exports = async function handler(req, res) {
       path: sanitize(body.path, 500),
       offerCode: OFFER_CODE,
       emailHash,
+      offerEmailStatus: emailDelivery.status,
+      offerEmailId: emailDelivery.id,
       leadStorage: storage.join(','),
       visitorId: ids.visitorId,
       sessionId: ids.sessionId,
@@ -63,6 +71,7 @@ module.exports = async function handler(req, res) {
       ok: true,
       code: OFFER_CODE,
       offerToken,
+      emailDelivery,
       storage,
     });
   } catch (err) {
@@ -82,6 +91,55 @@ module.exports = async function handler(req, res) {
     return res.status(502).json({ error: 'Could not save that email. Please try again.' });
   }
 };
+
+async function sendOfferEmail(email, emailHash) {
+  const config = getOfferEmailConfig();
+  if (!config.enabled) {
+    return { status: 'disabled' };
+  }
+  if (!process.env.RESEND_API_KEY) {
+    return { status: 'skipped_no_resend_key' };
+  }
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const message = buildOfferEmail(config);
+    const result = await resend.emails.send({
+      from: config.from,
+      to: email,
+      replyTo: config.replyTo,
+      subject: message.subject,
+      html: message.html,
+      text: message.text,
+      headers: offerEmailHeaders(config),
+      tags: [
+        { name: 'type', value: 'first_visit_offer' },
+        { name: 'code', value: OFFER_CODE },
+      ],
+    }, {
+      idempotencyKey: `first-visit-offer-${emailHash}`,
+    });
+
+    if (result?.error) {
+      console.error('Resend offer email failed:', result.error.message);
+      return {
+        status: 'failed',
+        error: sanitize(result.error.message || 'Resend rejected the offer email', 180),
+      };
+    }
+
+    return {
+      status: 'sent',
+      id: result?.data?.id || '',
+    };
+  } catch (err) {
+    console.error('Resend offer email failed:', err.message);
+    return {
+      status: 'failed',
+      error: sanitize(err.message || 'Resend rejected the offer email', 180),
+    };
+  }
+}
 
 async function storeLead(email, body) {
   const storage = [];

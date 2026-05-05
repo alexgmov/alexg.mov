@@ -38,7 +38,12 @@ Commerce and fulfillment use these variables:
 - `HALOCLYNE_BLOB_URL`: optional private Vercel Blob URL override for HALOCLYNE.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
-- `RESEND_API_KEY`: Resend key used by the webhook fulfillment email.
+- `RESEND_API_KEY`: Resend key used by the webhook fulfillment email and first-visit promo code email.
+- `FIRST_VISIT_OFFER_FROM`: optional sender override for the promo code email. Defaults to `alexg.mov <downloads@alexg.mov>`.
+- `FIRST_VISIT_OFFER_REPLY_TO`: optional reply-to override for the promo code email. Defaults to `alex@alexg.mov`.
+- `FIRST_VISIT_OFFER_UNSUBSCRIBE_EMAIL`: optional unsubscribe reply address override. Defaults to `FIRST_VISIT_OFFER_REPLY_TO`.
+- `FIRST_VISIT_OFFER_EMAIL_ENABLED`: set to `0` to disable the promo code email while keeping the on-site code reveal active.
+- `EMAIL_POSTAL_ADDRESS` or `BUSINESS_POSTAL_ADDRESS`: footer address to include for commercial email compliance.
 - `ANALYTICS_LOG_DIR`: optional local analytics log directory.
 - `ANALYTICS_SALT`: optional visitor fingerprint salt. Falls back to `DOWNLOAD_SECRET`.
 

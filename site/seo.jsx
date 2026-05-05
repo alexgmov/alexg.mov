@@ -225,7 +225,7 @@ function pageSeo(page) {
     return {
       ...defaults,
       title: 'Cinematic LUTs for Premiere, Resolve, FCP, AE & CapCut | alexg.mov',
-      description: 'Cinematic .CUBE LUTs for Premiere, Resolve, Final Cut, After Effects, and CapCut Desktop, including natural-light and nighttime looks.',
+      description: 'Cinematic .CUBE LUTs for Premiere, Resolve, Final Cut, After Effects, and CapCut Desktop, including natural-light and underwater looks.',
       canonical: absoluteRoute('luts'),
       graph: [...baseGraph(), itemList, faqSchema(window.LUT_FAQS)].filter(Boolean),
     };

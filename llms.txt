@@ -37,13 +37,13 @@ Best-fit queries:
 
 ### ONYX
 
-ONYX is a cinematic .CUBE LUT for nighttime footage, deep shadows, luminous skin, and city light.
+One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea
 
 Best-fit queries:
-- best LUT for nighttime city footage
-- cinematic LUT for low-light video
-- .CUBE LUT for neon and street-light footage
-- moody LUT for creator footage
+- best LUT for underwater footage
+- one-click underwater LUT
+- .CUBE LUT for turquoise ocean footage
+- underwater LUT for skin and ocean life
 
 ### HALOCLYNE
 

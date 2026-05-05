@@ -54,8 +54,8 @@ const LUTS = window.LUTS || [
   {
     id: 'onyx',
     name: 'ONYX',
-    oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
-    seoDescription: 'ONYX is a .CUBE LUT crafted for nighttime footage, deep shadows, luminous skin, and city light.',
+    oneline: 'One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea',
+    seoDescription: 'One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea',
     price: 18,
     formats: '.CUBE',
     badge: 'NEW',
@@ -66,8 +66,8 @@ const LUTS = window.LUTS || [
     mockupAlt: 'ONYX LUT product mockup',
     demoLabel: 'ONYX',
     details: {
-      whatItDoes: 'Shapes nighttime footage with deeper shadows, luminous skin, and controlled city-light glow.',
-      whoItsFor: 'Editors grading night streets, low-light portraits, events, and neon-lit creator footage.',
+      whatItDoes: 'One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea',
+      whoItsFor: 'Editors grading underwater, ocean, diving, snorkel, reef, and tropical travel footage.',
       whatYouGet: 'ZIP containing 1 x .CUBE',
     },
     compare: {
@@ -118,8 +118,8 @@ const LUT_GUIDE_ITEMS = [
     body: 'Use MERIDIAN when the shot is clean and you want warm contrast, richer skin, and a finished look.',
   },
   {
-    title: 'Best LUT for nighttime city footage',
-    body: 'Use ONYX when the scene needs deep shadows, luminous skin, and controlled neon or street-light color.',
+    title: 'Best LUT for underwater footage',
+    body: 'One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea',
   },
   {
     title: 'Best LUT for underwater footage',
@@ -130,7 +130,7 @@ const LUT_GUIDE_ITEMS = [
 const LUT_FAQS = window.LUT_FAQS || [
   {
     q: 'What footage works best with these LUTs?',
-    a: 'MERIDIAN performs best with clean natural light. ONYX is built for nighttime footage, city lights, and deeper shadow work. HALOCLYNE is made for underwater footage, ocean life, turquoise water, and hazy sand-heavy scenes.',
+    a: 'MERIDIAN performs best with clean natural light. ONYX: One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea. HALOCLYNE is made for underwater footage, ocean life, turquoise water, and hazy sand-heavy scenes.',
   },
   {
     q: 'Do these LUTs work in Premiere Pro, DaVinci Resolve, Final Cut Pro, After Effects, and CapCut?',
@@ -390,11 +390,11 @@ function LutDetail({ id, go }) {
             <div className="pd-price-note">ONE-TIME · EMAIL DOWNLOAD LINK</div>
           </div>
           <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
-            <DownloadIcon />
-            <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy & Email Download Link'}</span>
-            <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Buy & Email Link'}</span>
+            <MailIcon />
+            <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy'}</span>
+            <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Buy'}</span>
           </button>
-          <div className="pd-reassure"><CheckIcon /> Download link sent to your checkout email · open on desktop when ready</div>
+          <div className="pd-reassure"><CheckIcon /> Files sent directly to your email.</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{detailCopy.whatItDoes}</div></div>
@@ -445,9 +445,10 @@ function LutDetail({ id, go }) {
       <MobileProductStickyCta
         active={showStickyCta && !purchased}
         productName={l.name}
-        productMeta=".CUBE LUT · email link after checkout"
+        productMeta=".CUBE LUT · files sent by email"
         price={`$${l.price}`}
-        actionLabel={buying ? 'Redirecting…' : 'Buy & Email Link'}
+        actionLabel={buying ? 'Redirecting…' : 'Buy'}
+        actionIcon={<MailIcon />}
         onAction={handleBuy}
         disabled={buying}
       />

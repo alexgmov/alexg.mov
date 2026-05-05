@@ -22,6 +22,12 @@ const DownloadIcon = ({ size = 14 }) => (
     <path d="M12 3v12M6 9l6 6 6-6M4 21h16" />
   </svg>
 );
+const MailIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="m3 7 9 6 9-6" />
+  </svg>
+);
 const CheckIcon = ({ size = 14 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12l5 5L20 7" />
@@ -194,7 +200,7 @@ function useStickyCta(anchorRef) {
   return visible;
 }
 
-function MobileProductStickyCta({ active, productName, productMeta, price, actionLabel, onAction, disabled }) {
+function MobileProductStickyCta({ active, productName, productMeta, price, actionLabel, actionIcon, onAction, disabled }) {
   return (
     <div className={"mobile-product-cta" + (active ? " show" : "")} aria-hidden={active ? undefined : 'true'}>
       <div className="mobile-product-cta-copy">
@@ -204,6 +210,7 @@ function MobileProductStickyCta({ active, productName, productMeta, price, actio
       <div className="mobile-product-cta-actions">
         <span className="mobile-product-cta-price">{price}</span>
         <button type="button" className="btn btn-primary mobile-product-cta-button" onClick={onAction} disabled={disabled}>
+          {actionIcon}
           {actionLabel}
         </button>
       </div>
@@ -260,4 +267,4 @@ function Footer({ go }) {
   );
 }
 
-Object.assign(window, { Nav, MobileBottomNav, useStickyCta, MobileProductStickyCta, Footer, PlayIcon, ArrowIcon, ShoppingBagIcon, DownloadIcon, CheckIcon });
+Object.assign(window, { Nav, MobileBottomNav, useStickyCta, MobileProductStickyCta, Footer, PlayIcon, ArrowIcon, ShoppingBagIcon, DownloadIcon, MailIcon, CheckIcon });

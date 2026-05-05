@@ -780,7 +780,7 @@ function Home({ go }) {
   const fallbackOnyx = {
     id: 'onyx',
     name: 'ONYX',
-    oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
+    oneline: 'One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea',
     price: 18,
     formats: '.CUBE',
     badge: 'NEW',

@@ -157,7 +157,7 @@ function FirstVisitOffer({ page }) {
       document.body.removeChild(node);
     }
     setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
+    window.setTimeout(() => setCopied(false), 1000);
   }
 
   async function handleSubmit(event) {
@@ -204,14 +204,11 @@ function FirstVisitOffer({ page }) {
       <button type="button" className="first-offer-close" aria-label="Close offer" onClick={closeOffer}>
         <span aria-hidden="true">×</span>
       </button>
-      <div className="first-offer-media" aria-hidden="true">
-        <img src="mockups/meridian mockup.png" alt="" loading="lazy" />
-      </div>
       {!claimed ? (
         <form className="first-offer-body" onSubmit={handleSubmit}>
           <p className="first-offer-kicker">First visit unlock</p>
           <h2>Take 10% off the LUT shop.</h2>
-          <p className="first-offer-copy">Drop your email for the private code. It auto-applies at checkout on this device.</p>
+          <p className="first-offer-copy">Drop your email for the private code.</p>
           <label className="first-offer-field">
             <span>Email address</span>
             <input
@@ -225,20 +222,21 @@ function FirstVisitOffer({ page }) {
           </label>
           {message && <p className="first-offer-error">{message}</p>}
           <button type="submit" className="first-offer-submit" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Unlocking' : 'Unlock HIFRIEND'}
+            {status === 'loading' ? 'Unlocking' : 'Unlock'}
           </button>
-          <p className="first-offer-consent">Occasional product emails. Unsubscribe anytime.</p>
         </form>
       ) : (
         <div className="first-offer-body first-offer-success">
           <p className="first-offer-kicker">You're in</p>
-          <h2>Your private code is ready.</h2>
+          <h2>Your promo code</h2>
           <button type="button" className="first-offer-code" onClick={copyCode} aria-label={`Copy discount code ${FIRST_VISIT_OFFER_CODE}`}>
             <span>{FIRST_VISIT_OFFER_CODE}</span>
-            <CopyIcon />
+            <span className="first-offer-copy-action">
+              <span className={`first-offer-copied ${copied ? 'is-visible' : ''}`}>Copied</span>
+              <CopyIcon />
+            </span>
           </button>
-          <p className="first-offer-copy">Copied once for you. The discount will auto-apply to LUT checkout from this browser.</p>
-          <p className="first-offer-copied">{copied ? 'Copied' : 'Tap the code to copy again.'}</p>
+          <p className="first-offer-copy">The discount will auto apply at checkout from this browser.</p>
         </div>
       )}
     </aside>

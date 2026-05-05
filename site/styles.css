@@ -214,7 +214,7 @@ img, svg, video { display: block; max-width: 100%; }
 .first-offer-close {
   position: absolute;
   top: 10px;
-  left: 10px;
+  right: 10px;
   z-index: 2;
   width: 34px;
   height: 34px;
@@ -232,22 +232,11 @@ img, svg, video { display: block; max-width: 100%; }
   background: #fff;
   border-color: #356eea;
 }
-.first-offer-media {
-  height: 98px;
-  background: linear-gradient(135deg, #dfefff, #f8efe1 48%, #151515);
-  overflow: hidden;
-}
-.first-offer-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 44%;
-  filter: saturate(1.05) contrast(1.02);
-}
 .first-offer-body {
-  padding: 20px 20px 18px;
+  padding: 22px 20px 18px;
 }
 .first-offer-kicker {
+  padding-right: 42px;
   margin: 0 0 8px;
   font-family: var(--mono);
   font-size: 10.5px;
@@ -256,6 +245,7 @@ img, svg, video { display: block; max-width: 100%; }
   color: #356eea;
 }
 .first-offer h2 {
+  padding-right: 42px;
   margin: 0 0 8px;
   font-size: 23px;
   line-height: 1.05;
@@ -317,13 +307,6 @@ img, svg, video { display: block; max-width: 100%; }
   cursor: wait;
   opacity: 0.72;
 }
-.first-offer-consent,
-.first-offer-copied {
-  margin: 10px 0 0;
-  color: #747474;
-  font-size: 12px;
-  line-height: 1.4;
-}
 .first-offer-code {
   width: 100%;
   min-height: 50px;
@@ -345,6 +328,27 @@ img, svg, video { display: block; max-width: 100%; }
 .first-offer-code:hover {
   background: #e5eeff;
   border-color: #356eea;
+}
+.first-offer-copy-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 82px;
+}
+.first-offer-copied {
+  color: #356eea;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+.first-offer-copied.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ── Hero ──────────────────────────────────────── */
@@ -3823,9 +3827,6 @@ footer {
     width: auto;
     max-height: calc(100vh - 116px);
     overflow-y: auto;
-  }
-  .first-offer-media {
-    height: 72px;
   }
   .first-offer-body {
     padding: 16px 16px 15px;
