@@ -212,7 +212,11 @@ function PluginDetail({ id, go }) {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: p.id }),
+        body: JSON.stringify({
+          productId: p.id,
+          offerEmail: window.getFirstVisitOfferEmail?.() || '',
+          offerToken: window.getFirstVisitOfferToken?.() || '',
+        }),
       });
       const { url, error } = await res.json();
       if (error) throw new Error(error);

@@ -8,7 +8,9 @@ alexg.mov is the site and shop for Alex Garrett, a filmmaker, editor, and tool-m
 - Premiere Pro plugins: https://alexg.mov/?page=plugins
 - FlowState Premiere Pro plugin: https://alexg.mov/?page=plugin%3Aflowstate
 - Cinematic LUTs: https://alexg.mov/?page=luts
-- Meridian cinematic LUT: https://alexg.mov/?page=lut%3Acinematic-01
+- MERIDIAN cinematic LUT: https://alexg.mov/?page=lut%3Acinematic-01
+- ONYX cinematic LUT: https://alexg.mov/?page=lut%3Aonyx
+- HALOCLYNE cinematic LUT: https://alexg.mov/?page=lut%3Ahaloclyne
 - Support: https://alexg.mov/?page=support
 
 ## Products
@@ -23,15 +25,35 @@ Best-fit queries:
 - semantic clip search for video editors
 - find B-roll and A-roll faster in Premiere
 
-### Meridian
+### MERIDIAN
 
-Meridian is a cinematic .CUBE LUT for Premiere Pro, DaVinci Resolve, Final Cut Pro, and other .CUBE workflows. It performs best with footage shot in natural light after a clean base correction.
+MERIDIAN is a cinematic .CUBE LUT for Premiere Pro, DaVinci Resolve, Final Cut Pro, After Effects, CapCut Desktop, and other .CUBE workflows. It performs best with footage shot in natural light after a clean base correction. iMovie does not natively import .CUBE LUTs.
 
 Best-fit queries:
 - best LUT for natural light footage
 - cinematic LUT for Premiere Pro
-- .CUBE LUT for DaVinci Resolve and Final Cut Pro
+- .CUBE LUT for DaVinci Resolve, Final Cut Pro, After Effects, and CapCut Desktop
 - warm cinematic LUT for creator footage
+
+### ONYX
+
+ONYX is a cinematic .CUBE LUT for nighttime footage, deep shadows, luminous skin, and city light.
+
+Best-fit queries:
+- best LUT for nighttime city footage
+- cinematic LUT for low-light video
+- .CUBE LUT for neon and street-light footage
+- moody LUT for creator footage
+
+### HALOCLYNE
+
+HALOCLYNE is a cinematic .CUBE LUT for underwater footage. A one-click underwater grade that separates foreground from background by warming up skin and ocean life into vivid oranges while holding a beautiful turquoise sea, killing haze and quieting sand.
+
+Best-fit queries:
+- best LUT for underwater footage
+- cinematic LUT for diving and snorkel video
+- .CUBE LUT for turquoise ocean footage
+- underwater LUT for coral, sand, and skin tones
 
 ## Support
 

@@ -30,9 +30,12 @@ Commerce and fulfillment use these variables:
 - `SITE_URL`: canonical public origin. Defaults to `https://alexg.mov`.
 - `STRIPE_SECRET_KEY`: server-side Stripe key used to create and inspect Checkout Sessions.
 - `STRIPE_WEBHOOK_SECRET`: webhook signing secret for `/api/webhook`.
-- `STRIPE_PRICE_SOLENE`: Stripe Price ID for the Meridian/Solene checkout product.
-- `STRIPE_PRICE_ONYX`: Stripe Price ID for the Onyx checkout product.
-- `ONYX_BLOB_URL`: private Vercel Blob URL for the Onyx zip.
+- `STRIPE_PRICE_SOLENE`: Stripe Price ID for the MERIDIAN/Solene checkout product.
+- `STRIPE_PRICE_ONYX`: Stripe Price ID for the ONYX checkout product.
+- `STRIPE_PRICE_HALOCLYNE`: Stripe Price ID for the HALOCLYNE checkout product.
+- `MERIDIAN_BLOB_URL`: optional private Vercel Blob URL override for MERIDIAN.
+- `ONYX_BLOB_URL`: optional private Vercel Blob URL override for ONYX.
+- `HALOCLYNE_BLOB_URL`: optional private Vercel Blob URL override for HALOCLYNE.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
 - `RESEND_API_KEY`: Resend key used by the webhook fulfillment email.
@@ -77,7 +80,7 @@ Each sellable product entry must include:
 - `name`: display name used in the fulfillment email.
 - `stripePriceId`: Stripe Price ID, usually from an environment variable.
 - `statementDescriptorSuffix`: optional card statement suffix.
-- `blobUrl`: private Vercel Blob URL for the purchased zip.
+- `blobUrl`: private Vercel Blob URL for the purchased file.
 - `downloadFilename`: filename sent in the `Content-Disposition` download header.
 - `page`: SPA route used when checkout is canceled.
 
@@ -89,14 +92,15 @@ checkoutProductId: 'onyx'
 
 That value must match a key in `PRODUCTS`. The current LUT pattern is:
 
-- Frontend page `lut:cinematic-01` -> checkout product `solene` -> Meridian zip.
-- Frontend page `lut:onyx` -> checkout product `onyx` -> Onyx zip.
+- Frontend page `lut:cinematic-01` -> checkout product `solene` -> MERIDIAN zip.
+- Frontend page `lut:onyx` -> checkout product `onyx` -> ONYX zip.
+- Frontend page `lut:haloclyne` -> checkout product `haloclyne` -> HALOCLYNE zip.
 
 When adding a new product:
 
-1. Upload the zip to Vercel Blob as a private object.
+1. Upload the product file to Vercel Blob as a private object.
 2. Add a server product in `lib/products.js`.
-3. Add the Stripe Price ID and Blob URL environment variables.
+3. Add the Stripe Price ID, and add a Blob URL environment variable if you do not want to use the checked-in fallback URL.
 4. Add or update the public product data in `site/product-data.js` and the matching route data in the route file if needed.
 5. Make sure the frontend `checkoutProductId` matches the server catalog key.
 6. Run a test Checkout Session and confirm that the webhook sends the email.

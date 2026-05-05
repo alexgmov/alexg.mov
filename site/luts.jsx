@@ -5,9 +5,9 @@ import React from 'react';
 const LUTS = window.LUTS || [
   {
     id: 'cinematic-01',
-    name: 'Meridian',
+    name: 'MERIDIAN',
     oneline: 'Warm, polished color for footage shot in natural light.',
-    seoDescription: 'Meridian is a .CUBE LUT for warm, polished color on footage shot in natural light.',
+    seoDescription: 'MERIDIAN is a .CUBE LUT for warm, polished color on footage shot in natural light.',
     price: 18,
     formats: '.CUBE',
     badge: 'BESTSELLER',
@@ -15,14 +15,14 @@ const LUTS = window.LUTS || [
     available: true,
     checkoutProductId: 'solene',
     mockupSrc: 'mockups/meridian mockup.png',
-    mockupAlt: 'Meridian LUT product mockup',
-    demoLabel: 'Meridian',
+    mockupAlt: 'MERIDIAN LUT product mockup',
+    demoLabel: 'MERIDIAN',
     compare: {
-      title: 'Meridian',
+      title: 'MERIDIAN',
       beforeLabel: 'Ungraded',
       afterLabel: 'Graded',
-      beforeTitle: 'Meridian ungraded preview',
-      afterTitle: 'Meridian graded preview',
+      beforeTitle: 'MERIDIAN ungraded preview',
+      afterTitle: 'MERIDIAN graded preview',
       beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
       afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
     },
@@ -30,22 +30,22 @@ const LUTS = window.LUTS || [
       {
         id: 'scene-01',
         label: 'Scene 01',
-        title: 'Meridian scene 01',
+        title: 'MERIDIAN scene 01',
         beforeLabel: 'Ungraded',
         afterLabel: 'Graded',
-        beforeTitle: 'Meridian scene 01 ungraded preview',
-        afterTitle: 'Meridian scene 01 graded preview',
+        beforeTitle: 'MERIDIAN scene 01 ungraded preview',
+        afterTitle: 'MERIDIAN scene 01 graded preview',
         beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
         afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
       },
       {
         id: 'scene-02',
         label: 'Scene 02',
-        title: 'Meridian scene 02',
+        title: 'MERIDIAN scene 02',
         beforeLabel: 'Ungraded',
         afterLabel: 'Graded',
-        beforeTitle: 'Meridian scene 02 ungraded preview',
-        afterTitle: 'Meridian scene 02 graded preview',
+        beforeTitle: 'MERIDIAN scene 02 ungraded preview',
+        afterTitle: 'MERIDIAN scene 02 graded preview',
         beforeSrc: 'videos/lut showcase/meridian 2 ungraded.mp4',
         afterSrc: 'videos/lut showcase/meridian 2 graded.mp4',
       },
@@ -53,9 +53,9 @@ const LUTS = window.LUTS || [
   },
   {
     id: 'onyx',
-    name: 'Onyx',
+    name: 'ONYX',
     oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
-    seoDescription: 'Onyx is a .CUBE LUT crafted for nighttime footage, deep shadows, luminous skin, and city light.',
+    seoDescription: 'ONYX is a .CUBE LUT crafted for nighttime footage, deep shadows, luminous skin, and city light.',
     price: 18,
     formats: '.CUBE',
     badge: 'NEW',
@@ -63,64 +63,86 @@ const LUTS = window.LUTS || [
     available: true,
     checkoutProductId: 'onyx',
     mockupSrc: 'mockups/onyx mockup.png',
-    mockupAlt: 'Onyx LUT product mockup',
-    demoLabel: 'Onyx',
+    mockupAlt: 'ONYX LUT product mockup',
+    demoLabel: 'ONYX',
     details: {
       whatItDoes: 'Shapes nighttime footage with deeper shadows, luminous skin, and controlled city-light glow.',
       whoItsFor: 'Editors grading night streets, low-light portraits, events, and neon-lit creator footage.',
-      whatYouGet: '1 x .CUBE',
+      whatYouGet: 'ZIP containing 1 x .CUBE',
     },
     compare: {
-      title: 'Onyx',
+      title: 'ONYX',
       beforeLabel: 'Ungraded',
       afterLabel: 'Graded',
-      beforeTitle: 'Onyx ungraded preview',
-      afterTitle: 'Onyx graded preview',
+      beforeTitle: 'ONYX ungraded preview',
+      afterTitle: 'ONYX graded preview',
       beforeSrc: 'videos/lut showcase/onyx 1 ungraded.mp4',
       afterSrc: 'videos/lut showcase/onyx 1 graded.mp4',
     },
   },
   {
-    id: 'interior-03',
-    name: 'Haloclyne',
-    oneline: 'Soft interior color for natural light, interviews, and lifestyle footage.',
-    price: null,
+    id: 'haloclyne',
+    name: 'HALOCLYNE',
+    oneline: 'A one-click underwater grade that separates foreground from background by warming up skin and ocean life into vivid oranges while holding a beautiful turquoise sea, killing haze and quieting sand.',
+    seoDescription: 'HALOCLYNE is a .CUBE LUT for underwater footage, separating foreground from background by warming up skin and ocean life into vivid oranges while holding a beautiful turquoise sea, killing haze and quieting sand.',
+    price: 18,
     formats: '.CUBE',
-    badge: 'COMING SOON',
+    badge: 'NEW',
     tone: 'warm-film',
-    available: false,
-    release: 'Q2',
-    demoLabel: 'Haloclyne',
+    available: true,
+    checkoutProductId: 'haloclyne',
+    mockupSrc: 'mockups/haloclyne mockup.png',
+    mockupAlt: 'HALOCLYNE LUT product mockup',
+    demoLabel: 'HALOCLYNE',
+    details: {
+      whatItDoes: 'Separates foreground from background by warming up skin and ocean life into vivid oranges while holding a beautiful turquoise sea, killing haze and quieting sand.',
+      whoItsFor: 'Editors grading underwater, ocean, diving, snorkel, reef, and tropical travel footage.',
+      whatYouGet: 'ZIP containing 1 x .CUBE',
+    },
+    compare: {
+      title: 'HALOCLYNE',
+      label: 'Scene 01',
+      beforeLabel: 'Ungraded',
+      afterLabel: 'Graded',
+      beforeTitle: 'HALOCLYNE ungraded preview',
+      afterTitle: 'HALOCLYNE graded preview',
+      beforeSrc: 'videos/lut showcase/haloclyne 1 ungraded.mp4',
+      afterSrc: 'videos/lut showcase/haloclyne 1 graded..mp4',
+    },
   },
 ];
 
 const LUT_GUIDE_ITEMS = [
   {
     title: 'Best LUT for footage shot in natural light',
-    body: 'Use Meridian when the shot is clean and you want warm contrast, richer skin, and a finished look.',
+    body: 'Use MERIDIAN when the shot is clean and you want warm contrast, richer skin, and a finished look.',
   },
   {
     title: 'Best LUT for nighttime city footage',
-    body: 'Use Onyx when the scene needs deep shadows, luminous skin, and controlled neon or street-light color.',
+    body: 'Use ONYX when the scene needs deep shadows, luminous skin, and controlled neon or street-light color.',
   },
   {
-    title: 'Best LUT format for multiple editing apps',
-    body: '.CUBE works across Premiere Pro, DaVinci Resolve, Final Cut Pro, and most modern color workflows.',
+    title: 'Best LUT for underwater footage',
+    body: 'Use HALOCLYNE when ocean, reef, diving, or snorkel footage needs vivid foreground warmth, turquoise water, less haze, and quieter sand.',
   },
 ];
 
 const LUT_FAQS = window.LUT_FAQS || [
   {
     q: 'What footage works best with these LUTs?',
-    a: 'Meridian performs best with clean natural light. Onyx is built for nighttime footage, city lights, and deeper shadow work.',
+    a: 'MERIDIAN performs best with clean natural light. ONYX is built for nighttime footage, city lights, and deeper shadow work. HALOCLYNE is made for underwater footage, ocean life, turquoise water, and hazy sand-heavy scenes.',
   },
   {
-    q: 'Do these LUTs work in Premiere Pro, DaVinci Resolve, and Final Cut Pro?',
-    a: 'Yes. The LUTs ship as .CUBE files for Premiere Pro, DaVinci Resolve, Final Cut Pro, and most modern color workflows.',
+    q: 'Do these LUTs work in Premiere Pro, DaVinci Resolve, Final Cut Pro, After Effects, and CapCut?',
+    a: 'Yes. Each download is a .zip containing a .CUBE file for Premiere Pro, DaVinci Resolve, Final Cut Pro, After Effects, CapCut Desktop, and most modern color workflows. iMovie does not natively import .CUBE LUTs.',
   },
   {
     q: 'Should I apply a LUT before or after color correction?',
     a: 'Apply the LUT after a base correction or log-to-Rec.709 transform, then fine-tune each shot.',
+  },
+  {
+    q: 'How do I receive the download?',
+    a: 'After checkout, the download link is sent to the email you use at checkout, so you can buy on your phone and open the files on your computer.',
   },
 ];
 
@@ -131,7 +153,7 @@ const LUT_DETAIL_FAQS = window.LUT_DETAIL_FAQS || [
   },
   {
     q: 'What software can open these LUTs?',
-    a: 'Any editor that accepts .CUBE files, including Premiere Pro, DaVinci Resolve, and Final Cut Pro.',
+    a: 'Any editor that accepts .CUBE files, including Premiere Pro, DaVinci Resolve, Final Cut Pro, After Effects, and CapCut Desktop. iMovie does not natively import .CUBE LUTs.',
   },
   {
     q: 'How strong should the LUT be?',
@@ -148,13 +170,13 @@ function LutsList({ go }) {
       <section className="list-head">
         <div className="wrap">
           <h1>Looks for clean color, day or night.</h1>
-          <p>Cinematic .CUBE LUTs for Premiere, Resolve, and Final Cut.</p>
+          <p>Cinematic .CUBE LUTs for Premiere, Resolve, Final Cut, After Effects, and CapCut Desktop.</p>
           <div className="list-meta">
             <span>{releasedCount} RELEASED {releasedCount === 1 ? 'LOOK' : 'LOOKS'}</span>
             <span>·</span>
             <span>.CUBE FILES</span>
             <span>·</span>
-            <span>PREMIERE, RESOLVE + FCP</span>
+            <span>PREMIERE + RESOLVE + FCP + AFTER EFFECTS + CAPCUT DESKTOP</span>
           </div>
         </div>
       </section>
@@ -217,7 +239,7 @@ function LutsList({ go }) {
             <div className="how-item">
               <div className="how-num">01 / DOWNLOAD LUT</div>
               <h4 className="how-h">Get the LUT file</h4>
-              <p className="how-p">Download and unzip the .cube file. A quick usage note is included.</p>
+              <p className="how-p">Use the email link after checkout to download and unzip the LUT package.</p>
             </div>
             <div className="how-item">
               <div className="how-num">02 / APPLY AFTER BASE GRADE</div>
@@ -289,7 +311,11 @@ function LutDetail({ id, go }) {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: l.checkoutProductId || l.id }),
+        body: JSON.stringify({
+          productId: l.checkoutProductId || l.id,
+          offerEmail: window.getFirstVisitOfferEmail?.() || '',
+          offerToken: window.getFirstVisitOfferToken?.() || '',
+        }),
       });
       const { url, error } = await res.json();
       if (error || !url) throw new Error(error || 'Missing checkout URL');
@@ -361,14 +387,14 @@ function LutDetail({ id, go }) {
           )}
           <div className="pd-price-row">
             <div className="pd-price">${l.price}</div>
-            <div className="pd-price-note">ONE-TIME · .CUBE FILE INCLUDED</div>
+            <div className="pd-price-note">ONE-TIME · EMAIL DOWNLOAD LINK</div>
           </div>
           <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
             <DownloadIcon />
-            <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy & Download'}</span>
-            <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Get Instant Access'}</span>
+            <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy & Email Download Link'}</span>
+            <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Buy & Email Link'}</span>
           </button>
-          <div className="pd-reassure"><CheckIcon /> Instant download · ZIP · .cube</div>
+          <div className="pd-reassure"><CheckIcon /> Download link sent to your checkout email · open on desktop when ready</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{detailCopy.whatItDoes}</div></div>
@@ -408,10 +434,10 @@ function LutDetail({ id, go }) {
         <div className="pd-block">
           <h3>Install steps</h3>
           <ol>
-            <li>Unzip the download.</li>
+            <li>Download and unzip the .zip file from the email link.</li>
             <li>Premiere → Lumetri Color panel → Creative → Look dropdown → Browse…</li>
             <li>Point to the .cube file. Done.</li>
-            <li>For DaVinci / Final Cut, copy the .cube file to your LUT library.</li>
+            <li>For DaVinci, Final Cut, After Effects, or CapCut Desktop, import or copy the .cube file into the app's LUT workflow.</li>
             <li>Apply on an adjustment layer. Tune intensity 20–100%, usually 30–60%.</li>
           </ol>
         </div>
@@ -419,9 +445,9 @@ function LutDetail({ id, go }) {
       <MobileProductStickyCta
         active={showStickyCta && !purchased}
         productName={l.name}
-        productMeta=".CUBE LUT · instant download"
+        productMeta=".CUBE LUT · email link after checkout"
         price={`$${l.price}`}
-        actionLabel={buying ? 'Redirecting…' : 'Get Instant Access'}
+        actionLabel={buying ? 'Redirecting…' : 'Buy & Email Link'}
         onAction={handleBuy}
         disabled={buying}
       />

@@ -66,6 +66,31 @@ function MobileBottomNav({ page, go }) {
   const hrefFor = window.routeHref || ((id) => '#');
   const pageKey = String(page || 'home').split(':')[0];
   const isProductDetail = String(page || '').startsWith('plugin:') || String(page || '').startsWith('lut:');
+  const [open, setOpen] = React.useState(false);
+  const navRef = React.useRef(null);
+
+  React.useEffect(() => {
+    setOpen(false);
+  }, [pageKey]);
+
+  React.useEffect(() => {
+    if (!open) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    const handlePointerDown = (event) => {
+      if (navRef.current && !navRef.current.contains(event.target)) setOpen(false);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [open]);
+
   if (isProductDetail) return null;
 
   const items = [
@@ -76,7 +101,7 @@ function MobileBottomNav({ page, go }) {
   ];
 
   return (
-    <nav className="mobile-bottom-nav" aria-label="Primary mobile navigation">
+    <nav className={"mobile-bottom-nav" + (open ? " is-open" : "")} aria-label="Primary mobile navigation" ref={navRef}>
       <svg className="mobile-liquid-glass-defs" width="0" height="0" focusable="false" aria-hidden="true">
         <filter id="mobile-nav-liquid-glass" x="-8%" y="-28%" width="116%" height="156%" colorInterpolationFilters="sRGB">
           <feTurbulence type="fractalNoise" baseFrequency="0.01 0.024" numOctaves="1" seed="9" result="navLiquidNoise" />
@@ -84,27 +109,45 @@ function MobileBottomNav({ page, go }) {
           <feDisplacementMap in="SourceGraphic" in2="navLiquidSoftNoise" scale="2.2" xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </svg>
-      <div className="mobile-bottom-nav-inner">
-        {items.map(item => {
-          const active = pageKey === item.id;
-          const href = hrefFor(item.id);
-          return (
-            <a
-              key={item.label}
-              className={"mobile-bottom-nav-item" + (active ? " active" : "")}
-              href={href}
-              onClick={(e) => {
-                e.preventDefault();
-                go(item.id);
-              }}
-            >
-              <span className="mobile-bottom-nav-copy">
-                <span className="mobile-bottom-nav-label">{item.label}</span>
-                <span className="mobile-bottom-nav-helper">{item.helper}</span>
-              </span>
-            </a>
-          );
-        })}
+      <div className="mobile-bottom-nav-shell">
+        <div className="mobile-bottom-nav-inner" id="mobile-primary-nav-menu" aria-hidden={!open}>
+          {items.map(item => {
+            const active = pageKey === item.id;
+            const href = hrefFor(item.id);
+            return (
+              <a
+                key={item.label}
+                className={"mobile-bottom-nav-item" + (active ? " active" : "")}
+                href={href}
+                tabIndex={open ? 0 : -1}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setOpen(false);
+                  go(item.id);
+                }}
+              >
+                <span className="mobile-bottom-nav-copy">
+                  <span className="mobile-bottom-nav-label">{item.label}</span>
+                  <span className="mobile-bottom-nav-helper">{item.helper}</span>
+                </span>
+              </a>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          className="mobile-bottom-nav-toggle"
+          aria-label={open ? "Close mobile navigation" : "Open mobile navigation"}
+          aria-expanded={open}
+          aria-controls="mobile-primary-nav-menu"
+          onClick={() => setOpen(current => !current)}
+        >
+          <span className="mobile-bottom-nav-toggle-bars" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+        </button>
       </div>
     </nav>
   );

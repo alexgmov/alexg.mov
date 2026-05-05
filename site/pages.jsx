@@ -1,6 +1,9 @@
 import React from 'react';
+import { useScrollBlur } from './scroll-blur.js';
 
 // Portfolio, Services, Support, Terms, Refund
+
+const PORTFOLIO_SCROLL_BLUR_SELECTOR = '[data-portfolio-scroll-blur]';
 
 // Keep source links and per-project metadata on each tile so the next
 // click-through / project-file purchase layer can attach to this same model.
@@ -50,7 +53,7 @@ const PORTFOLIO_VIDEOS = [
     category: 'launchbrand',
     kind: 'Product launch film',
     client: 'OMI',
-    blurb: 'Launch film with 5.5M views.',
+    blurb: 'Launch film with 6M views.',
     source: 'alexg.mov',
     sourceUrl: 'videos/portfolio/web/omi-launch-film.mp4',
     src: 'videos/portfolio/web/omi-launch-film.mp4',
@@ -288,11 +291,11 @@ const PORTFOLIO_SECTIONS = PORTFOLIO_CATEGORIES.map((category) => ({
 
 const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
   client: 'OMI',
-  impactValue: '5.5',
-  impactUnit: 'M VIEWS',
+  impactValue: '6M',
+  impactUnit: 'VIEWS',
   impactWindow: 'in 4 days',
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2025',
-  heroTitle: "Directed OMI's launch film and drove 5.5M views in four days.",
+  heroTitle: "Directed OMI's launch film and drove 6M views in four days.",
   summary: 'OMI needed a launch film built for reach. I handled concept, script, production, edit, and onscreen product moments.',
   videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
   services: ['Brand Film', 'Video Editing', 'Motion Graphics'],
@@ -307,7 +310,7 @@ const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
     },
     {
       title: 'Post + outcome',
-      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 5.5M views across X and Instagram in four days.',
+      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 6M views across X and Instagram in four days.',
     },
   ],
 };
@@ -315,6 +318,7 @@ const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
 function PortfolioVideoTile({ item, priority = false }) {
   const cardRef = React.useRef(null);
   const videoRef = React.useRef(null);
+  const sourceUrl = item.sourceUrl || item.src;
 
   React.useEffect(() => {
     const card = cardRef.current;
@@ -384,15 +388,18 @@ function PortfolioVideoTile({ item, priority = false }) {
   }, [item.src, priority]);
 
   return (
-    <article
+    <a
       ref={cardRef}
+      href={sourceUrl}
+      target="_blank"
+      rel="noopener noreferrer"
       className={"port-item port-video " + item.layout}
       style={{ '--video-scale': item.videoScale || 1 }}
       data-portfolio-id={item.id}
       data-category={item.category}
       data-source={item.source}
-      data-source-url={item.sourceUrl}
-      tabIndex={0}
+      data-source-url={sourceUrl}
+      aria-label={`Open ${item.title} source on ${item.source}`}
     >
       <video
         ref={videoRef}
@@ -413,7 +420,7 @@ function PortfolioVideoTile({ item, priority = false }) {
           <h3 className="port-title">{item.title}</h3>
         </div>
       </div>
-    </article>
+    </a>
   );
 }
 
@@ -441,7 +448,7 @@ function PortfolioCategorySection({ category, priority = false }) {
       data-category={category.id}
     >
       <div className="portfolio-section-head">
-        <div className="portfolio-section-copy">
+        <div className="portfolio-section-copy" data-portfolio-scroll-blur>
           <div>
             <h2>{category.label}</h2>
             <p>{category.intro}</p>
@@ -454,6 +461,7 @@ function PortfolioCategorySection({ category, priority = false }) {
           <div
             key={group.id}
             className={`portfolio-rail portfolio-rail-${group.id}`}
+            data-portfolio-scroll-blur
           >
             {group.items.map(({ item, index }) => (
               <PortfolioVideoTile
@@ -487,7 +495,7 @@ function PortfolioAbout() {
 
   return (
     <section className="portfolio-about" aria-labelledby="portfolio-about-title">
-      <div className="portfolio-about-intro">
+      <div className="portfolio-about-intro" data-portfolio-scroll-blur>
         <p className="portfolio-about-kicker">About Alex</p>
         <div className="portfolio-about-copy">
           <h2 id="portfolio-about-title">Creative direction for technical products that need attention to convert.</h2>
@@ -496,7 +504,7 @@ function PortfolioAbout() {
           </p>
         </div>
       </div>
-      <div className="portfolio-about-facts" aria-label="About Alex Garrett">
+      <div className="portfolio-about-facts" aria-label="About Alex Garrett" data-portfolio-scroll-blur>
         {facts.map((fact) => (
           <div className="portfolio-about-fact" key={fact.label}>
             <span>{fact.label}</span>
@@ -510,6 +518,7 @@ function PortfolioAbout() {
 
 function Portfolio({ go }) {
   const [activeCategory, setActiveCategory] = React.useState(PORTFOLIO_SECTIONS[0].id);
+  useScrollBlur(PORTFOLIO_SCROLL_BLUR_SELECTOR);
 
   React.useEffect(() => {
     const sections = PORTFOLIO_SECTIONS.map((category) =>
@@ -539,7 +548,7 @@ function Portfolio({ go }) {
 
   return (
     <>
-      <section className="list-head portfolio-head">
+      <section className="list-head portfolio-head" data-portfolio-scroll-blur>
         <div className="wrap">
           <h1>Selected Video Work</h1>
           <div className="portfolio-jump-wrap">

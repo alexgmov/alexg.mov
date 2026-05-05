@@ -88,7 +88,7 @@ function lutProductSchema(lut, page = `lut:${lut.id}`) {
     category: 'Digital color grading LUT',
     additionalProperty: [
       { '@type': 'PropertyValue', name: 'File format', value: lut.formats || '.CUBE' },
-      { '@type': 'PropertyValue', name: 'Compatible software', value: 'Adobe Premiere Pro, DaVinci Resolve, Final Cut Pro' },
+      { '@type': 'PropertyValue', name: 'Compatible software', value: 'Adobe Premiere Pro, DaVinci Resolve, Final Cut Pro, Adobe After Effects, CapCut Desktop' },
     ],
     offers: productOffer(lut.price, url, lut.available),
     url,
@@ -224,8 +224,8 @@ function pageSeo(page) {
     };
     return {
       ...defaults,
-      title: 'Cinematic LUTs for Premiere, Resolve & Final Cut | alexg.mov',
-      description: 'Cinematic .CUBE LUTs for Premiere, Resolve, and Final Cut, including natural-light and nighttime looks.',
+      title: 'Cinematic LUTs for Premiere, Resolve, FCP, AE & CapCut | alexg.mov',
+      description: 'Cinematic .CUBE LUTs for Premiere, Resolve, Final Cut, After Effects, and CapCut Desktop, including natural-light and nighttime looks.',
       canonical: absoluteRoute('luts'),
       graph: [...baseGraph(), itemList, faqSchema(window.LUT_FAQS)].filter(Boolean),
     };
@@ -237,7 +237,7 @@ function pageSeo(page) {
     if (lut) {
       return {
         ...defaults,
-        title: `${lut.name} LUT | Cinematic .CUBE LUT for Premiere, Resolve & Final Cut`,
+        title: `${lut.name} LUT | Cinematic .CUBE LUT for Premiere, Resolve, FCP, AE & CapCut`,
         description: lut.seoDescription || `${lut.name} is a .CUBE LUT for focused cinematic color after a clean base correction.`,
         canonical: absoluteRoute(`lut:${lut.id}`),
         image: imageUrl(lut.mockupSrc),

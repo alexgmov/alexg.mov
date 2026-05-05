@@ -1,5 +1,14 @@
 const Stripe = require('stripe');
 const { PRODUCTS } = require('../lib/products');
+const {
+  OFFER_CODE,
+  configuredPromotionCodeId,
+  hashEmail,
+  isOfferEligibleProduct,
+  isValidEmail,
+  normalizeEmail,
+  verifyOfferToken,
+} = require('../lib/first-visit-offer');
 const { ensureVisitorIds, logEvent } = require('../lib/analytics-store');
 
 const CANONICAL_ORIGIN = normalizeOrigin(process.env.SITE_URL || 'https://alexg.mov');
@@ -58,7 +67,7 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid request body' });
   }
 
-  const { productId } = body || {};
+  const { productId, offerEmail, offerToken } = body || {};
   const product = PRODUCTS[productId];
   if (!product) return res.status(400).json({ error: 'Unknown product' });
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -78,8 +87,17 @@ module.exports = async function handler(req, res) {
   const host = firstHeaderValue(req.headers['x-forwarded-host'] || req.headers.host);
   const origin = getCheckoutOrigin(req, host);
   const returnPage = encodeURIComponent(product.page || `plugin:${productId}`);
+  const claimedOffer = verifyOfferToken(offerToken);
+  const canApplyOffer = Boolean(claimedOffer && isOfferEligibleProduct(productId, product));
+  const normalizedOfferEmail = normalizeEmail(offerEmail);
+  const canPrefillOfferEmail = Boolean(
+    claimedOffer &&
+    isValidEmail(normalizedOfferEmail) &&
+    hashEmail(normalizedOfferEmail) === claimedOffer.emailHash
+  );
 
   let session;
+  let offerDiscountApplied = false;
   try {
     const checkoutParams = {
       mode: 'payment',
@@ -88,6 +106,23 @@ module.exports = async function handler(req, res) {
       cancel_url: `${origin}/?page=${returnPage}`,
       metadata: { productId },
     };
+
+    if (canPrefillOfferEmail) {
+      checkoutParams.customer_email = normalizedOfferEmail;
+    }
+
+    if (canApplyOffer) {
+      const promotionCodeId = await resolveOfferPromotionCodeId(stripe);
+      if (promotionCodeId) {
+        checkoutParams.discounts = [{ promotion_code: promotionCodeId }];
+        checkoutParams.metadata.offerCode = OFFER_CODE;
+        offerDiscountApplied = true;
+      } else {
+        checkoutParams.allow_promotion_codes = true;
+      }
+    } else {
+      checkoutParams.allow_promotion_codes = true;
+    }
 
     if (product.statementDescriptorSuffix) {
       checkoutParams.payment_intent_data = {
@@ -112,6 +147,8 @@ module.exports = async function handler(req, res) {
     paymentStatus: session.payment_status,
     amountTotal: session.amount_total,
     currency: session.currency,
+    offerCode: offerDiscountApplied ? OFFER_CODE : undefined,
+    offerDiscountApplied,
     visitorId: analyticsIds.visitorId,
     sessionId: analyticsIds.sessionId,
     visitorHash: analyticsIds.visitorHash,
@@ -119,3 +156,21 @@ module.exports = async function handler(req, res) {
 
   res.json({ url: session.url });
 };
+
+async function resolveOfferPromotionCodeId(stripe) {
+  const configured = configuredPromotionCodeId();
+  if (configured) return configured;
+
+  try {
+    const result = await stripe.promotionCodes.list({
+      code: OFFER_CODE,
+      active: true,
+      limit: 10,
+    });
+    const match = result.data.find(item => item.code.toLowerCase() === OFFER_CODE.toLowerCase());
+    return match?.id || '';
+  } catch (err) {
+    console.error('Could not resolve offer promotion code:', err.message);
+    return '';
+  }
+}

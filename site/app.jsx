@@ -15,6 +15,8 @@ const routeChunkLoaders = {
 };
 
 const routeChunkCache = new Map();
+const FIRST_VISIT_OFFER_CODE = 'HIFRIEND';
+const FIRST_VISIT_OFFER_STORAGE_KEY = 'alexgmov:firstVisitOffer:v1';
 
 function loadRouteChunk(chunk) {
   if (!routeChunkCache.has(chunk)) {
@@ -44,6 +46,203 @@ function routeForPage(page) {
   };
 
   return routes[page] || routes.home;
+}
+
+function readFirstVisitOffer() {
+  try {
+    return JSON.parse(localStorage.getItem(FIRST_VISIT_OFFER_STORAGE_KEY) || 'null') || {};
+  } catch {
+    return {};
+  }
+}
+
+function writeFirstVisitOffer(patch) {
+  try {
+    const current = readFirstVisitOffer();
+    localStorage.setItem(FIRST_VISIT_OFFER_STORAGE_KEY, JSON.stringify({
+      ...current,
+      ...patch,
+      code: FIRST_VISIT_OFFER_CODE,
+      updatedAt: Date.now(),
+    }));
+  } catch {}
+}
+
+function getFirstVisitOfferToken() {
+  const saved = readFirstVisitOffer();
+  return saved?.state === 'claimed' && saved.offerToken ? saved.offerToken : '';
+}
+
+function getFirstVisitOfferEmail() {
+  const saved = readFirstVisitOffer();
+  return saved?.state === 'claimed' && saved.email ? saved.email : '';
+}
+
+function isOfferSuppressed() {
+  const saved = readFirstVisitOffer();
+  return ['shown', 'dismissed', 'claimed'].includes(saved?.state);
+}
+
+function CopyIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+function FirstVisitOffer({ page }) {
+  const [visible, setVisible] = React.useState(false);
+  const [email, setEmail] = React.useState('');
+  const [status, setStatus] = React.useState('idle');
+  const [message, setMessage] = React.useState('');
+  const [copied, setCopied] = React.useState(false);
+  const claimed = status === 'claimed';
+
+  React.useEffect(() => {
+    if (isOfferSuppressed()) return undefined;
+    if (String(page || '').startsWith('success')) return undefined;
+
+    let didShow = false;
+    const show = () => {
+      if (didShow || isOfferSuppressed()) return;
+      didShow = true;
+      writeFirstVisitOffer({ state: 'shown', shownAt: Date.now() });
+      setVisible(true);
+    };
+
+    const delayMs = String(page || '').startsWith('lut') ? 4200 : 7200;
+    const timer = window.setTimeout(show, delayMs);
+    const onScroll = () => {
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      if ((window.scrollY / maxScroll) > 0.35) show();
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [page]);
+
+  React.useEffect(() => {
+    if (!visible) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') closeOffer();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [visible]);
+
+  if (!visible) return null;
+
+  function closeOffer() {
+    writeFirstVisitOffer({ state: claimed ? 'claimed' : 'dismissed', dismissedAt: Date.now() });
+    setVisible(false);
+  }
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(FIRST_VISIT_OFFER_CODE);
+    } catch {
+      const node = document.createElement('textarea');
+      node.value = FIRST_VISIT_OFFER_CODE;
+      node.setAttribute('readonly', '');
+      node.style.position = 'fixed';
+      node.style.opacity = '0';
+      document.body.appendChild(node);
+      node.select();
+      document.execCommand('copy');
+      document.body.removeChild(node);
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const value = email.trim();
+    if (!value) {
+      setMessage('Enter your email first.');
+      return;
+    }
+
+    setStatus('loading');
+    setMessage('');
+
+    try {
+      const res = await fetch('/api/email-capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: value,
+          page,
+          path: `${location.pathname}${location.search}${location.hash}`,
+          referrer: document.referrer || '',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.offerToken) throw new Error(data.error || 'Could not unlock offer');
+      writeFirstVisitOffer({
+        state: 'claimed',
+        claimedAt: Date.now(),
+        email: value,
+        offerToken: data.offerToken,
+      });
+      setStatus('claimed');
+      setMessage('');
+      copyCode();
+    } catch (err) {
+      setStatus('idle');
+      setMessage(err.message || 'Could not unlock offer. Try again.');
+    }
+  }
+
+  return (
+    <aside className="first-offer" role="dialog" aria-label="First visit discount" aria-live="polite">
+      <button type="button" className="first-offer-close" aria-label="Close offer" onClick={closeOffer}>
+        <span aria-hidden="true">×</span>
+      </button>
+      <div className="first-offer-media" aria-hidden="true">
+        <img src="mockups/meridian mockup.png" alt="" loading="lazy" />
+      </div>
+      {!claimed ? (
+        <form className="first-offer-body" onSubmit={handleSubmit}>
+          <p className="first-offer-kicker">First visit unlock</p>
+          <h2>Take 10% off the LUT shop.</h2>
+          <p className="first-offer-copy">Drop your email for the private code. It auto-applies at checkout on this device.</p>
+          <label className="first-offer-field">
+            <span>Email address</span>
+            <input
+              type="email"
+              value={email}
+              placeholder="you@example.com"
+              autoComplete="email"
+              onChange={event => setEmail(event.target.value)}
+              disabled={status === 'loading'}
+            />
+          </label>
+          {message && <p className="first-offer-error">{message}</p>}
+          <button type="submit" className="first-offer-submit" disabled={status === 'loading'}>
+            {status === 'loading' ? 'Unlocking' : 'Unlock HIFRIEND'}
+          </button>
+          <p className="first-offer-consent">Occasional product emails. Unsubscribe anytime.</p>
+        </form>
+      ) : (
+        <div className="first-offer-body first-offer-success">
+          <p className="first-offer-kicker">You're in</p>
+          <h2>Your private code is ready.</h2>
+          <button type="button" className="first-offer-code" onClick={copyCode} aria-label={`Copy discount code ${FIRST_VISIT_OFFER_CODE}`}>
+            <span>{FIRST_VISIT_OFFER_CODE}</span>
+            <CopyIcon />
+          </button>
+          <p className="first-offer-copy">Copied once for you. The discount will auto-apply to LUT checkout from this browser.</p>
+          <p className="first-offer-copied">{copied ? 'Copied' : 'Tap the code to copy again.'}</p>
+        </div>
+      )}
+    </aside>
+  );
 }
 
 function RouteContent({ page, go, onLoaded }) {
@@ -193,6 +392,7 @@ export function App({ initialPage, embedded }) {
       <RouteContent page={page} go={go} onLoaded={handleRouteLoaded} />
       <Footer go={go} />
       <MobileBottomNav page={page} go={go} />
+      {!embedded && <FirstVisitOffer page={page} />}
       {!embedded && <Analytics />}
       {!embedded && (
         <div className={"tweaks " + (editMode ? 'on' : '')}>
@@ -207,4 +407,4 @@ export function App({ initialPage, embedded }) {
   );
 }
 
-Object.assign(window, { App });
+Object.assign(window, { App, getFirstVisitOfferEmail, getFirstVisitOfferToken });

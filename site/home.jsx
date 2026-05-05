@@ -1,4 +1,5 @@
 import React from 'react';
+import { getScrollBlur, useScrollBlur } from './scroll-blur.js';
 
 // Home page. personal site first, shop second
 
@@ -396,7 +397,7 @@ function HologramGlobe({ locKey }) {
         const [px, py] = projection([loc.lng, loc.lat]);
         const t = (Math.sin(phase) + 1) / 2;
         ctx.save();
-        ctx.font = '500 12px Calibri, "Segoe UI", Arial, sans-serif';
+        ctx.font = '500 12px "Segoe UI", Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.shadowBlur = 0;
@@ -529,64 +530,13 @@ function useMobileViewport(query = '(max-width: 720px)') {
   return matches;
 }
 
-const HOME_SCROLL_BLUR_MAX = 14;
 const HOME_SCROLL_BLUR_SELECTOR = '[data-home-scroll-blur]';
-const HOME_SCROLL_BLUR_START_VIEWPORT_RATIO = 0.4;
 const HERO_VIDEO_PARALLAX_DESKTOP_QUERY = '(min-width: 721px)';
 const HERO_VIDEO_PARALLAX_SCROLL_RATE = 0.22;
 const HERO_VIDEO_PARALLAX_CLIP_OVERLAP_PX = 2;
 
 function useHomeScrollBlur(refreshKey) {
-  React.useEffect(() => {
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let raf = 0;
-
-    const getElements = () => Array.from(document.querySelectorAll(HOME_SCROLL_BLUR_SELECTOR));
-    const setBlur = (element, value) => {
-      element.style.setProperty('--home-scroll-blur', `${value.toFixed(2)}px`);
-    };
-    const update = () => {
-      raf = 0;
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;
-      const blurStartLine = viewportHeight * HOME_SCROLL_BLUR_START_VIEWPORT_RATIO;
-      const reduceMotion = motionQuery.matches;
-
-      getElements().forEach((element) => {
-        if (reduceMotion) {
-          setBlur(element, 0);
-          return;
-        }
-
-        const rect = element.getBoundingClientRect();
-        const progress = Math.max(0, Math.min(1, (blurStartLine - rect.bottom) / blurStartLine));
-        const eased = progress * progress * (3 - (2 * progress));
-        setBlur(element, eased * HOME_SCROLL_BLUR_MAX);
-      });
-    };
-    const requestUpdate = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(update);
-    };
-
-    requestUpdate();
-    window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
-    if (motionQuery.addEventListener) motionQuery.addEventListener('change', requestUpdate);
-    else motionQuery.addListener(requestUpdate);
-
-    const resizeObserver = 'ResizeObserver' in window ? new ResizeObserver(requestUpdate) : null;
-    if (resizeObserver) getElements().forEach((element) => resizeObserver.observe(element));
-
-    return () => {
-      window.removeEventListener('scroll', requestUpdate);
-      window.removeEventListener('resize', requestUpdate);
-      if (motionQuery.removeEventListener) motionQuery.removeEventListener('change', requestUpdate);
-      else motionQuery.removeListener(requestUpdate);
-      if (resizeObserver) resizeObserver.disconnect();
-      if (raf) window.cancelAnimationFrame(raf);
-      getElements().forEach((element) => element.style.removeProperty('--home-scroll-blur'));
-    };
-  }, [refreshKey]);
+  useScrollBlur(HOME_SCROLL_BLUR_SELECTOR, refreshKey);
 }
 
 function useHeroVideoParallax() {
@@ -624,10 +574,7 @@ function useHeroVideoParallax() {
         return;
       }
 
-      const blurStartLine = viewportHeight * HOME_SCROLL_BLUR_START_VIEWPORT_RATIO;
-      const blurProgress = Math.max(0, Math.min(1, (blurStartLine - rect.bottom) / blurStartLine));
-      const easedBlur = blurProgress * blurProgress * (3 - (2 * blurProgress));
-      setBlur(easedBlur * HOME_SCROLL_BLUR_MAX);
+      setBlur(getScrollBlur(rect, viewportHeight));
 
       if (!desktopQuery.matches) {
         resetFixedLayer();
@@ -707,7 +654,10 @@ function HeroReel() {
 function HeroTitle() {
   return (
     <div className="hero-title-block hero-title-enter" data-home-scroll-blur>
-      <h1 className="hero-h1 hero-h1-italic">Alex Garrett</h1>
+      <h1 className="hero-h1 hero-h1-italic" aria-label="Alex Garrett">
+        <span className="hero-name-line">Alex</span>
+        <span className="hero-name-line">Garrett</span>
+      </h1>
       <p className="hero-role hero-role-lg">Filmmaker and tool-maker.</p>
     </div>
   );
@@ -753,14 +703,14 @@ function HeroProductShortcut({ kind, name, type, href, onActivate, iconSrc }) {
 
 const OMI_CASE_STUDY = {
   client: 'OMI',
-  impactValue: '5.5',
-  impactUnit: 'M VIEWS',
+  impactValue: '6M',
+  impactUnit: 'VIEWS',
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2026',
   teaserLabelParts: ['OMI LAUNCH FILM', 'FULL STACK VIDEO PRODUCTION', '2026'],
-  teaserTitle: 'Shipped a 5.5M-view launch film.',
+  teaserTitle: 'Shipped a 6M-view launch film.',
   teaserSummary: 'Concept, production, edit, and UI moments tied to one metric: reach.',
   videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
-  heroTitle: "Directed OMI's launch film and drove 5.5M views in four days.",
+  heroTitle: "Directed OMI's launch film and drove 6M views in four days.",
   summary: 'OMI needed a launch film built for reach. I handled concept, script, production, edit, and onscreen product moments.',
   detailSections: [
     {
@@ -773,12 +723,12 @@ const OMI_CASE_STUDY = {
     },
     {
       title: 'Post + outcome',
-      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 5.5M views across X and Instagram in four days.',
+      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 6M views across X and Instagram in four days.',
     },
   ],
 };
 
-const FEATURED_HOME_LUT_IDS = ['cinematic-01', 'onyx'];
+const FEATURED_HOME_LUT_IDS = ['cinematic-01', 'onyx', 'haloclyne'];
 
 function Home({ go }) {
   const deferTravel = useMobileViewport();
@@ -786,7 +736,7 @@ function Home({ go }) {
   const hrefFor = window.routeHref || ((id) => '#');
   const fallbackMeridian = {
     id: 'cinematic-01',
-    name: 'Meridian',
+    name: 'MERIDIAN',
     oneline: 'Warm, polished color for footage shot in natural light.',
     price: 18,
     formats: '.CUBE',
@@ -794,11 +744,11 @@ function Home({ go }) {
     tone: 'teal-orange',
     mockupSrc: 'mockups/meridian mockup.png',
     compare: {
-      title: 'Meridian',
+      title: 'MERIDIAN',
       beforeLabel: 'Ungraded',
       afterLabel: 'Graded',
-      beforeTitle: 'Meridian ungraded preview',
-      afterTitle: 'Meridian graded preview',
+      beforeTitle: 'MERIDIAN ungraded preview',
+      afterTitle: 'MERIDIAN graded preview',
       beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
       afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
     },
@@ -806,22 +756,22 @@ function Home({ go }) {
       {
         id: 'scene-01',
         label: 'Scene 01',
-        title: 'Meridian scene 01',
+        title: 'MERIDIAN scene 01',
         beforeLabel: 'Ungraded',
         afterLabel: 'Graded',
-        beforeTitle: 'Meridian scene 01 ungraded preview',
-        afterTitle: 'Meridian scene 01 graded preview',
+        beforeTitle: 'MERIDIAN scene 01 ungraded preview',
+        afterTitle: 'MERIDIAN scene 01 graded preview',
         beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
         afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
       },
       {
         id: 'scene-02',
         label: 'Scene 02',
-        title: 'Meridian scene 02',
+        title: 'MERIDIAN scene 02',
         beforeLabel: 'Ungraded',
         afterLabel: 'Graded',
-        beforeTitle: 'Meridian scene 02 ungraded preview',
-        afterTitle: 'Meridian scene 02 graded preview',
+        beforeTitle: 'MERIDIAN scene 02 ungraded preview',
+        afterTitle: 'MERIDIAN scene 02 graded preview',
         beforeSrc: 'videos/lut showcase/meridian 2 ungraded.mp4',
         afterSrc: 'videos/lut showcase/meridian 2 graded.mp4',
       },
@@ -829,7 +779,7 @@ function Home({ go }) {
   };
   const fallbackOnyx = {
     id: 'onyx',
-    name: 'Onyx',
+    name: 'ONYX',
     oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
     price: 18,
     formats: '.CUBE',
@@ -837,43 +787,61 @@ function Home({ go }) {
     tone: 'onyx-night',
     mockupSrc: 'mockups/onyx mockup.png',
     compare: {
-      title: 'Onyx',
+      title: 'ONYX',
       beforeLabel: 'Ungraded',
       afterLabel: 'Graded',
-      beforeTitle: 'Onyx ungraded preview',
-      afterTitle: 'Onyx graded preview',
+      beforeTitle: 'ONYX ungraded preview',
+      afterTitle: 'ONYX graded preview',
       beforeSrc: 'videos/lut showcase/onyx 1 ungraded.mp4',
       afterSrc: 'videos/lut showcase/onyx 1 graded.mp4',
+    },
+  };
+  const fallbackHaloclyne = {
+    id: 'haloclyne',
+    name: 'HALOCLYNE',
+    oneline: 'A one-click underwater grade that separates foreground from background by warming up skin and ocean life into vivid oranges while holding a beautiful turquoise sea, killing haze and quieting sand.',
+    price: 18,
+    formats: '.CUBE',
+    badge: 'NEW',
+    tone: 'warm-film',
+    compare: {
+      title: 'HALOCLYNE',
+      label: 'Scene 01',
+      beforeLabel: 'Ungraded',
+      afterLabel: 'Graded',
+      beforeTitle: 'HALOCLYNE ungraded preview',
+      afterTitle: 'HALOCLYNE graded preview',
+      beforeSrc: 'videos/lut showcase/haloclyne 1 ungraded.mp4',
+      afterSrc: 'videos/lut showcase/haloclyne 1 graded..mp4',
     },
   };
   const luts = window.LUTS || [];
   const fallbackLutsById = {
     'cinematic-01': fallbackMeridian,
     onyx: fallbackOnyx,
+    haloclyne: fallbackHaloclyne,
   };
   const featuredLuts = FEATURED_HOME_LUT_IDS
     .map(id => luts.find(l => l.id === id) || fallbackLutsById[id])
     .filter(Boolean);
+  const heroLutsMockup = featuredLuts[0]?.mockupSrc || fallbackMeridian.mockupSrc;
   return (
-    <>
+    <main className="home-page">
       <section className="hero hero-immersive">
         <HeroReel />
         <div className="wrap hero-content hero-content-left">
           <HeroTitle />
         </div>
         <div className="hero-actions hero-product-actions hero-title-block hero-title-enter" style={{ animationDelay: '300ms' }} data-home-scroll-blur>
-          {featuredLuts.map(lut => (
-            <HeroProductShortcut
-              key={lut.id}
-              kind="lut"
-              name={lut.name}
-              type="LUT"
-              href={hrefFor('lut:' + lut.id)}
-              onActivate={() => go('lut:' + lut.id)}
-              iconSrc={lut.mockupSrc}
-            />
-          ))}
-          <div className="hero-mobile-proof">Instant downloads · service replies within 24h</div>
+          <HeroProductShortcut
+            kind="lut"
+            name="BUY LUTS"
+            type="Color presets"
+            href={hrefFor('luts')}
+            onActivate={() => go('luts')}
+            iconSrc={heroLutsMockup}
+          />
+          <div className="hero-mobile-proof">Email download links · service replies within 24h</div>
         </div>
       </section>
 
@@ -974,7 +942,7 @@ function Home({ go }) {
 
       {deferTravel && <TravelSection deferred />}
 
-    </>
+    </main>
   );
 }
 
