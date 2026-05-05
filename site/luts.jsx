@@ -387,7 +387,7 @@ function LutDetail({ id, go }) {
           )}
           <div className="pd-price-row">
             <div className="pd-price">${l.price}</div>
-            <div className="pd-price-note">ONE-TIME · EMAIL DOWNLOAD LINK</div>
+            <div className="pd-price-note">ONE-TIME · SENT BY EMAIL</div>
           </div>
           <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
             <MailIcon />
