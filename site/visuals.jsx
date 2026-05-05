@@ -1,4 +1,5 @@
 import React from 'react';
+import { getVideoPosterSrc, useResponsiveVideoSrc } from './media.js';
 
 // Visual components. faked plausible screenshots/stills
 
@@ -139,6 +140,9 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
   const [dragOffset, setDragOffset] = React.useState(0);
   const split = clampSplit(baseSplit + dragOffset);
   const hasVideoCompare = Boolean(compare && compare.beforeSrc && compare.afterSrc);
+  const baseVideoSrc = useResponsiveVideoSrc(compare?.beforeSrc);
+  const revealVideoSrc = useResponsiveVideoSrc(compare?.afterSrc);
+  const [shouldLoadVideo, setShouldLoadVideo] = React.useState(false);
   const tones = {
     "teal-orange": {
       a: "linear-gradient(135deg, #2a3540 0%, #1a2028 50%, #0f1519 100%)",
@@ -219,9 +223,44 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
 
   React.useEffect(() => {
     if (!hasVideoCompare) return undefined;
+    const node = wrapRef.current;
+    setShouldLoadVideo(false);
+    if (!node || !('IntersectionObserver' in window)) {
+      setShouldLoadVideo(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setShouldLoadVideo(true);
+      observer.disconnect();
+    }, {
+      threshold: 0.01,
+      rootMargin: scrollLinked ? '520px 0px' : '320px 0px',
+    });
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasVideoCompare, compare?.beforeSrc, compare?.afterSrc, scrollLinked]);
+
+  React.useEffect(() => {
+    if (!hasVideoCompare || !shouldLoadVideo) return undefined;
     const base = baseVideoRef.current;
     const reveal = revealVideoRef.current;
     if (!base || !reveal) return undefined;
+    const node = wrapRef.current;
+    let inView = false;
+
+    const pauseBoth = () => {
+      base.pause();
+      reveal.pause();
+    };
+
+    const playBoth = () => {
+      if (!inView || document.hidden) return;
+      base.play().catch(() => {});
+      reveal.play().catch(() => {});
+    };
 
     const syncReveal = () => {
       if (!base || !reveal) return;
@@ -232,15 +271,19 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
       }
       if (reveal.playbackRate !== base.playbackRate) reveal.playbackRate = base.playbackRate;
       if (base.paused && !reveal.paused) reveal.pause();
-      if (!base.paused && reveal.paused) reveal.play().catch(() => {});
+      if (!base.paused && reveal.paused) playBoth();
     };
 
     const handleLoadedMetadata = () => {
       try {
         reveal.currentTime = base.currentTime || 0;
       } catch (err) {}
-      if (base.paused) return;
-      reveal.play().catch(() => {});
+      playBoth();
+    };
+
+    const handleVisibility = () => {
+      if (document.hidden) pauseBoth();
+      else playBoth();
     };
 
     base.addEventListener('play', syncReveal);
@@ -251,10 +294,27 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
     base.addEventListener('timeupdate', syncReveal);
     base.addEventListener('loadedmetadata', handleLoadedMetadata);
 
-    reveal.play().catch(() => {});
-    base.play().catch(() => {});
+    const playObserver = node && 'IntersectionObserver' in window
+      ? new IntersectionObserver(([entry]) => {
+        inView = entry.isIntersecting;
+        if (inView) playBoth();
+        else pauseBoth();
+      }, {
+        threshold: 0.01,
+        rootMargin: '120px 0px',
+      })
+      : null;
+
+    if (playObserver && node) playObserver.observe(node);
+    else {
+      inView = true;
+      playBoth();
+    }
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
+      if (playObserver) playObserver.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibility);
       base.removeEventListener('play', syncReveal);
       base.removeEventListener('pause', syncReveal);
       base.removeEventListener('seeking', syncReveal);
@@ -262,8 +322,9 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
       base.removeEventListener('ratechange', syncReveal);
       base.removeEventListener('timeupdate', syncReveal);
       base.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      pauseBoth();
     };
-  }, [hasVideoCompare, compare?.beforeSrc, compare?.afterSrc]);
+  }, [hasVideoCompare, shouldLoadVideo, baseVideoSrc, revealVideoSrc]);
 
   const renderSubject = (fill) => (
     <div style={{
@@ -282,14 +343,15 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
         <>
           <video
             ref={baseVideoRef}
-            src={compare.beforeSrc}
+            src={shouldLoadVideo ? baseVideoSrc : undefined}
+            poster={getVideoPosterSrc(compare.beforeSrc)}
             title={compare.beforeTitle || `${compare.title || 'LUT'} ${compare.beforeLabel || 'ungraded'} preview`}
             aria-label={compare.beforeTitle || `${compare.title || 'LUT'} ${compare.beforeLabel || 'ungraded'} preview`}
             muted
             loop
             playsInline
             autoPlay
-            preload="metadata"
+            preload={shouldLoadVideo ? 'metadata' : 'none'}
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
           />
           <div style={{
@@ -299,14 +361,15 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
           }}>
             <video
               ref={revealVideoRef}
-              src={compare.afterSrc}
+              src={shouldLoadVideo ? revealVideoSrc : undefined}
+              poster={getVideoPosterSrc(compare.afterSrc)}
               title={compare.afterTitle || `${compare.title || 'LUT'} ${compare.afterLabel || 'graded'} preview`}
               aria-label={compare.afterTitle || `${compare.title || 'LUT'} ${compare.afterLabel || 'graded'} preview`}
               muted
               loop
               playsInline
               autoPlay
-              preload="metadata"
+              preload={shouldLoadVideo ? 'metadata' : 'none'}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </div>

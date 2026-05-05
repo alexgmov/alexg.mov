@@ -23,6 +23,10 @@ npm run preview
 
 `npm run dev` starts the local Node server and Vite middleware on `PORT` or `3000`. `npm run build` runs `vite build` and then copies static assets into `dist/`.
 
+## TODO
+
+- Make the Services testimonials section happy later, then uncomment `ServiceTestimonials` in `site/pages.jsx`.
+
 ## Environment Variables
 
 Commerce and fulfillment use these variables:

@@ -1,5 +1,6 @@
 import React from 'react';
 import { getScrollBlur, useScrollBlur } from './scroll-blur.js';
+import { getVideoPosterSrc, useResponsiveVideoSrc } from './media.js';
 
 // Home page. personal site first, shop second
 
@@ -627,13 +628,16 @@ function useHeroVideoParallax() {
 
 function HeroReel() {
   const visualRef = useHeroVideoParallax();
+  const baseSrc = 'videos/website%20landing%20page.mp4';
+  const videoSrc = useResponsiveVideoSrc(baseSrc);
 
   return (
     <div className="hero-bg">
       <div className="hero-bg-visual" ref={visualRef}>
         <video
           className="hero-bg-video"
-          src="videos/website%20landing%20page.mp4"
+          src={videoSrc}
+          poster={getVideoPosterSrc(baseSrc)}
           autoPlay
           muted
           loop
@@ -732,6 +736,7 @@ const FEATURED_HOME_LUT_IDS = ['cinematic-01', 'onyx', 'haloclyne'];
 
 function Home({ go }) {
   const deferTravel = useMobileViewport();
+  const proofVideoSrc = useResponsiveVideoSrc(OMI_CASE_STUDY.videoSrc);
   useHomeScrollBlur(deferTravel);
   const hrefFor = window.routeHref || ((id) => '#');
   const fallbackMeridian = {
@@ -918,7 +923,8 @@ function Home({ go }) {
                 </div>
                 <div className="proof-video">
                   <video
-                    src={OMI_CASE_STUDY.videoSrc}
+                    src={proofVideoSrc}
+                    poster={getVideoPosterSrc(OMI_CASE_STUDY.videoSrc)}
                     autoPlay
                     muted
                     loop

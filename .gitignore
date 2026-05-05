@@ -15,3 +15,6 @@ dist/
 
 # Product deliverables
 luts/
+
+# Local archived media originals
+videos/obsolete/

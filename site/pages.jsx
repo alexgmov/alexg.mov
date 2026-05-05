@@ -1,5 +1,6 @@
 import React from 'react';
 import { useScrollBlur } from './scroll-blur.js';
+import { getVideoPosterSrc, useResponsiveVideoSrc } from './media.js';
 
 // Portfolio, Services, Support, Terms, Refund
 
@@ -319,20 +320,22 @@ function PortfolioVideoTile({ item, priority = false }) {
   const cardRef = React.useRef(null);
   const videoRef = React.useRef(null);
   const sourceUrl = item.sourceUrl || item.src;
+  const playbackSrc = useResponsiveVideoSrc(item.src);
+  const posterSrc = getVideoPosterSrc(item.src);
 
   React.useEffect(() => {
     const card = cardRef.current;
     const video = videoRef.current;
     if (!card || !video) return undefined;
 
-    let hydrated = Boolean(video.currentSrc || video.getAttribute('src'));
+    let hydrated = video.getAttribute('src') === playbackSrc;
     let inView = false;
 
     const ensureHydrated = () => {
       if (hydrated) return;
       hydrated = true;
       video.preload = priority ? 'metadata' : 'none';
-      video.src = item.src;
+      video.src = playbackSrc;
       video.load();
     };
 
@@ -385,7 +388,7 @@ function PortfolioVideoTile({ item, priority = false }) {
       video.removeEventListener('canplay', handleCanPlay);
       pause();
     };
-  }, [item.src, priority]);
+  }, [playbackSrc, priority]);
 
   return (
     <a
@@ -403,7 +406,8 @@ function PortfolioVideoTile({ item, priority = false }) {
     >
       <video
         ref={videoRef}
-        src={priority ? item.src : undefined}
+        src={priority ? playbackSrc : undefined}
+        poster={posterSrc}
         autoPlay
         muted
         loop
@@ -700,6 +704,7 @@ function getBriefMailtoHref() {
 
 function ServiceCaseStudyCard({ study }) {
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const videoSrc = useResponsiveVideoSrc(study.videoSrc);
   return (
     <article className="svc-case-card">
       <div className="svc-case-main">
@@ -712,7 +717,8 @@ function ServiceCaseStudyCard({ study }) {
         {study.videoSrc && (
           <div className="svc-case-video">
             <video
-              src={study.videoSrc}
+              src={videoSrc}
+              poster={getVideoPosterSrc(study.videoSrc)}
               autoPlay
               muted
               loop
@@ -865,7 +871,8 @@ function Services({ go }) {
           <ServiceCaseStudyCard study={FEATURED_SERVICE_CASE_STUDY} />
         </section>
 
-        <ServiceTestimonials />
+        {/* TODO: Re-enable the testimonials section once it is ready to feel happy on the page. */}
+        {/* <ServiceTestimonials /> */}
 
         <div style={{ padding: '48px 0 72px', display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
           <a className="btn btn-primary btn-lg" href={getBriefMailtoHref()}>Email a brief</a>

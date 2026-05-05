@@ -19,6 +19,6 @@ for (const item of staticPaths) {
   if (!existsSync(source)) continue;
   cpSync(source, join(dist, item), {
     recursive: true,
-    filter: current => basename(current) !== '.DS_Store',
+    filter: current => basename(current) !== '.DS_Store' && basename(current) !== 'obsolete',
   });
 }
