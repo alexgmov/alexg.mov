@@ -175,6 +175,9 @@ Stripe-hosted Checkout does not expose internal Checkout page clicks, field focu
 
 ## Recent Change Log
 
+- 2026-05-09: Homepage hero centers `EVERY FRAME TELLS A STORY.` at half the previous headline size, places a 20%-smaller original product-card `BUY LUTS` CTA directly underneath, and removes the byline/tagline copy.
+- 2026-05-07: Mobile homepage hero name now renders smaller on one line while keeping the desktop two-line name treatment.
+- 2026-05-07: Mobile homepage hero copy and the primary LUT CTA now sit about 20vh higher over the hero media while leaving the desktop immersive hero layout unchanged.
 - 2026-05-05: FlowState 1.0.0 is released on the plugins page with a blank visual placeholder, email-delivered ZXP fulfillment, a private Vercel Blob fallback URL, and a dedicated Stripe one-time price fallback.
 - 2026-05-05: OMI case-study proof copy now spells out `6 million` instead of `6M` across homepage, portfolio, and service fallback copy.
 - 2026-05-05: First-visit promo `Unlock` now reveals and copies `HIFRIEND` immediately after client-side email validation. Email capture, lead storage, promo email send, token creation, and analytics continue in the background. Checkout can auto-apply the LUT promo from the saved front-end claim so the button is not blocked by external API latency.

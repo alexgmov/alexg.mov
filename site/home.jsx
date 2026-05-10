@@ -655,14 +655,14 @@ function HeroReel() {
   );
 }
 
-function HeroTitle() {
+function HeroTitle({ children }) {
   return (
-    <div className="hero-title-block hero-title-enter" data-home-scroll-blur>
-      <h1 className="hero-h1 hero-h1-italic" aria-label="Alex Garrett">
-        <span className="hero-name-line">Alex</span>
-        <span className="hero-name-line">Garrett</span>
+    <div className="hero-title-block hero-title-stack hero-title-enter" data-home-scroll-blur>
+      <h1 className="hero-h1 hero-h1-italic" aria-label="Every frame tells a story.">
+        <span className="hero-name-line">EVERY FRAME</span>
+        <span className="hero-name-line">TELLS A STORY.</span>
       </h1>
-      <p className="hero-role hero-role-lg">Filmmaker and tool-maker.</p>
+      {children}
     </div>
   );
 }
@@ -835,18 +835,18 @@ function Home({ go }) {
       <section className="hero hero-immersive">
         <HeroReel />
         <div className="wrap hero-content hero-content-left">
-          <HeroTitle />
-        </div>
-        <div className="hero-actions hero-product-actions hero-title-block hero-title-enter" style={{ animationDelay: '300ms' }} data-home-scroll-blur>
-          <HeroProductShortcut
-            kind="lut"
-            name="BUY LUTS"
-            type="Color presets"
-            href={hrefFor('luts')}
-            onActivate={() => go('luts')}
-            iconSrc={heroLutsMockup}
-          />
-          <div className="hero-mobile-proof">Email download links · service replies within 24h</div>
+          <HeroTitle>
+            <div className="hero-actions hero-product-actions hero-title-cta">
+              <HeroProductShortcut
+                kind="lut"
+                name="BUY LUTS"
+                type="Color presets"
+                href={hrefFor('luts')}
+                onActivate={() => go('luts')}
+                iconSrc={heroLutsMockup}
+              />
+            </div>
+          </HeroTitle>
         </div>
       </section>
 

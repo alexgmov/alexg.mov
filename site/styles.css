@@ -2012,22 +2012,21 @@ footer {
 }
 .hero-content {
   position: relative; z-index: 2;
+  width: 100%;
   padding: 140px 32px 120px;
 }
 .hero-content-left {
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  text-align: left;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
-/* Pull the title to the true left edge of the viewport, with
-   a modest gutter that matches the nav. Overrides the .wrap centering. */
 .hero.hero-immersive .hero-content.hero-content-left {
   max-width: none;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: clamp(32px, 6vw, 96px);
-  padding-right: clamp(32px, 6vw, 96px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(24px, 6vw, 96px);
+  padding-right: clamp(24px, 6vw, 96px);
 }
 .hero-title-block {
   will-change: filter;
@@ -2852,40 +2851,85 @@ footer {
 .film-frames { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: #000; }
 .film-frame { aspect-ratio: 16/10; position: relative; overflow: hidden; }
 
-/* ── Hero updates: all-Garamond-italic name, tagline ── */
+/* ── Hero updates: centered statement, CTA, tagline ── */
 .hero-h1-italic {
   font-family: var(--serif);
   font-style: italic;
   font-weight: 400;
   color: #fff;
-  font-size: clamp(56px, 8.5vw, 128px);
-  letter-spacing: -0.02em;
-  line-height: 0.95;
-  margin: 0 0 18px;
+  font-size: 62px;
+  letter-spacing: 0;
+  line-height: 0.9;
+  margin: 0;
   max-width: none;
+  text-shadow: 0 16px 46px rgba(0,0,0,0.48);
 }
 .home-page .hero-h1-italic {
-  font-family: var(--mono);
+  font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue Condensed", "Helvetica Condensed", "Arial Narrow", var(--sans);
   font-style: normal;
-  font-weight: 400;
+  font-stretch: condensed;
+  font-weight: 700;
   letter-spacing: 0;
+  line-height: 0.9;
+}
+.hero-title-stack {
+  width: min(100%, 940px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 .hero-name-line {
   display: block;
 }
-.hero-role-lg {
-  font-family: var(--sans);
-  font-size: clamp(18px, 1.7vw, 24px);
-  color: rgba(255,255,255,0.92);
-  font-weight: 300;
-  letter-spacing: -0.01em;
-  margin: 0;
-  max-width: none;
+.hero-title-cta {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  z-index: 2;
+  width: auto;
+  margin: 34px auto 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
-.home-page .hero-role-lg {
-  font-family: var(--mono);
-  font-weight: 400;
-  letter-spacing: 0;
+.hero-title-cta .hero-product-shortcut {
+  width: clamp(198px, 14.4vw, 256px);
+  min-height: 54px;
+  padding: 10px;
+  grid-template-columns: 34px minmax(0, 1fr) 13px;
+  gap: 9px;
+  box-shadow: 0 11px 29px rgba(0,0,0,0.24);
+}
+.hero-title-cta .hero-product-shortcut:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.26);
+}
+.hero-title-cta .hero-product-glyph {
+  width: 34px;
+  height: 34px;
+}
+.hero-title-cta .hero-product-glyph-image {
+  padding: 3px;
+}
+.hero-title-cta .hero-product-name {
+  font-size: 11px;
+}
+.hero-title-cta .hero-product-type {
+  font-size: 9px;
+}
+.hero-title-cta .hero-product-arrow svg {
+  width: 10px;
+  height: 10px;
+}
+@media (max-width: 1080px) {
+  .hero-h1-italic {
+    font-size: 48px;
+  }
+  .hero-title-cta {
+    margin-top: 30px;
+  }
 }
 
 /* ── Travel log v2 ────────────────────────────── */
@@ -3172,7 +3216,6 @@ footer {
 /* ── Mobile conversion pass ───────────────────── */
 .mobile-bottom-nav,
 .mobile-product-cta,
-.hero-mobile-proof,
 .cta-copy-mobile,
 .svc-mobile-intro-copy,
 .svc-mobile-brief-cta {
@@ -3486,6 +3529,7 @@ footer {
   }
 
   .hero-immersive {
+    --hero-mobile-copy-lift: min(20vh, 168px);
     height: auto;
     min-height: 0;
     padding: 14px 0 28px;
@@ -3549,39 +3593,65 @@ footer {
   .hero.hero-immersive .hero-content.hero-content-left {
     position: relative;
     z-index: 5;
-    margin-top: -30px;
+    margin-top: calc(-30px - var(--hero-mobile-copy-lift));
     padding: 0 28px;
     align-items: center;
     justify-content: center;
     text-align: center;
   }
+  .hero-title-stack {
+    width: min(100%, 326px);
+  }
   .hero-h1-italic {
-    font-size: clamp(54px, 15vw, 70px);
-    line-height: 0.96;
-    margin-bottom: 10px;
+    font-size: 17px;
+    line-height: 0.9;
+    margin-bottom: 0;
+    max-width: 100%;
+    white-space: normal;
     text-shadow: 0 12px 34px rgba(0,0,0,0.58);
   }
-  .hero-role-lg {
-    font-size: 17px;
+  .hero-name-line {
+    display: block;
+  }
+  .hero-name-line + .hero-name-line::before {
+    content: "";
   }
   .hero-actions {
     position: relative;
     left: auto;
     right: auto;
     bottom: auto;
-    width: auto;
-    margin: 22px 16px 0;
-    justify-content: stretch;
+    width: min(326px, calc(100% - 32px));
+    margin: 22px auto 0;
+    justify-content: center;
   }
   .hero-product-actions {
-    grid-template-columns: minmax(0, 326px);
+    grid-template-columns: minmax(0, 1fr);
     justify-content: center;
   }
   .hero-product-shortcut {
     width: 100%;
+    max-width: 100%;
     justify-self: center;
     min-width: 0;
     min-height: 64px;
+  }
+  .hero-title-cta .hero-product-shortcut {
+    width: 80%;
+    min-height: 51px;
+    padding: 8px;
+    grid-template-columns: 29px minmax(0, 1fr);
+    gap: 7px;
+  }
+  .hero-title-cta .hero-product-glyph {
+    width: 29px;
+    height: 29px;
+  }
+  .hero-title-cta .hero-product-name {
+    font-size: 10px;
+  }
+  .hero-title-cta .hero-product-type {
+    font-size: 9px;
   }
   .hero-product-copy {
     min-width: 0;
@@ -3589,18 +3659,11 @@ footer {
   .hero-product-name {
     font-size: 12.5px;
   }
-  .hero-mobile-proof {
-    display: flex;
-    grid-column: 1 / -1;
-    min-height: 28px;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-    font-size: 10px;
-    line-height: 1.2;
-    color: rgba(255,255,255,0.72);
-    letter-spacing: 0.02em;
-    text-align: center;
+
+  @media (max-width: 360px) {
+    .hero-h1-italic {
+      font-size: 15px;
+    }
   }
 
   .section,
