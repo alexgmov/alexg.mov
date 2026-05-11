@@ -50,6 +50,10 @@ function getPublicOrigin(req) {
   return `${getRequestProto(req, host)}://${host}`;
 }
 
+function isFulfilledCheckoutStatus(paymentStatus) {
+  return paymentStatus === 'paid' || paymentStatus === 'no_payment_required';
+}
+
 module.exports = async function handler(req, res) {
   try {
     if (req.method !== 'POST') {
@@ -87,6 +91,14 @@ module.exports = async function handler(req, res) {
         amountTotal: session.amount_total,
         currency: session.currency,
       });
+
+      if (!isFulfilledCheckoutStatus(session.payment_status)) {
+        console.warn('Checkout session is not ready for fulfillment:', {
+          sessionId: session.id,
+          paymentStatus: session.payment_status,
+        });
+        return res.json({ received: true });
+      }
 
       try {
         await fulfillCheckoutSession(session, req);

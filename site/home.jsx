@@ -139,8 +139,8 @@ const LOCATIONS = {
   },
 };
 
-// Itinerary loaded from site/travel.js (edit that file to update the site)
-const ITINERARY = window.ALEXG_TRAVEL;
+// Itinerary loaded from site/travel.js; statuses are derived from current date.
+const ITINERARY = window.ALEXG_TRAVEL || [];
 
 // Module-level geo-data cache — fetched once, shared across mounts
 let _geoCache = null;
@@ -451,10 +451,13 @@ function HologramGlobe({ locKey }) {
 
 
 function TravelLog() {
-  const currentKey = ITINERARY.find(i => i.status === 'here').key;
+  const currentRow = ITINERARY.find(i => i.status === 'here') || ITINERARY[0];
+  const currentKey = currentRow?.key;
   const currentLoc = LOCATIONS[currentKey];
   const scrollRef = React.useRef(null);
   const hereRef = React.useRef(null);
+
+  if (!currentLoc) return null;
 
   React.useEffect(() => {
     if (!scrollRef.current || !hereRef.current) return;
@@ -485,6 +488,7 @@ function TravelLog() {
         <div className="travel2-scroll" ref={scrollRef}>
           {ITINERARY.map((row, i) => {
             const loc = LOCATIONS[row.key];
+            if (!loc) return null;
             return (
               <div key={i} ref={row.status === 'here' ? hereRef : null} className={"travel2-row travel2-" + row.status}>
                 <span className="travel2-when">{row.when}</span>

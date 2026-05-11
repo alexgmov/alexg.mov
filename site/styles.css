@@ -3594,17 +3594,17 @@ footer {
     position: relative;
     z-index: 5;
     margin-top: calc(-30px - var(--hero-mobile-copy-lift));
-    padding: 0 28px;
+    padding: 0 20px;
     align-items: center;
     justify-content: center;
     text-align: center;
   }
   .hero-title-stack {
-    width: min(100%, 326px);
+    width: min(100%, 350px);
   }
   .hero-h1-italic {
-    font-size: 17px;
-    line-height: 0.9;
+    font-size: 51px;
+    line-height: 0.86;
     margin-bottom: 0;
     max-width: 100%;
     white-space: normal;
@@ -3612,6 +3612,11 @@ footer {
   }
   .hero-name-line {
     display: block;
+    position: relative;
+    left: 50%;
+    width: max-content;
+    transform: translateX(-50%) scaleX(0.86);
+    transform-origin: center;
   }
   .hero-name-line + .hero-name-line::before {
     content: "";
@@ -3621,8 +3626,8 @@ footer {
     left: auto;
     right: auto;
     bottom: auto;
-    width: min(326px, calc(100% - 32px));
-    margin: 22px auto 0;
+    width: min(350px, calc(100% - 24px));
+    margin: 16px auto 0;
     justify-content: center;
   }
   .hero-product-actions {
@@ -3637,21 +3642,24 @@ footer {
     min-height: 64px;
   }
   .hero-title-cta .hero-product-shortcut {
-    width: 80%;
-    min-height: 51px;
-    padding: 8px;
-    grid-template-columns: 29px minmax(0, 1fr);
-    gap: 7px;
+    width: min(148px, 44%);
+    min-height: 44px;
+    padding: 6px;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 6px;
   }
   .hero-title-cta .hero-product-glyph {
-    width: 29px;
-    height: 29px;
+    width: 22px;
+    height: 22px;
   }
   .hero-title-cta .hero-product-name {
-    font-size: 10px;
+    font-size: 9px;
   }
   .hero-title-cta .hero-product-type {
-    font-size: 9px;
+    font-size: 7px;
+  }
+  .hero-title-cta .hero-product-arrow {
+    display: none;
   }
   .hero-product-copy {
     min-width: 0;
@@ -3660,9 +3668,18 @@ footer {
     font-size: 12.5px;
   }
 
+  @media (max-width: 390px) {
+    .hero-name-line {
+      transform: translateX(-50%) scaleX(0.8);
+    }
+  }
+
   @media (max-width: 360px) {
     .hero-h1-italic {
-      font-size: 15px;
+      font-size: 45px;
+    }
+    .hero-name-line {
+      transform: translateX(-50%) scaleX(0.72);
     }
   }
 

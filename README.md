@@ -7,7 +7,8 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `site/main.jsx` boots the React app, first loading shared browser modules such as analytics, product data, SEO helpers, visuals, and chrome.
 - `site/app.jsx` owns the query-string router. Public pages are represented by `?page=...`, for example `?page=luts`, `?page=lut:cinematic-01`, and `?page=success`.
 - Route components are split into chunks: home, plugins, LUTs, and supporting pages.
-- `site/home.jsx` owns the homepage hero, featured product rail, and OMI proof teaser. `site/pages.jsx` owns portfolio/services pages and keeps the service case-study fallback copy.
+- `site/home.jsx` owns the homepage hero, featured product rail, and OMI proof teaser. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
+- `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `Australia/Sydney` timezone.
 - `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, media paths, and product page metadata.
 - `lib/products.js` is the server-side commerce catalog. This is the only product catalog used for Stripe Checkout and fulfillment.
 - `api/*.js` files are Vercel-compatible CommonJS handlers. Locally, `server.js` maps those same files to `/api/...` routes and attaches small `res.status()`, `res.json()`, and `res.send()` helpers.
@@ -88,13 +89,13 @@ The integration intentionally uses Stripe-hosted Checkout Sessions for one-time 
 
 ## Checkout Success Page
 
-The success page does not fulfill the order. It only confirms the paid session for the browser:
+The success page does not fulfill the order. It only confirms the completed Stripe session for the browser:
 
 1. `site/pages.jsx` reads `session_id` from the URL.
 2. It calls `GET /api/checkout-session?session_id=...`.
 3. `api/checkout-session.js` retrieves the Checkout Session from Stripe.
-4. If `payment_status` is not `paid`, it returns `402`.
-5. If paid, it returns the customer email and product name for confirmation copy.
+4. If `payment_status` is neither `paid` nor `no_payment_required`, it returns `402`.
+5. If complete, it returns the customer email and product name for confirmation copy.
 
 Download email delivery is handled by the Stripe webhook, not by this page.
 
@@ -142,10 +143,11 @@ When adding a new product:
 2. The handler reads the raw request body and verifies `stripe-signature` with `STRIPE_WEBHOOK_SECRET`.
 3. The webhook logs `stripe_webhook_checkout_completed`.
 4. `fulfillCheckoutSession()` reads `metadata.productId` from the Stripe session.
-5. The product is loaded from `lib/products.js`.
-6. Fulfillment requires a configured product Blob URL, customer email, `DOWNLOAD_SECRET`, and `RESEND_API_KEY`.
-7. `api/download.makeLink()` creates a signed URL valid for 48 hours.
-8. Resend sends the buyer an email from `alexg.mov <downloads@alexg.mov>`.
+5. Fulfillment only runs when `payment_status` is `paid` or `no_payment_required`. The second status supports Stripe no-cost orders from 100% promotion codes.
+6. The product is loaded from `lib/products.js`.
+7. Fulfillment requires a configured product Blob URL, customer email, `DOWNLOAD_SECRET`, and `RESEND_API_KEY`.
+8. `api/download.makeLink()` creates a signed URL valid for 48 hours.
+9. Resend sends the buyer an email from `alexg.mov <downloads@alexg.mov>`.
 
 Important operational detail: fulfillment errors are logged, but the webhook still responds with `{ received: true }`. That means Stripe will not retry a failed Resend send or missing-product configuration after the handler catches the error. Check deployment logs after product launches and webhook tests.
 
@@ -173,8 +175,19 @@ Download links are generated server-side only and are currently valid for 48 hou
 
 Stripe-hosted Checkout does not expose internal Checkout page clicks, field focus, heatmaps, or page attention. The dashboard uses real Stripe Session lifecycle fields such as created, open, complete, expired, paid, amount, product metadata, and completion timing.
 
+## Homepage Travel Widget
+
+`site/travel.js` is the source of truth for the homepage location list. To update travel, add or edit rows in `TRAVEL_ITINERARY`, keep `startsOn` sorted oldest to newest, and make sure each `key` exists in the `LOCATIONS` map in `site/home.jsx`.
+
+The current location is derived automatically at page load using the current date in the `Australia/Sydney` timezone. The latest row whose `startsOn` date is today or earlier becomes `here`; earlier rows become `past`; later rows become `next`.
+
 ## Recent Change Log
 
+- 2026-05-11: Checkout success confirmation and webhook fulfillment now treat Stripe `no_payment_required` sessions as complete, so 100% promotion-code orders can receive normal download delivery while unpaid sessions are not fulfilled.
+- 2026-05-11: LUT list page no longer renders the buyer-guide recommendation block, and the portfolio title/category header is excluded from scroll blur so the jump buttons stay crisp.
+- 2026-05-11: Mobile homepage hero headline is 50% larger than the previous mobile lockup while the `BUY LUTS` CTA card is visually halved and kept at a mobile-safe tap height.
+- 2026-05-11: Homepage travel now marks Sydney, Australia as current automatically from `site/travel.js` start dates instead of manually maintained status flags.
+- 2026-05-10: Mobile homepage hero now mirrors the desktop `EVERY FRAME TELLS A STORY.` headline lockup while keeping a mobile-safe centered size and the scaled `BUY LUTS` CTA beneath it.
 - 2026-05-09: Homepage hero centers `EVERY FRAME TELLS A STORY.` at half the previous headline size, places a 20%-smaller original product-card `BUY LUTS` CTA directly underneath, and removes the byline/tagline copy.
 - 2026-05-07: Mobile homepage hero name now renders smaller on one line while keeping the desktop two-line name treatment.
 - 2026-05-07: Mobile homepage hero copy and the primary LUT CTA now sit about 20vh higher over the hero media while leaving the desktop immersive hero layout unchanged.

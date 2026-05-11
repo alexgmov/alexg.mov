@@ -552,7 +552,7 @@ function Portfolio({ go }) {
 
   return (
     <>
-      <section className="list-head portfolio-head" data-portfolio-scroll-blur>
+      <section className="list-head portfolio-head">
         <div className="wrap">
           <h1>Selected Video Work</h1>
           <div className="portfolio-jump-wrap">
@@ -1022,7 +1022,7 @@ function CheckoutSuccess({ go }) {
 
       <section className="success-panel">
         <div className="success-mark"><CheckIcon size={24} /></div>
-        <p className="success-kicker">Purchase complete</p>
+        <p className="success-kicker">Order complete</p>
         <h1>Thank you.</h1>
 
         {state.status === 'loading' ? (
@@ -1035,7 +1035,7 @@ function CheckoutSuccess({ go }) {
         )}
 
         {state.status === 'error' && (
-          <p className="success-note">The payment went through, but I could not load the email address here. The download email still sends automatically after checkout.</p>
+          <p className="success-note">I could not load the order details here. If checkout completed, the download email still sends automatically.</p>
         )}
 
         <button className="btn btn-primary btn-lg success-back" onClick={() => { window.location.href = '/'; }}>

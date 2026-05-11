@@ -112,21 +112,6 @@ const LUTS = window.LUTS || [
   },
 ];
 
-const LUT_GUIDE_ITEMS = [
-  {
-    title: 'Best LUT for footage shot in natural light',
-    body: 'Use MERIDIAN when the shot is clean and you want warm contrast, richer skin, and a finished look.',
-  },
-  {
-    title: 'Best LUT for underwater footage',
-    body: 'One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea',
-  },
-  {
-    title: 'Best LUT for underwater footage',
-    body: 'Use HALOCLYNE when ocean, reef, diving, or snorkel footage needs vivid foreground warmth, turquoise water, less haze, and quieter sand.',
-  },
-];
-
 const LUT_FAQS = window.LUT_FAQS || [
   {
     q: 'What footage works best with these LUTs?',
@@ -225,13 +210,6 @@ function LutsList({ go }) {
           ))}
         </div>
       </div>
-      <BuyerGuide
-        eyebrow="LUT BUYER GUIDE"
-        title="Choose the right LUT for your footage."
-        intro="Use these after a clean base correction. Let the footage lead."
-        items={LUT_GUIDE_ITEMS}
-        faqs={LUT_FAQS}
-      />
       <section className="section-sm">
         <div className="wrap">
           <p className="section-title">HOW IT WORKS</p>

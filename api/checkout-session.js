@@ -2,6 +2,10 @@ const Stripe = require('stripe');
 const { PRODUCTS } = require('../lib/products');
 const { ensureVisitorIds, logEvent } = require('../lib/analytics-store');
 
+function isFulfilledCheckoutStatus(paymentStatus) {
+  return paymentStatus === 'paid' || paymentStatus === 'no_payment_required';
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -47,8 +51,8 @@ module.exports = async function handler(req, res) {
     visitorHash: analyticsIds.visitorHash,
   });
 
-  if (session.payment_status !== 'paid') {
-    return res.status(402).json({ error: 'Checkout session is not paid' });
+  if (!isFulfilledCheckoutStatus(session.payment_status)) {
+    return res.status(402).json({ error: 'Checkout session is not complete' });
   }
 
   res.json({
