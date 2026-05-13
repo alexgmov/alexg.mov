@@ -274,6 +274,8 @@ function HologramGlobe({ locKey }) {
     let lastLayoutSignature = '';
     let fontsReady = !document.fonts || document.fonts.status === 'loaded';
     const currentLocHorizontalBias = 2;
+    // Positive longitude rotation turns the globe counterclockwise from a north-pole view.
+    const globeCounterClockwiseLngOffset = 60;
 
     if (document.fonts && !fontsReady) {
       document.fonts.ready.then(() => { fontsReady = true; });
@@ -344,7 +346,7 @@ function HologramGlobe({ locKey }) {
         const viewportCenterY = scrollY + viewportOffsetTop + (viewportHeight / 2);
         const offset  = viewportCenterY - sectionCenterY;
         baselineScrollY = scrollY;
-        baselineRotLng = -loc.lng - currentLocHorizontalBias + offset * 0.12;
+        baselineRotLng = -loc.lng - currentLocHorizontalBias + globeCounterClockwiseLngOffset + offset * 0.12;
       }
 
       const rotLng  = baselineRotLng + ((scrollY - baselineScrollY) * 0.12);

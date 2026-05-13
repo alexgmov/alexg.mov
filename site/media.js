@@ -1,6 +1,21 @@
 import React from 'react';
 
 export const MOBILE_VIDEO_QUERY = '(max-width: 720px)';
+const CONSTRAINED_IN_APP_BROWSER_RE = /(Instagram|FBAN|FBAV|FB_IAB|TikTok|TikTokWebView|TTWebView|musical_ly|musically|BytedanceWebview|Bytedance|Aweme)/i;
+
+export function isConstrainedInAppBrowser(userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '') {
+  return CONSTRAINED_IN_APP_BROWSER_RE.test(userAgent || '');
+}
+
+export function useConstrainedInAppBrowser() {
+  const [matches, setMatches] = React.useState(() => isConstrainedInAppBrowser());
+
+  React.useEffect(() => {
+    setMatches(isConstrainedInAppBrowser());
+  }, []);
+
+  return matches;
+}
 
 function splitUrlTail(src) {
   const value = String(src || '');

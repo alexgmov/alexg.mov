@@ -2,9 +2,7 @@ const Stripe = require('stripe');
 const { PRODUCTS } = require('../lib/products');
 const {
   OFFER_CODE,
-  configuredPromotionCodeId,
   hashEmail,
-  isOfferEligibleProduct,
   isValidEmail,
   normalizeEmail,
   verifyOfferToken,
@@ -102,17 +100,12 @@ module.exports = async function handler(req, res) {
     normalizeOfferCode(offerCode) === OFFER_CODE &&
     isValidEmail(normalizedOfferEmail)
   );
-  const canApplyOffer = Boolean(
-    isOfferEligibleProduct(productId, product) &&
-    (claimedOffer || hasClientOfferClaim)
-  );
   const canPrefillOfferEmail = Boolean(
     isValidEmail(normalizedOfferEmail) &&
     (tokenMatchesEmail || hasClientOfferClaim)
   );
 
   let session;
-  let offerDiscountApplied = false;
   try {
     const checkoutParams = {
       mode: 'payment',
@@ -120,23 +113,11 @@ module.exports = async function handler(req, res) {
       success_url: `${origin}/?page=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?page=${returnPage}`,
       metadata: { productId },
+      allow_promotion_codes: true,
     };
 
     if (canPrefillOfferEmail) {
       checkoutParams.customer_email = normalizedOfferEmail;
-    }
-
-    if (canApplyOffer) {
-      const promotionCodeId = await resolveOfferPromotionCodeId(stripe);
-      if (promotionCodeId) {
-        checkoutParams.discounts = [{ promotion_code: promotionCodeId }];
-        checkoutParams.metadata.offerCode = OFFER_CODE;
-        offerDiscountApplied = true;
-      } else {
-        checkoutParams.allow_promotion_codes = true;
-      }
-    } else {
-      checkoutParams.allow_promotion_codes = true;
     }
 
     if (product.statementDescriptorSuffix) {
@@ -162,8 +143,7 @@ module.exports = async function handler(req, res) {
     paymentStatus: session.payment_status,
     amountTotal: session.amount_total,
     currency: session.currency,
-    offerCode: offerDiscountApplied ? OFFER_CODE : undefined,
-    offerDiscountApplied,
+    promotionCodeFieldEnabled: true,
     visitorId: analyticsIds.visitorId,
     sessionId: analyticsIds.sessionId,
     visitorHash: analyticsIds.visitorHash,
@@ -171,21 +151,3 @@ module.exports = async function handler(req, res) {
 
   res.json({ url: session.url });
 };
-
-async function resolveOfferPromotionCodeId(stripe) {
-  const configured = configuredPromotionCodeId();
-  if (configured) return configured;
-
-  try {
-    const result = await stripe.promotionCodes.list({
-      code: OFFER_CODE,
-      active: true,
-      limit: 10,
-    });
-    const match = result.data.find(item => item.code.toLowerCase() === OFFER_CODE.toLowerCase());
-    return match?.id || '';
-  } catch (err) {
-    console.error('Could not resolve offer promotion code:', err.message);
-    return '';
-  }
-}

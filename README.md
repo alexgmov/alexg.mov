@@ -10,6 +10,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `site/home.jsx` owns the homepage hero, featured product rail, and OMI proof teaser. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
 - `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `Australia/Sydney` timezone.
 - `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, media paths, and product page metadata.
+- `site/visuals.jsx` owns reusable visual previews such as `LutPreview`. `site/media.js` owns responsive video helpers plus the constrained in-app browser detector; LUT previews render poster-based before/after layers in TikTok/Instagram-style WebViews so autoplay preview videos cannot jump into native fullscreen.
 - `lib/products.js` is the server-side commerce catalog. This is the only product catalog used for Stripe Checkout and fulfillment.
 - `api/*.js` files are Vercel-compatible CommonJS handlers. Locally, `server.js` maps those same files to `/api/...` routes and attaches small `res.status()`, `res.json()`, and `res.send()` helpers.
 - `server.js` serves Vite middleware in development and the `dist/` build in production mode.
@@ -70,7 +71,7 @@ The `Unlock` button is intentionally instant:
 4. `api/email-capture.js` stores the lead, sends the promo email when configured, creates the signed offer token, logs analytics, and returns `{ code, offerToken }`.
 5. When the background request succeeds, the browser updates the saved offer token and marks `captureStatus: 'synced'`. If it fails, the visible code remains usable and local state records `captureStatus: 'failed'`.
 
-Checkout buttons in `site/luts.jsx` and `site/plugins.jsx` pass `offerCode`, `offerEmail`, and `offerToken` from the browser helpers exposed by `site/app.jsx`. `api/create-checkout.js` only auto-applies `HIFRIEND` to eligible LUT products. It accepts either a valid server-signed token or the front-end saved code plus a valid email, so a fast buyer can click checkout immediately after unlock without waiting for Resend or Stripe lead storage. The Stripe Checkout Session still allows manual promotion codes as a fallback.
+Checkout buttons in `site/luts.jsx` and `site/plugins.jsx` pass `offerCode`, `offerEmail`, and `offerToken` from the browser helpers exposed by `site/app.jsx`. `api/create-checkout.js` uses a valid saved offer claim only to prefill the Checkout email. It always sends `allow_promotion_codes: true` so Stripe-hosted Checkout shows the manual promotion-code field for codes such as `HIFRIEND` or one-off comp codes. Do not also send a `discounts` array for the first-visit offer unless you intentionally want Stripe to hide the manual promo-code field.
 
 ## Stripe Checkout Flow
 
@@ -79,11 +80,12 @@ Checkout buttons in `site/luts.jsx` and `site/plugins.jsx` pass `offerCode`, `of
 3. Checkout fails closed if the product is unknown, the Stripe secret is missing, the product has no `stripePriceId`, or the product has no `blobUrl`.
 4. The handler creates a Stripe Checkout Session in `payment` mode with one Price ID from the server catalog.
 5. The Checkout Session metadata stores `{ productId }`. The webhook depends on this metadata for fulfillment.
-6. `success_url` returns the buyer to `/?page=success&session_id={CHECKOUT_SESSION_ID}`.
-7. `cancel_url` returns the buyer to the product page declared in `product.page`.
-8. `statement_descriptor_suffix` is set when the product defines `statementDescriptorSuffix`.
-9. The server logs a `checkout_session_created` analytics event.
-10. The browser redirects to the Stripe-hosted Checkout URL.
+6. `allow_promotion_codes: true` enables Stripe's promotion-code entry field on the hosted Checkout page.
+7. `success_url` returns the buyer to `/?page=success&session_id={CHECKOUT_SESSION_ID}`.
+8. `cancel_url` returns the buyer to the product page declared in `product.page`.
+9. `statement_descriptor_suffix` is set when the product defines `statementDescriptorSuffix`.
+10. The server logs a `checkout_session_created` analytics event.
+11. The browser redirects to the Stripe-hosted Checkout URL.
 
 The integration intentionally uses Stripe-hosted Checkout Sessions for one-time digital purchases.
 
@@ -181,8 +183,13 @@ Stripe-hosted Checkout does not expose internal Checkout page clicks, field focu
 
 The current location is derived automatically at page load using the current date in the `Australia/Sydney` timezone. The latest row whose `startsOn` date is today or earlier becomes `here`; earlier rows become `past`; later rows become `next`.
 
+`HologramGlobe()` in `site/home.jsx` applies a visual +60 degree longitude rotation after centering the current location. Keep that offset separate from `LOCATIONS` latitude/longitude data so the list and date logic remain geographically correct while the planet framing can be art-directed.
+
 ## Recent Change Log
 
+- 2026-05-13: LUT before/after previews now disable native video interaction and fall back to poster layers inside constrained TikTok/Instagram-style in-app browsers to prevent random fullscreen video flashes on product pages.
+- 2026-05-12: Homepage travel globe now applies a +60 degree counterclockwise longitude framing offset so the current location sits farther right on the planet without changing itinerary data.
+- 2026-05-12: Checkout Session creation now always enables Stripe-hosted manual promotion codes and no longer pre-applies `HIFRIEND`, because Stripe hides the promo-code field when a `discounts` array is supplied.
 - 2026-05-11: Checkout success confirmation and webhook fulfillment now treat Stripe `no_payment_required` sessions as complete, so 100% promotion-code orders can receive normal download delivery while unpaid sessions are not fulfilled.
 - 2026-05-11: LUT list page no longer renders the buyer-guide recommendation block, and the portfolio title/category header is excluded from scroll blur so the jump buttons stay crisp.
 - 2026-05-11: Mobile homepage hero headline is 50% larger than the previous mobile lockup while the `BUY LUTS` CTA card is visually halved and kept at a mobile-safe tap height.

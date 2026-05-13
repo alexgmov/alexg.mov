@@ -1,5 +1,5 @@
 import React from 'react';
-import { getVideoPosterSrc, useResponsiveVideoSrc } from './media.js';
+import { getVideoPosterSrc, useConstrainedInAppBrowser, useResponsiveVideoSrc } from './media.js';
 
 // Visual components. faked plausible screenshots/stills
 
@@ -140,8 +140,11 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
   const [dragOffset, setDragOffset] = React.useState(0);
   const split = clampSplit(baseSplit + dragOffset);
   const hasVideoCompare = Boolean(compare && compare.beforeSrc && compare.afterSrc);
+  const usePosterOnlyPreview = useConstrainedInAppBrowser();
   const baseVideoSrc = useResponsiveVideoSrc(compare?.beforeSrc);
   const revealVideoSrc = useResponsiveVideoSrc(compare?.afterSrc);
+  const basePosterSrc = getVideoPosterSrc(compare?.beforeSrc);
+  const revealPosterSrc = getVideoPosterSrc(compare?.afterSrc);
   const [shouldLoadVideo, setShouldLoadVideo] = React.useState(false);
   const tones = {
     "teal-orange": {
@@ -222,7 +225,10 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
   }, [scrollLinked, initialSplit, clampSplit]);
 
   React.useEffect(() => {
-    if (!hasVideoCompare) return undefined;
+    if (!hasVideoCompare || usePosterOnlyPreview) {
+      setShouldLoadVideo(false);
+      return undefined;
+    }
     const node = wrapRef.current;
     setShouldLoadVideo(false);
     if (!node || !('IntersectionObserver' in window)) {
@@ -241,10 +247,10 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [hasVideoCompare, compare?.beforeSrc, compare?.afterSrc, scrollLinked]);
+  }, [hasVideoCompare, compare?.beforeSrc, compare?.afterSrc, scrollLinked, usePosterOnlyPreview]);
 
   React.useEffect(() => {
-    if (!hasVideoCompare || !shouldLoadVideo) return undefined;
+    if (!hasVideoCompare || usePosterOnlyPreview || !shouldLoadVideo) return undefined;
     const base = baseVideoRef.current;
     const reveal = revealVideoRef.current;
     if (!base || !reveal) return undefined;
@@ -324,7 +330,7 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
       base.removeEventListener('loadedmetadata', handleLoadedMetadata);
       pauseBoth();
     };
-  }, [hasVideoCompare, shouldLoadVideo, baseVideoSrc, revealVideoSrc]);
+  }, [hasVideoCompare, usePosterOnlyPreview, shouldLoadVideo, baseVideoSrc, revealVideoSrc]);
 
   const renderSubject = (fill) => (
     <div style={{
@@ -333,6 +339,46 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
       borderRadius: '50% 50% 45% 45%',
     }} />
   );
+  const previewMediaStyle = {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    pointerEvents: 'none',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+  };
+  const compareLabels = showLabels && (
+    <>
+      <div style={{
+        position: 'absolute',
+        left: 10 * scale,
+        top: 10 * scale,
+        fontFamily: '"Courier New", monospace',
+        fontSize: 9 * scale,
+        color: 'rgba(255,255,255,0.9)',
+        padding: `${4 * scale}px ${8 * scale}px`,
+        background: 'rgba(0,0,0,0.45)',
+        borderRadius: 999,
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+      }}>{(compare?.afterLabel || 'GRADED').toUpperCase()}</div>
+      <div style={{
+        position: 'absolute',
+        right: 10 * scale,
+        top: 10 * scale,
+        fontFamily: '"Courier New", monospace',
+        fontSize: 9 * scale,
+        color: 'rgba(255,255,255,0.76)',
+        padding: `${4 * scale}px ${8 * scale}px`,
+        background: 'rgba(0,0,0,0.35)',
+        borderRadius: 999,
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+      }}>{(compare?.beforeLabel || 'UNGRADED').toUpperCase()}</div>
+    </>
+  );
 
   return (
     <div
@@ -340,70 +386,79 @@ function LutPreview({ tone = "teal-orange", scale = 1, interactive = false, init
       style={{ position: 'absolute', inset: 0, overflow: 'hidden', touchAction: 'auto', userSelect: interactive ? 'none' : 'auto', cursor: 'inherit' }}
     >
       {hasVideoCompare ? (
-        <>
-          <video
-            ref={baseVideoRef}
-            src={shouldLoadVideo ? baseVideoSrc : undefined}
-            poster={getVideoPosterSrc(compare.beforeSrc)}
-            title={compare.beforeTitle || `${compare.title || 'LUT'} ${compare.beforeLabel || 'ungraded'} preview`}
-            aria-label={compare.beforeTitle || `${compare.title || 'LUT'} ${compare.beforeLabel || 'ungraded'} preview`}
-            muted
-            loop
-            playsInline
-            autoPlay
-            preload={shouldLoadVideo ? 'metadata' : 'none'}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            clipPath: `inset(0 ${Math.max(0, (1 - split) * 100)}% 0 0)`,
-          }}>
+        usePosterOnlyPreview ? (
+          <>
+            <img
+              src={basePosterSrc}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              style={previewMediaStyle}
+            />
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              clipPath: `inset(0 ${Math.max(0, (1 - split) * 100)}% 0 0)`,
+            }}>
+              <img
+                src={revealPosterSrc}
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+                style={previewMediaStyle}
+              />
+            </div>
+            {compareLabels}
+          </>
+        ) : (
+          <>
             <video
-              ref={revealVideoRef}
-              src={shouldLoadVideo ? revealVideoSrc : undefined}
-              poster={getVideoPosterSrc(compare.afterSrc)}
-              title={compare.afterTitle || `${compare.title || 'LUT'} ${compare.afterLabel || 'graded'} preview`}
-              aria-label={compare.afterTitle || `${compare.title || 'LUT'} ${compare.afterLabel || 'graded'} preview`}
+              ref={baseVideoRef}
+              src={shouldLoadVideo ? baseVideoSrc : undefined}
+              poster={basePosterSrc}
+              title={compare.beforeTitle || `${compare.title || 'LUT'} ${compare.beforeLabel || 'ungraded'} preview`}
+              aria-label={compare.beforeTitle || `${compare.title || 'LUT'} ${compare.beforeLabel || 'ungraded'} preview`}
               muted
               loop
               playsInline
+              webkit-playsinline="true"
               autoPlay
               preload={shouldLoadVideo ? 'metadata' : 'none'}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              disablePictureInPicture
+              disableRemotePlayback
+              controlsList="nodownload nofullscreen noremoteplayback"
+              x-webkit-airplay="deny"
+              tabIndex={-1}
+              style={previewMediaStyle}
             />
-          </div>
-          {showLabels && (
-            <>
-              <div style={{
-                position: 'absolute',
-                left: 10 * scale,
-                top: 10 * scale,
-                fontFamily: '"Courier New", monospace',
-                fontSize: 9 * scale,
-                color: 'rgba(255,255,255,0.9)',
-                padding: `${4 * scale}px ${8 * scale}px`,
-                background: 'rgba(0,0,0,0.45)',
-                borderRadius: 999,
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-              }}>{(compare.afterLabel || 'GRADED').toUpperCase()}</div>
-              <div style={{
-                position: 'absolute',
-                right: 10 * scale,
-                top: 10 * scale,
-                fontFamily: '"Courier New", monospace',
-                fontSize: 9 * scale,
-                color: 'rgba(255,255,255,0.76)',
-                padding: `${4 * scale}px ${8 * scale}px`,
-                background: 'rgba(0,0,0,0.35)',
-                borderRadius: 999,
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-              }}>{(compare.beforeLabel || 'UNGRADED').toUpperCase()}</div>
-            </>
-          )}
-        </>
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              clipPath: `inset(0 ${Math.max(0, (1 - split) * 100)}% 0 0)`,
+            }}>
+              <video
+                ref={revealVideoRef}
+                src={shouldLoadVideo ? revealVideoSrc : undefined}
+                poster={revealPosterSrc}
+                title={compare.afterTitle || `${compare.title || 'LUT'} ${compare.afterLabel || 'graded'} preview`}
+                aria-label={compare.afterTitle || `${compare.title || 'LUT'} ${compare.afterLabel || 'graded'} preview`}
+                muted
+                loop
+                playsInline
+                webkit-playsinline="true"
+                autoPlay
+                preload={shouldLoadVideo ? 'metadata' : 'none'}
+                disablePictureInPicture
+                disableRemotePlayback
+                controlsList="nodownload nofullscreen noremoteplayback"
+                x-webkit-airplay="deny"
+                tabIndex={-1}
+                style={previewMediaStyle}
+              />
+            </div>
+            {compareLabels}
+          </>
+        )
       ) : (
         <>
           <div style={{ position: 'absolute', inset: 0, background: t.a }}>
