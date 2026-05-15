@@ -9,7 +9,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - Route components are split into chunks: home, plugins, LUTs, and supporting pages.
 - `site/home.jsx` owns the homepage hero, featured product rail, and OMI proof teaser. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
 - `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `Australia/Sydney` timezone.
-- `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, media paths, and product page metadata.
+- `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, media paths, and product page metadata. LUT copy also has fallback/indexable mirrors in `site/luts.jsx`, `site/home.jsx`, and `llms.txt`; keep those aligned when changing product descriptions.
 - `site/visuals.jsx` owns reusable visual previews such as `LutPreview`. `site/media.js` owns responsive video helpers plus the constrained in-app browser detector; LUT previews render poster-based before/after layers in TikTok/Instagram-style WebViews so autoplay preview videos cannot jump into native fullscreen.
 - `lib/products.js` is the server-side commerce catalog. This is the only product catalog used for Stripe Checkout and fulfillment.
 - `api/*.js` files are Vercel-compatible CommonJS handlers. Locally, `server.js` maps those same files to `/api/...` routes and attaches small `res.status()`, `res.json()`, and `res.send()` helpers.
@@ -179,7 +179,7 @@ Stripe-hosted Checkout does not expose internal Checkout page clicks, field focu
 
 ## Homepage Travel Widget
 
-`site/travel.js` is the source of truth for the homepage location list. To update travel, add or edit rows in `TRAVEL_ITINERARY`, keep `startsOn` sorted oldest to newest, and make sure each `key` exists in the `LOCATIONS` map in `site/home.jsx`.
+`site/travel.js` is the source of truth for the homepage location list. To update travel, add or edit rows in `TRAVEL_ITINERARY`, keep `startsOn` sorted oldest to newest, and make sure each `key` exists in the `LOCATIONS` map in `site/home.jsx`. `LOCATIONS` entries usually render as `City, Country`; country-level stops can leave `country` blank and the travel list will omit the comma suffix.
 
 The current location is derived automatically at page load using the current date in the `Australia/Sydney` timezone. The latest row whose `startsOn` date is today or earlier becomes `here`; earlier rows become `past`; later rows become `next`.
 
@@ -187,6 +187,9 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-05-15: ONYX copy has been restored to its nighttime look across shared product data, route fallbacks, homepage fallback cards, FAQ copy, and `llms.txt`.
+- 2026-05-14: Homepage travel adds Madrid, Spain for Jun 7-Jul 6 and Croatia for Jul 6-Aug 6, including map/globe profiles that render on both desktop and mobile travel layouts.
+- 2026-05-14: OMI proof copy now says `7 million` across the homepage proof teaser, portfolio tile, and service case-study fallback copy.
 - 2026-05-13: LUT before/after previews now disable native video interaction and fall back to poster layers inside constrained TikTok/Instagram-style in-app browsers to prevent random fullscreen video flashes on product pages.
 - 2026-05-12: Homepage travel globe now applies a +60 degree counterclockwise longitude framing offset so the current location sits farther right on the planet without changing itinerary data.
 - 2026-05-12: Checkout Session creation now always enables Stripe-hosted manual promotion codes and no longer pre-applies `HIFRIEND`, because Stripe hides the promo-code field when a `discounts` array is supplied.

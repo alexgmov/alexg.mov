@@ -143,8 +143,8 @@ const LUTS = [
   {
     id: 'onyx',
     name: 'ONYX',
-    oneline: 'One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea',
-    seoDescription: 'One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea',
+    oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
+    seoDescription: 'ONYX is a .CUBE LUT crafted for nighttime footage, deep shadows, luminous skin, and city light.',
     price: 18,
     formats: '.CUBE',
     badge: 'NEW',
@@ -155,8 +155,8 @@ const LUTS = [
     mockupAlt: 'ONYX LUT product mockup',
     demoLabel: 'ONYX',
     details: {
-      whatItDoes: 'One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea',
-      whoItsFor: 'Editors grading underwater, ocean, diving, snorkel, reef, and tropical travel footage.',
+      whatItDoes: 'Shapes nighttime footage with deeper shadows, luminous skin, and controlled city-light glow.',
+      whoItsFor: 'Editors grading night streets, low-light portraits, events, and neon-lit creator footage.',
       whatYouGet: 'ZIP containing 1 x .CUBE',
     },
     compare: {
@@ -204,7 +204,7 @@ const LUTS = [
 const LUT_FAQS = [
   {
     q: 'What footage works best with these LUTs?',
-    a: 'MERIDIAN performs best with clean natural light. ONYX: One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea. HALOCLYNE is made for underwater footage, ocean life, turquoise water, and hazy sand-heavy scenes.',
+    a: 'MERIDIAN performs best with clean natural light. ONYX is built for nighttime footage, city lights, and deeper shadow work. HALOCLYNE is made for underwater footage, ocean life, turquoise water, and hazy sand-heavy scenes.',
   },
   {
     q: 'Do these LUTs work in Premiere Pro, DaVinci Resolve, Final Cut Pro, After Effects, and CapCut?',

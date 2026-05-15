@@ -22,6 +22,8 @@ export const TRAVEL_ITINERARY = [
   { key: 'bangkok',    when: 'APR 15–17',      startsOn: '2026-04-15' },
   { key: 'ko-samui',   when: 'APR 17–MAY 6',   startsOn: '2026-04-17' },
   { key: 'sydney',     when: 'MAY 6–JUN 6',    startsOn: '2026-05-06' },
+  { key: 'madrid',     when: 'JUN 7–JUL 6',    startsOn: '2026-06-07' },
+  { key: 'croatia',    when: 'JUL 6–AUG 6',    startsOn: '2026-07-06' },
 ];
 
 function dateValueInTimeZone(date, timeZone) {

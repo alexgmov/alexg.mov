@@ -54,7 +54,7 @@ const PORTFOLIO_VIDEOS = [
     category: 'launchbrand',
     kind: 'Product launch film',
     client: 'OMI',
-    blurb: 'Launch film with 6 million views.',
+    blurb: 'Launch film with 7 million views.',
     source: 'alexg.mov',
     sourceUrl: 'videos/portfolio/web/omi-launch-film.mp4',
     src: 'videos/portfolio/web/omi-launch-film.mp4',
@@ -292,11 +292,11 @@ const PORTFOLIO_SECTIONS = PORTFOLIO_CATEGORIES.map((category) => ({
 
 const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
   client: 'OMI',
-  impactValue: '6 million',
+  impactValue: '7 million',
   impactUnit: 'VIEWS',
   impactWindow: 'in 4 days',
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2025',
-  heroTitle: "Directed OMI's launch film and drove 6 million views in four days.",
+  heroTitle: "Directed OMI's launch film and drove 7 million views in four days.",
   summary: 'OMI needed a launch film built for reach. I handled concept, script, production, edit, and onscreen product moments.',
   videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
   services: ['Brand Film', 'Video Editing', 'Motion Graphics'],
@@ -311,7 +311,7 @@ const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
     },
     {
       title: 'Post + outcome',
-      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 6 million views across X and Instagram in four days.',
+      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 7 million views across X and Instagram in four days.',
     },
   ],
 };

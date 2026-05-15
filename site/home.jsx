@@ -137,6 +137,37 @@ const LOCATIONS = {
       scale: '~20 KM ACROSS',
     }
   },
+  'madrid': {
+    city: 'Madrid', country: 'Spain', lat: 40.4168, lng: -3.7038,
+    map: {
+      shapes: [
+        // Manzanares river corridor and city core, stylized
+        "M360,0 C350,70 348,135 365,205 C382,275 370,345 340,420 C320,470 318,535 330,600",
+        "M280,250 C345,210 430,195 505,210 C585,226 640,275 660,340 C680,410 645,470 580,500 C505,535 410,520 350,470 C292,420 260,340 280,250 Z",
+      ],
+      roads: [
+        "M0,305 L1000,295", "M500,0 L492,600", "M160,150 L820,500", "M800,120 L210,520",
+      ],
+      pin: { x: 500, y: 315 },
+      scale: '~12 KM ACROSS',
+    }
+  },
+  'croatia': {
+    city: 'Croatia', country: '', lat: 45.1, lng: 15.2,
+    map: {
+      shapes: [
+        // Mainland spine and Adriatic coastline, stylized
+        "M390,70 C460,45 550,55 610,110 C660,160 650,225 590,250 C540,272 520,310 540,350 C565,400 520,455 455,470 C390,485 330,450 310,395 C290,340 320,300 365,275 C410,250 425,215 400,175 C375,135 350,92 390,70 Z",
+        "M320,290 C290,335 282,390 300,445 C320,510 370,555 440,585",
+        // Dalmatian islands
+        "M250,345 C270,338 292,345 300,362 C308,380 292,398 270,395 C248,392 238,372 250,345 Z",
+        "M220,445 C240,438 260,445 267,462 C274,480 258,494 238,492 C218,490 208,468 220,445 Z",
+        "M295,520 C310,514 326,520 332,534 C338,548 326,560 310,558 C294,556 286,538 295,520 Z",
+      ],
+      pin: { x: 410, y: 345 },
+      scale: '~300 KM ACROSS',
+    }
+  },
 };
 
 // Itinerary loaded from site/travel.js; statuses are derived from current date.
@@ -479,7 +510,7 @@ function TravelLog() {
       <div className="travel2-list">
         <div className="travel2-mobile-title">
           <span>WHERE I AM</span>
-          <strong>{currentLoc.city}<em>, {currentLoc.country}</em></strong>
+          <strong>{currentLoc.city}{currentLoc.country && <em>, {currentLoc.country}</em>}</strong>
         </div>
         <div className="travel2-scroll-cue" aria-hidden="true">
           <span className="travel2-scroll-cue-icon">
@@ -494,7 +525,7 @@ function TravelLog() {
             return (
               <div key={i} ref={row.status === 'here' ? hereRef : null} className={"travel2-row travel2-" + row.status}>
                 <span className="travel2-when">{row.when}</span>
-                <span className="travel2-where">{loc.city}<span className="travel2-country">, {loc.country}</span></span>
+                <span className="travel2-where">{loc.city}{loc.country && <span className="travel2-country">, {loc.country}</span>}</span>
                 {row.status === 'here' && <span className="travel2-status">here</span>}
               </div>
             );
@@ -713,14 +744,14 @@ function HeroProductShortcut({ kind, name, type, href, onActivate, iconSrc }) {
 
 const OMI_CASE_STUDY = {
   client: 'OMI',
-  impactValue: '6 million',
+  impactValue: '7 million',
   impactUnit: 'VIEWS',
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2026',
   teaserLabelParts: ['OMI LAUNCH FILM', 'FULL STACK VIDEO PRODUCTION', '2026'],
-  teaserTitle: 'Shipped a launch film with 6 million views.',
+  teaserTitle: 'Shipped a launch film with 7 million views.',
   teaserSummary: 'Concept, production, edit, and UI moments tied to one metric: reach.',
   videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
-  heroTitle: "Directed OMI's launch film and drove 6 million views in four days.",
+  heroTitle: "Directed OMI's launch film and drove 7 million views in four days.",
   summary: 'OMI needed a launch film built for reach. I handled concept, script, production, edit, and onscreen product moments.',
   detailSections: [
     {
@@ -733,7 +764,7 @@ const OMI_CASE_STUDY = {
     },
     {
       title: 'Post + outcome',
-      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 6 million views across X and Instagram in four days.',
+      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 7 million views across X and Instagram in four days.',
     },
   ],
 };
@@ -791,7 +822,7 @@ function Home({ go }) {
   const fallbackOnyx = {
     id: 'onyx',
     name: 'ONYX',
-    oneline: 'One-click underwater grade that warms skin and ocean life into vivid orange against a clean turquoise sea',
+    oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
     price: 18,
     formats: '.CUBE',
     badge: 'NEW',
