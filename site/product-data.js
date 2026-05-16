@@ -33,7 +33,7 @@ const PLUGINS = [
     id: 'sidestream',
     name: 'Sidestream',
     oneline: 'Search YouTube, preview, download, convert, and import media without leaving Premiere.',
-    price: 18,
+    price: 0,
     version: '1.0.2',
     badge: 'LIVE',
     status: 'released',
@@ -48,7 +48,7 @@ const PLUGINS = [
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
     get: 'Sidestream 1.0.2 ZXP · Premiere panel · YouTube search · video/audio downloads · Premiere-safe MP4 conversion · lifetime download.',
     install: [
-      'Buy once and check your email for the Sidestream download link.',
+      'Free for now: enter your email at checkout and Sidestream sends the download link.',
       'Download Sidestream-1.0.2.zxp on your editing computer.',
       'Install the ZXP with your Adobe extension installer.',
       'Open Window → Extensions → Sidestream in Premiere.',
@@ -90,7 +90,7 @@ const PLUGINS = [
       },
       {
         q: 'How do I receive Sidestream after checkout?',
-        a: 'The Sidestream ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install it later on your editing computer.',
+        a: 'The free Sidestream checkout sends the ZXP download link to your email, so you can claim it on your phone and install it later on your editing computer.',
       },
     ],
   },
@@ -133,7 +133,7 @@ const PLUGIN_FAQS = [
   },
   {
     q: 'How do I receive a plugin after checkout?',
-    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install later on your editing computer.',
+    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install later on your editing computer.',
   },
 ];
 

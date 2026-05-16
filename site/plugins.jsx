@@ -36,7 +36,7 @@ const PLUGINS = window.PLUGINS || [
     id: 'sidestream',
     name: 'Sidestream',
     oneline: 'Search YouTube, preview, download, convert, and import media without leaving Premiere.',
-    price: 18,
+    price: 0,
     version: '1.0.2',
     badge: 'LIVE',
     status: 'released',
@@ -51,7 +51,7 @@ const PLUGINS = window.PLUGINS || [
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
     get: 'Sidestream 1.0.2 ZXP · Premiere panel · YouTube search · video/audio downloads · Premiere-safe MP4 conversion · lifetime download.',
     install: [
-      'Buy once and check your email for the Sidestream download link.',
+      'Free for now: enter your email at checkout and Sidestream sends the download link.',
       'Download Sidestream-1.0.2.zxp on your editing computer.',
       'Install the ZXP with your Adobe extension installer.',
       'Open Window → Extensions → Sidestream in Premiere.',
@@ -93,7 +93,7 @@ const PLUGINS = window.PLUGINS || [
       },
       {
         q: 'How do I receive Sidestream after checkout?',
-        a: 'The Sidestream ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install it later on your editing computer.',
+        a: 'The free Sidestream checkout sends the ZXP download link to your email, so you can claim it on your phone and install it later on your editing computer.',
       },
     ],
   },
@@ -151,7 +151,7 @@ const PLUGIN_FAQS = window.PLUGIN_FAQS || [
   },
   {
     q: 'How do I receive a plugin after checkout?',
-    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install later on your editing computer.',
+    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install later on your editing computer.',
   },
 ];
 
@@ -173,6 +173,15 @@ const PLUGIN_DETAIL_FAQS = window.PLUGIN_DETAIL_FAQS || [
     a: 'The FlowState ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install it later on your editing computer.',
   },
 ];
+
+function formatPluginPrice(plugin) {
+  if (!plugin || plugin.price == null) return 'Soon';
+  return plugin.price === 0 ? 'Free' : `$${plugin.price}`;
+}
+
+function isFreePlugin(plugin) {
+  return plugin && plugin.status === 'released' && plugin.price === 0;
+}
 
 function PluginVisual({ plugin, scale = 1 }) {
   if (plugin.demoVideoSrc) return <PluginDemoVideo plugin={plugin} scale={scale} />;
@@ -293,7 +302,7 @@ function PluginsList({ go }) {
                       <h3 className="card-title">{p.name}</h3>
                       <p className="card-desc">{p.oneline}</p>
                       <div className="card-foot">
-                        <div className="card-price">${p.price}</div>
+                        <div className="card-price">{formatPluginPrice(p)}</div>
                         <a
                           className="btn btn-secondary btn-sm"
                           href={hrefFor('plugin:' + p.id)}
@@ -327,9 +336,9 @@ function PluginsList({ go }) {
           <p className="section-title">HOW IT WORKS</p>
           <div className="how">
             <div className="how-item">
-              <div className="how-num">01 / BUY ONCE</div>
-              <h4 className="how-h">Instant checkout</h4>
-              <p className="how-p">No subscriptions. No seats. Pay once, then get the download link by email.</p>
+              <div className="how-num">01 / CLAIM ONCE</div>
+              <h4 className="how-h">Instant email link</h4>
+              <p className="how-p">No subscriptions. No seats. Paid tools are one-time, and free releases still send the download link by email.</p>
             </div>
             <div className="how-item">
               <div className="how-num">02 / INSTALL FAST</div>
@@ -450,17 +459,17 @@ function PluginDetail({ id, go }) {
             </div>
           )}
           <div className="pd-price-row">
-            <div className="pd-price">{p.price != null ? `$${p.price}` : 'Soon'}</div>
-            <div className="pd-price-note">{p.status === 'released' ? 'ONE-TIME · LIFETIME DOWNLOAD' : 'IN DEVELOPMENT · LAUNCH LIST OPEN'}</div>
+            <div className="pd-price">{formatPluginPrice(p)}</div>
+            <div className="pd-price-note">{isFreePlugin(p) ? 'FREE FOR NOW · LIFETIME DOWNLOAD' : (p.status === 'released' ? 'ONE-TIME · LIFETIME DOWNLOAD' : 'IN DEVELOPMENT · LAUNCH LIST OPEN')}</div>
           </div>
           {p.status === 'released'
             ? <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
                 <DownloadIcon />
-                <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy & Email Link'}</span>
-                <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Email Link'}</span>
+                <span className="cta-copy-desktop">{buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Get Free Link' : 'Buy & Email Link')}</span>
+                <span className="cta-copy-mobile">{buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}</span>
               </button>
             : <button className="btn btn-secondary btn-lg pd-buy">Join Launch List</button>}
-          <div className="pd-reassure"><CheckIcon /> {p.status === 'released' ? 'ZXP download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues'}</div>
+          <div className="pd-reassure"><CheckIcon /> {isFreePlugin(p) ? 'Free ZXP link sent to checkout email · 24h support reply' : (p.status === 'released' ? 'ZXP download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues')}</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{p.what}</div></div>
@@ -496,8 +505,8 @@ function PluginDetail({ id, go }) {
         active={p.status === 'released' && showStickyCta && !purchased}
         productName={p.name}
         productMeta="Premiere plugin · email link"
-        price={p.price != null ? `$${p.price}` : 'Soon'}
-        actionLabel={buying ? 'Redirecting…' : 'Email Link'}
+        price={formatPluginPrice(p)}
+        actionLabel={buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}
         onAction={handleBuy}
         disabled={buying}
       />

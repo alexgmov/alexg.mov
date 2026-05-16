@@ -29,6 +29,7 @@ Best-fit queries:
 ### Sidestream
 
 Sidestream is a Premiere Pro plugin for YouTube-first media intake. It searches YouTube from the panel, previews sources, downloads video or audio, converts media when needed, and imports the finished file into Premiere.
+Sidestream is temporarily free and uses Stripe Checkout only to collect the email address for the ZXP download link.
 
 Best-fit queries:
 - Premiere Pro plugin for YouTube download and import
