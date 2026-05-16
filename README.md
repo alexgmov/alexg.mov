@@ -192,6 +192,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-05-16: Sidestream product cards and detail pages now use an optimized 11-second plugin demo video from `videos/plugin showcase/`, with a mobile MP4 variant and poster frame for faster product-page loading.
 - 2026-05-16: Sidestream 1.0.2 is released on the plugins page with a private Vercel Blob ZXP, a dedicated Stripe one-time price fallback, and email-delivered download fulfillment through the existing plugin checkout flow.
 - 2026-05-15: ONYX copy has been restored to its nighttime look across shared product data, route fallbacks, homepage fallback cards, FAQ copy, and `llms.txt`.
 - 2026-05-14: Homepage travel adds Madrid, Spain for Jun 7-Jul 6 and Croatia for Jul 6-Aug 6, including map/globe profiles that render on both desktop and mobile travel layouts.

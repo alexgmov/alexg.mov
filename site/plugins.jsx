@@ -1,4 +1,5 @@
 import React from 'react';
+import { useResponsiveVideoSrc } from './media.js';
 
 // Plugins list + Plugin detail
 
@@ -40,7 +41,10 @@ const PLUGINS = window.PLUGINS || [
     badge: 'LIVE',
     status: 'released',
     variant: 'media-intake',
-    visual: 'blank',
+    visual: 'demo-video',
+    demoVideoSrc: 'videos/plugin showcase/sidestream demo.optimized.mp4',
+    demoPosterSrc: 'videos/plugin showcase/sidestream demo.optimized.poster.jpg',
+    demoDuration: '11s',
     seoTitle: 'Sidestream Premiere Pro Plugin | YouTube Media Intake for Editors',
     seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
     what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
@@ -171,8 +175,70 @@ const PLUGIN_DETAIL_FAQS = window.PLUGIN_DETAIL_FAQS || [
 ];
 
 function PluginVisual({ plugin, scale = 1 }) {
+  if (plugin.demoVideoSrc) return <PluginDemoVideo plugin={plugin} scale={scale} />;
   if (plugin.visual === 'blank') return <BlankPluginVisual scale={scale} />;
   return <PremiereScreenshot variant={plugin.variant} scale={scale} />;
+}
+
+function PluginDemoVideo({ plugin, scale = 1 }) {
+  const wrapRef = React.useRef(null);
+  const videoRef = React.useRef(null);
+  const videoSrc = useResponsiveVideoSrc(plugin.demoVideoSrc);
+  const [shouldLoadVideo, setShouldLoadVideo] = React.useState(false);
+
+  React.useEffect(() => {
+    const node = wrapRef.current;
+    setShouldLoadVideo(false);
+    if (!node || !('IntersectionObserver' in window)) {
+      setShouldLoadVideo(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setShouldLoadVideo(true);
+      observer.disconnect();
+    }, {
+      threshold: 0.01,
+      rootMargin: '320px 0px',
+    });
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [plugin.demoVideoSrc]);
+
+  React.useEffect(() => {
+    if (!shouldLoadVideo) return;
+    videoRef.current?.play().catch(() => {});
+  }, [shouldLoadVideo, videoSrc]);
+
+  return (
+    <div
+      ref={wrapRef}
+      className="plugin-demo-visual"
+      style={{ '--plugin-demo-scale': scale }}
+      aria-label={`${plugin.name} demo video`}
+    >
+      <video
+        ref={videoRef}
+        className="plugin-demo-video"
+        src={shouldLoadVideo ? videoSrc : undefined}
+        poster={plugin.demoPosterSrc}
+        title={`${plugin.name} demo video`}
+        aria-label={`${plugin.name} demo video`}
+        muted
+        loop
+        playsInline
+        webkit-playsinline="true"
+        autoPlay
+        preload={shouldLoadVideo ? 'metadata' : 'none'}
+        disablePictureInPicture
+        disableRemotePlayback
+        controlsList="nodownload nofullscreen noremoteplayback"
+        x-webkit-airplay="deny"
+      />
+    </div>
+  );
 }
 
 function BlankPluginVisual({ scale = 1 }) {
@@ -290,7 +356,9 @@ function PluginDetail({ id, go }) {
   const hrefFor = window.routeHref || ((id) => '#');
   const purchased = new URLSearchParams(location.search).get('purchased') === 'true';
   const p = PLUGINS.find(x => x.id === id) || PLUGINS[0];
-  const hasBlankVisual = p.visual === 'blank';
+  const hasDemoVideo = Boolean(p.demoVideoSrc);
+  const hasBlankVisual = p.visual === 'blank' && !hasDemoVideo;
+  const showGeneratedPreview = !hasBlankVisual && !hasDemoVideo;
   const detailGuide = p.detailGuide || {
     title: `${p.name} helps you find the right clip faster.`,
     intro: 'Built for long sessions, mixed bins, and generic camera names.',
@@ -344,7 +412,7 @@ function PluginDetail({ id, go }) {
           <div className="pd-media">
             <PluginVisual plugin={p} scale={1.2} />
             {/* play overlay */}
-            {!hasBlankVisual && thumb === 0 && (
+            {showGeneratedPreview && thumb === 0 && (
               <div style={{
                 position: 'absolute', inset: 0, display: 'grid', placeItems: 'center',
                 background: 'linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.5))',
@@ -352,11 +420,11 @@ function PluginDetail({ id, go }) {
                 <div className="reel-play-btn" style={{ width: 56, height: 56 }}><PlayIcon size={20} /></div>
               </div>
             )}
-            {!hasBlankVisual && <div className="reel-meta">
-              <span>DEMO · 42s</span>
+            {(hasDemoVideo || showGeneratedPreview) && <div className="reel-meta">
+              <span>DEMO · {hasDemoVideo ? (p.demoDuration || '11s') : '42s'}</span>
             </div>}
           </div>
-          {!hasBlankVisual && <div className="pd-thumbs">
+          {showGeneratedPreview && <div className="pd-thumbs">
             {[0, 1, 2, 3].map(i => (
               <div key={i} className={"pd-thumb " + (thumb === i ? 'active' : '')} onClick={() => setThumb(i)}>
                 <div style={{ position: 'relative', width: '100%', height: '100%' }}>
