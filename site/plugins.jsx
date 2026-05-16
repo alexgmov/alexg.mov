@@ -32,6 +32,68 @@ const PLUGINS = window.PLUGINS || [
     ],
   },
   {
+    id: 'sidestream',
+    name: 'Sidestream',
+    oneline: 'Search YouTube, preview, download, convert, and import media without leaving Premiere.',
+    price: 18,
+    version: '1.0.2',
+    badge: 'LIVE',
+    status: 'released',
+    variant: 'media-intake',
+    visual: 'blank',
+    seoTitle: 'Sidestream Premiere Pro Plugin | YouTube Media Intake for Editors',
+    seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
+    what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
+    who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
+    get: 'Sidestream 1.0.2 ZXP · Premiere panel · YouTube search · video/audio downloads · Premiere-safe MP4 conversion · lifetime download.',
+    install: [
+      'Buy once and check your email for the Sidestream download link.',
+      'Download Sidestream-1.0.2.zxp on your editing computer.',
+      'Install the ZXP with your Adobe extension installer.',
+      'Open Window → Extensions → Sidestream in Premiere.',
+      'Search YouTube, preview a result, download video or audio, then import the finished file.',
+    ],
+    specs: [
+      'Adobe Premiere Pro 2020 (14.0) or later',
+      'macOS · Windows',
+      'YouTube-first media intake workflow',
+      'ZXP extension package',
+      'Version 1.0.2',
+    ],
+    detailGuide: {
+      title: 'Sidestream keeps media intake inside Premiere.',
+      intro: 'Built for reference pulls, licensed source clips, sound bites, and fast edit-room gathering.',
+      items: [
+        {
+          title: 'YouTube research without browser hopping',
+          body: 'Search, inspect, and preview candidates from the Premiere panel before downloading anything.',
+        },
+        {
+          title: 'Video or audio downloads',
+          body: 'Pull the format you need, normalize it for Premiere, and keep the handoff close to the timeline.',
+        },
+        {
+          title: 'Project-aware import',
+          body: 'Save into a predictable Sidestream folder and import finished media into the active project.',
+        },
+      ],
+    },
+    detailFaqs: [
+      {
+        q: 'What does Sidestream do in Premiere Pro?',
+        a: 'It searches YouTube, previews sources, downloads video or audio, converts media when needed, and imports the finished file into Premiere.',
+      },
+      {
+        q: 'Is Sidestream for licensed or permitted media?',
+        a: 'Yes. Use it only with media you own, have licensed, or are otherwise permitted to download and edit.',
+      },
+      {
+        q: 'How do I receive Sidestream after checkout?',
+        a: 'The Sidestream ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install it later on your editing computer.',
+      },
+    ],
+  },
+  {
     id: 'demonclipper',
     name: 'Demon Clip',
     oneline: 'A faster way to carve long sessions into usable selects.',
@@ -76,16 +138,16 @@ const PLUGIN_GUIDE_ITEMS = [
 
 const PLUGIN_FAQS = window.PLUGIN_FAQS || [
   {
-    q: 'What is the best Premiere Pro plugin for searching footage by meaning?',
-    a: 'FlowState analyzes selected bins, builds clip metadata, and lets editors search by content instead of filename.',
+    q: 'Which Premiere plugin should I start with?',
+    a: 'Use FlowState when you need AI clip search across your own footage. Use Sidestream when you need YouTube-first media intake, preview, download, conversion, and import inside Premiere.',
   },
   {
-    q: 'Does FlowState replace a normal editing workflow?',
-    a: 'No. It helps you find and organize footage faster. You still make the edit decisions.',
+    q: 'Do these plugins replace a normal editing workflow?',
+    a: 'No. They handle specific bottlenecks inside Premiere so you can keep making the edit decisions.',
   },
   {
-    q: 'Who should use an AI media browser plugin?',
-    a: 'Editors with large bins, interviews, B-roll, product footage, launches, and creator shoots.',
+    q: 'How do I receive a plugin after checkout?',
+    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install later on your editing computer.',
   },
 ];
 
@@ -229,6 +291,25 @@ function PluginDetail({ id, go }) {
   const purchased = new URLSearchParams(location.search).get('purchased') === 'true';
   const p = PLUGINS.find(x => x.id === id) || PLUGINS[0];
   const hasBlankVisual = p.visual === 'blank';
+  const detailGuide = p.detailGuide || {
+    title: `${p.name} helps you find the right clip faster.`,
+    intro: 'Built for long sessions, mixed bins, and generic camera names.',
+    items: [
+      {
+        title: 'Interview and talking-head projects',
+        body: 'Search by moment, subject, or visual detail without scrubbing the shoot again.',
+      },
+      {
+        title: 'B-roll and product footage libraries',
+        body: 'Find shots by frame content, motion, or context.',
+      },
+      {
+        title: 'Launch films and deadline edits',
+        body: 'Surface usable options quickly without leaving Premiere.',
+      },
+    ],
+  };
+  const detailFaqs = p.detailFaqs || PLUGIN_DETAIL_FAQS;
 
   async function handleBuy() {
     setBuying(true);
@@ -324,23 +405,10 @@ function PluginDetail({ id, go }) {
       <BuyerGuide
         contained
         eyebrow="BEST USE CASES"
-        title={`${p.name} helps you find the right clip faster.`}
-        intro="Built for long sessions, mixed bins, and generic camera names."
-        items={[
-          {
-            title: 'Interview and talking-head projects',
-            body: 'Search by moment, subject, or visual detail without scrubbing the shoot again.',
-          },
-          {
-            title: 'B-roll and product footage libraries',
-            body: 'Find shots by frame content, motion, or context.',
-          },
-          {
-            title: 'Launch films and deadline edits',
-            body: 'Surface usable options quickly without leaving Premiere.',
-          },
-        ]}
-        faqs={PLUGIN_DETAIL_FAQS}
+        title={detailGuide.title}
+        intro={detailGuide.intro}
+        items={detailGuide.items}
+        faqs={detailFaqs}
       />
 
       <div className="pd-blocks" style={{ paddingBottom: 72 }}>

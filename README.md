@@ -41,10 +41,12 @@ Commerce and fulfillment use these variables:
 - `STRIPE_PRICE_ONYX`: Stripe Price ID for the ONYX checkout product.
 - `STRIPE_PRICE_HALOCLYNE`: Stripe Price ID for the HALOCLYNE checkout product.
 - `STRIPE_PRICE_FLOWSTATE`: optional Stripe Price ID override for the FlowState plugin checkout product.
+- `STRIPE_PRICE_SIDESTREAM`: optional Stripe Price ID override for the Sidestream plugin checkout product.
 - `MERIDIAN_BLOB_URL`: optional private Vercel Blob URL override for MERIDIAN.
 - `ONYX_BLOB_URL`: optional private Vercel Blob URL override for ONYX.
 - `HALOCLYNE_BLOB_URL`: optional private Vercel Blob URL override for HALOCLYNE.
 - `FLOWSTATE_BLOB_URL`: optional private Vercel Blob URL override for FlowState.
+- `SIDESTREAM_BLOB_URL`: optional private Vercel Blob URL override for Sidestream.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
 - `RESEND_API_KEY`: Resend key used by the webhook fulfillment email and first-visit promo code email.
@@ -126,6 +128,7 @@ That value must match a key in `PRODUCTS`. Plugin detail pages currently post `p
 - Frontend page `lut:onyx` -> checkout product `onyx` -> ONYX zip.
 - Frontend page `lut:haloclyne` -> checkout product `haloclyne` -> HALOCLYNE zip.
 - Frontend page `plugin:flowstate` -> checkout product `flowstate` -> FlowState ZXP.
+- Frontend page `plugin:sidestream` -> checkout product `sidestream` -> Sidestream ZXP.
 
 When adding a new product:
 
@@ -136,6 +139,8 @@ When adding a new product:
 5. Make sure the frontend `checkoutProductId` or released plugin `id` matches the server catalog key.
 6. Run a test Checkout Session and confirm that the webhook sends the email.
 7. Open the emailed link before and after expiration to confirm download and expiry behavior.
+
+Local product files can live under `plugins/` or `luts/` while they are being uploaded to Vercel Blob. Those folders are ignored so large deliverables do not get committed.
 
 ## Webhook Fulfillment Flow
 
@@ -187,6 +192,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-05-16: Sidestream 1.0.2 is released on the plugins page with a private Vercel Blob ZXP, a dedicated Stripe one-time price fallback, and email-delivered download fulfillment through the existing plugin checkout flow.
 - 2026-05-15: ONYX copy has been restored to its nighttime look across shared product data, route fallbacks, homepage fallback cards, FAQ copy, and `llms.txt`.
 - 2026-05-14: Homepage travel adds Madrid, Spain for Jun 7-Jul 6 and Croatia for Jul 6-Aug 6, including map/globe profiles that render on both desktop and mobile travel layouts.
 - 2026-05-14: OMI proof copy now says `7 million` across the homepage proof teaser, portfolio tile, and service case-study fallback copy.

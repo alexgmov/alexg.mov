@@ -7,6 +7,7 @@ alexg.mov is the site and shop for Alex Garrett, a filmmaker, editor, and tool-m
 - Home: https://alexg.mov/
 - Premiere Pro plugins: https://alexg.mov/?page=plugins
 - FlowState Premiere Pro plugin: https://alexg.mov/?page=plugin%3Aflowstate
+- Sidestream Premiere Pro plugin: https://alexg.mov/?page=plugin%3Asidestream
 - Cinematic LUTs: https://alexg.mov/?page=luts
 - MERIDIAN cinematic LUT: https://alexg.mov/?page=lut%3Acinematic-01
 - ONYX cinematic LUT: https://alexg.mov/?page=lut%3Aonyx
@@ -24,6 +25,16 @@ Best-fit queries:
 - AI media browser for Premiere Pro
 - semantic clip search for video editors
 - find B-roll and A-roll faster in Premiere
+
+### Sidestream
+
+Sidestream is a Premiere Pro plugin for YouTube-first media intake. It searches YouTube from the panel, previews sources, downloads video or audio, converts media when needed, and imports the finished file into Premiere.
+
+Best-fit queries:
+- Premiere Pro plugin for YouTube download and import
+- YouTube media intake plugin for Premiere Pro
+- download video or audio inside Premiere
+- preview and import web media in Premiere Pro
 
 ### MERIDIAN
 

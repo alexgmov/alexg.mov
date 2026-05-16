@@ -178,8 +178,8 @@ function pageSeo(page) {
     };
     return {
       ...defaults,
-      title: 'Premiere Pro Plugins for Editors | FlowState AI Clip Search',
-      description: 'Small Premiere plugins, including FlowState: AI clip search by meaning, not filenames.',
+      title: 'Premiere Pro Plugins for Editors | FlowState & Sidestream',
+      description: 'Small Premiere plugins, including FlowState for AI clip search and Sidestream for YouTube-first media intake.',
       canonical: absoluteRoute('plugins'),
       graph: [...baseGraph(), itemList, faqSchema(window.PLUGIN_FAQS)].filter(Boolean),
     };
@@ -191,8 +191,8 @@ function pageSeo(page) {
     if (plugin) {
       return {
         ...defaults,
-        title: `${plugin.name} Premiere Pro Plugin | AI Footage Search for Editors`,
-        description: `${plugin.name} helps Premiere editors find and reuse footage without leaving the edit.`,
+        title: plugin.seoTitle || `${plugin.name} Premiere Pro Plugin | Tools for Editors`,
+        description: plugin.seoDescription || `${plugin.name} helps Premiere editors work faster without leaving the edit.`,
         canonical: absoluteRoute(`plugin:${plugin.id}`),
         graph: [
           ...baseGraph(),
@@ -202,7 +202,7 @@ function pageSeo(page) {
             { name: 'Plugins', url: absoluteRoute('plugins') },
             { name: plugin.name, url: absoluteRoute(`plugin:${plugin.id}`) },
           ]),
-          faqSchema(window.PLUGIN_DETAIL_FAQS),
+          faqSchema(plugin.detailFaqs || window.PLUGIN_DETAIL_FAQS),
         ].filter(Boolean),
       };
     }

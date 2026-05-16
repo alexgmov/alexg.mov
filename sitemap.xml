@@ -19,6 +19,12 @@
     <priority>0.95</priority>
   </url>
   <url>
+    <loc>https://alexg.mov/?page=plugin%3Asidestream</loc>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://alexg.mov/?page=luts</loc>
     <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>

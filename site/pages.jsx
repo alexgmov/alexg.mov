@@ -884,7 +884,7 @@ function Services({ go }) {
 }
 
 const FAQS = window.FAQS || [
-  { q: 'Do your plugins work on Windows?', a: 'Yes. Every plugin ships with a signed installer for Mac and Windows. Premiere Pro 2024 (24.0) or later.' },
+  { q: 'Do your plugins work on Windows?', a: 'Yes. Plugins ship as ZXP extension packages for macOS and Windows. Check each product page for the exact Premiere Pro version requirement.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
   { q: 'Do you offer refunds?', a: 'No. These are digital downloads, so all sales are final. If something is broken on my end, email me and I will fix or replace it.' },
   { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Include your OS, Premiere version, and a screen recording if possible.' },
