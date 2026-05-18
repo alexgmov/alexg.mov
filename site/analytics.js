@@ -14,7 +14,7 @@
     quick_buyer: 'Moves from product discovery to checkout quickly with little comparison behavior.',
     returning_lut_considerer: 'Returns after a prior LUT visit, usually with meaningful LUT page time and no purchase yet.',
     high_intent_lut_shopper: 'Spends meaningful time with LUT pages, previews, or buy CTAs.',
-    plugin_workflow_evaluator: 'Studies FlowState, compatibility, install details, or support before deciding.',
+    plugin_workflow_evaluator: 'Studies plugin compatibility, install details, or support before deciding.',
     comparison_shopper: 'Views both plugin and LUT paths before taking a purchase action.',
     service_lead_candidate: 'Engages with services, portfolio, proof, or the brief email flow.',
     proof_seeker: 'Looks for portfolio, case studies, testimonials, or proof before product action.',
@@ -522,6 +522,23 @@
     return String(node?.innerText || node?.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 120);
   }
 
+  function numberFromDataset(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : undefined;
+  }
+
+  function pricingFromTarget(target) {
+    const pricingNode = target.closest?.('[data-pricing-variant]');
+    if (!pricingNode) return {};
+    const pricing = {
+      pricingVariant: pricingNode.dataset.pricingVariant,
+      price: numberFromDataset(pricingNode.dataset.price),
+      compareAtPrice: numberFromDataset(pricingNode.dataset.compareAtPrice),
+    };
+    Object.keys(pricing).forEach(key => pricing[key] === undefined && delete pricing[key]);
+    return pricing;
+  }
+
   document.addEventListener('click', event => {
     const summary = event.target.closest?.('summary');
     if (summary) {
@@ -541,12 +558,14 @@
     const currentPage = currentPageFromLocation();
     const product = productFromPage(targetPage || currentPage);
     const lowerLabel = label.toLowerCase();
+    const pricing = pricingFromTarget(target);
 
     if (className.includes('pd-buy') || lowerLabel.includes('buy & download')) {
       track('buy_click', {
         label,
         targetPage,
         ...product,
+        ...pricing,
       });
       return;
     }
@@ -565,6 +584,7 @@
         label,
         targetPage,
         ...product,
+        ...pricing,
       });
       return;
     }

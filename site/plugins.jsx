@@ -1,37 +1,10 @@
 import React from 'react';
 import { useResponsiveVideoSrc } from './media.js';
+import { PriceDisplay, pricingTrackingAttrs, pricingVariantFor } from './pricing.jsx';
 
 // Plugins list + Plugin detail
 
 const PLUGINS = window.PLUGINS || [
-  {
-    id: 'flowstate',
-    name: 'FlowState',
-    oneline: 'Search Premiere footage by meaning, not filenames.',
-    price: 18,
-    version: '1.0.0',
-    badge: 'LIVE',
-    status: 'released',
-    variant: 'ai-media-browser',
-    visual: 'blank',
-    what: 'FlowState scans a bin, analyzes clips with Gemini, and builds a searchable catalog.',
-    who: 'Editors sorting A-roll, B-roll, transcripts, lighting, motion, and shot details across raw media.',
-    get: 'FlowState 1.0.0 ZXP · Premiere panel · Gemini workflow · searchable catalog.json · results bin · lifetime download.',
-    install: [
-      'Buy once and check your email for the FlowState download link.',
-      'Download FlowState-1.0.0.zxp on your editing computer.',
-      'Install the ZXP with your Adobe extension installer.',
-      'Open Window → Extensions → FlowState in Premiere.',
-      'Select a bin subtree, run analysis, then search and send matches to a results bin.',
-    ],
-    specs: [
-      'Adobe Premiere Pro 2024 (24.0) or later',
-      'macOS 13+ · Windows 10/11',
-      'Gemini API access required',
-      'ZXP extension package',
-      'Version 1.0.0',
-    ],
-  },
   {
     id: 'sidestream',
     name: 'Sidestream',
@@ -127,12 +100,12 @@ const PLUGINS = window.PLUGINS || [
 
 const PLUGIN_GUIDE_ITEMS = [
   {
-    title: 'Best for AI footage search',
-    body: 'Find clips by what is in them, not what they are called.',
+    title: 'Best for media intake',
+    body: 'Search, preview, download, convert, and import web media without leaving Premiere.',
   },
   {
-    title: 'Best for long shoots',
-    body: 'Use it on interviews, B-roll, product demos, creator sessions, and launch edits.',
+    title: 'Best for deadline pulls',
+    body: 'Keep source gathering close to the timeline when a browser detour would slow the edit down.',
   },
   {
     title: 'Best for Premiere-first workflows',
@@ -143,7 +116,7 @@ const PLUGIN_GUIDE_ITEMS = [
 const PLUGIN_FAQS = window.PLUGIN_FAQS || [
   {
     q: 'Which Premiere plugin should I start with?',
-    a: 'Use FlowState when you need AI clip search across your own footage. Use Sidestream when you need YouTube-first media intake, preview, download, conversion, and import inside Premiere.',
+    a: 'Use Sidestream when you need YouTube-first media intake, preview, download, conversion, and import inside Premiere.',
   },
   {
     q: 'Do these plugins replace a normal editing workflow?',
@@ -157,30 +130,31 @@ const PLUGIN_FAQS = window.PLUGIN_FAQS || [
 
 const PLUGIN_DETAIL_FAQS = window.PLUGIN_DETAIL_FAQS || [
   {
-    q: 'What does FlowState do in Premiere Pro?',
-    a: 'It scans selected bins with AI and turns clip details into searchable metadata.',
+    q: 'What do these Premiere plugins do?',
+    a: 'They handle focused edit-room bottlenecks inside Premiere, from media intake to faster selects.',
   },
   {
-    q: 'What does FlowState help me find?',
-    a: 'A-roll, B-roll, shot type, motion, lighting, subject matter, and clip context.',
+    q: 'Are they full editing replacements?',
+    a: 'No. They stay narrow so the plugin helps with one workflow without taking over the edit.',
   },
   {
     q: 'What software do I need?',
-    a: 'FlowState is built for Adobe Premiere Pro 2024 or later on macOS 13+ or Windows 10/11. Gemini API access is required for analysis.',
+    a: 'Released plugins ship as ZXP extensions for Premiere Pro on macOS and Windows. Check each plugin page for exact version support.',
   },
   {
-    q: 'How do I receive FlowState after checkout?',
-    a: 'The FlowState ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install it later on your editing computer.',
+    q: 'How do I receive a plugin after checkout?',
+    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install it later on your editing computer.',
   },
 ];
 
-function formatPluginPrice(plugin) {
-  if (!plugin || plugin.price == null) return 'Soon';
-  return plugin.price === 0 ? 'Free' : `$${plugin.price}`;
-}
-
 function isFreePlugin(plugin) {
   return plugin && plugin.status === 'released' && plugin.price === 0;
+}
+
+function pluginPriceNote(plugin) {
+  if (plugin?.priceNote) return plugin.priceNote;
+  if (isFreePlugin(plugin)) return 'FREE FOR NOW · LIFETIME DOWNLOAD';
+  return plugin?.status === 'released' ? 'ONE-TIME · LIFETIME DOWNLOAD' : 'IN DEVELOPMENT · LAUNCH LIST OPEN';
 }
 
 function PluginVisual({ plugin, scale = 1 }) {
@@ -276,7 +250,7 @@ function PluginsList({ go }) {
             <span>·</span>
             <span>MAC + WINDOWS</span>
             <span>·</span>
-            <span>PREMIERE 2024+</span>
+            <span>PREMIERE 2020+</span>
           </div>
         </div>
       </section>
@@ -290,6 +264,7 @@ function PluginsList({ go }) {
                 className={"card plugin-card" + (released ? '' : ' plugin-card-locked')}
                 onClick={released ? () => go('plugin:' + p.id) : undefined}
                 aria-disabled={released ? undefined : 'true'}
+                {...pricingTrackingAttrs(p)}
               >
                 {released ? (
                   <>
@@ -302,10 +277,11 @@ function PluginsList({ go }) {
                       <h3 className="card-title">{p.name}</h3>
                       <p className="card-desc">{p.oneline}</p>
                       <div className="card-foot">
-                        <div className="card-price">{formatPluginPrice(p)}</div>
+                        <div className="card-price"><PriceDisplay product={p} showLabel={false} /></div>
                         <a
                           className="btn btn-secondary btn-sm"
                           href={hrefFor('plugin:' + p.id)}
+                          {...pricingTrackingAttrs(p)}
                           onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('plugin:' + p.id); }}
                         >
                           View <ArrowIcon />
@@ -399,6 +375,7 @@ function PluginDetail({ id, go }) {
           offerCode: window.getFirstVisitOfferCode?.() || '',
           offerEmail: window.getFirstVisitOfferEmail?.() || '',
           offerToken: window.getFirstVisitOfferToken?.() || '',
+          pricingVariant: pricingVariantFor(p),
         }),
       });
       const { url, error } = await res.json();
@@ -459,11 +436,11 @@ function PluginDetail({ id, go }) {
             </div>
           )}
           <div className="pd-price-row">
-            <div className="pd-price">{formatPluginPrice(p)}</div>
-            <div className="pd-price-note">{isFreePlugin(p) ? 'FREE FOR NOW · LIFETIME DOWNLOAD' : (p.status === 'released' ? 'ONE-TIME · LIFETIME DOWNLOAD' : 'IN DEVELOPMENT · LAUNCH LIST OPEN')}</div>
+            <div className="pd-price"><PriceDisplay product={p} mode="detail" /></div>
+            <div className="pd-price-note">{pluginPriceNote(p)}</div>
           </div>
           {p.status === 'released'
-            ? <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
+            ? <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying} {...pricingTrackingAttrs(p)}>
                 <DownloadIcon />
                 <span className="cta-copy-desktop">{buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Get Free Link' : 'Buy & Email Link')}</span>
                 <span className="cta-copy-mobile">{buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}</span>
@@ -505,10 +482,11 @@ function PluginDetail({ id, go }) {
         active={p.status === 'released' && showStickyCta && !purchased}
         productName={p.name}
         productMeta="Premiere plugin · email link"
-        price={formatPluginPrice(p)}
+        price={<PriceDisplay product={p} mode="sticky" showLabel={false} />}
         actionLabel={buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}
         onAction={handleBuy}
         disabled={buying}
+        trackingAttrs={pricingTrackingAttrs(p)}
       />
     </div>
   );

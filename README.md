@@ -9,7 +9,8 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - Route components are split into chunks: home, plugins, LUTs, and supporting pages.
 - `site/home.jsx` owns the homepage hero, featured product rail, and OMI proof teaser. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
 - `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `Australia/Sydney` timezone.
-- `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, media paths, and product page metadata. LUT copy also has fallback/indexable mirrors in `site/luts.jsx`, `site/home.jsx`, and `llms.txt`; keep those aligned when changing product descriptions.
+- `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, display pricing fields, media paths, and product page metadata. LUT copy also has fallback/indexable mirrors in `site/luts.jsx`, `site/home.jsx`, and `llms.txt`; keep those aligned when changing product descriptions.
+- `site/pricing.jsx` owns display-only pricing helpers for rendered prices, compare-at launch pricing, and pricing-variant tracking attributes. Stripe Price IDs in `lib/products.js` remain the source of truth for what checkout actually charges.
 - `site/visuals.jsx` owns reusable visual previews such as `LutPreview`. `site/media.js` owns responsive video helpers plus the constrained in-app browser detector; LUT previews render poster-based before/after layers in TikTok/Instagram-style WebViews so autoplay preview videos cannot jump into native fullscreen.
 - `lib/products.js` is the server-side commerce catalog. This is the only product catalog used for Stripe Checkout and fulfillment.
 - `api/*.js` files are Vercel-compatible CommonJS handlers. Locally, `server.js` maps those same files to `/api/...` routes and attaches small `res.status()`, `res.json()`, and `res.send()` helpers.
@@ -40,12 +41,10 @@ Commerce and fulfillment use these variables:
 - `STRIPE_PRICE_SOLENE`: Stripe Price ID for the MERIDIAN/Solene checkout product.
 - `STRIPE_PRICE_ONYX`: Stripe Price ID for the ONYX checkout product.
 - `STRIPE_PRICE_HALOCLYNE`: Stripe Price ID for the HALOCLYNE checkout product.
-- `STRIPE_PRICE_FLOWSTATE`: optional Stripe Price ID override for the FlowState plugin checkout product.
 - `STRIPE_PRICE_SIDESTREAM`: optional Stripe Price ID override for the Sidestream plugin checkout product. Leave unset to use the checked-in temporary $0 Sidestream Price while the product is free.
 - `MERIDIAN_BLOB_URL`: optional private Vercel Blob URL override for MERIDIAN.
 - `ONYX_BLOB_URL`: optional private Vercel Blob URL override for ONYX.
 - `HALOCLYNE_BLOB_URL`: optional private Vercel Blob URL override for HALOCLYNE.
-- `FLOWSTATE_BLOB_URL`: optional private Vercel Blob URL override for FlowState.
 - `SIDESTREAM_BLOB_URL`: optional private Vercel Blob URL override for Sidestream.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
@@ -81,7 +80,7 @@ Checkout buttons in `site/luts.jsx` and `site/plugins.jsx` pass `offerCode`, `of
 2. `api/create-checkout.js` validates the product against `lib/products.js`.
 3. Checkout fails closed if the product is unknown, the Stripe secret is missing, the product has no `stripePriceId`, or the product has no `blobUrl`.
 4. The handler creates a Stripe Checkout Session in `payment` mode with one Price ID from the server catalog.
-5. The Checkout Session metadata stores `{ productId }`. The webhook depends on this metadata for fulfillment.
+5. The Checkout Session metadata stores `{ productId }` plus a sanitized optional `pricingVariant` for pricing-display experiments. The webhook depends on `productId` for fulfillment; the client-provided pricing variant is analytics-only and never controls the charged amount.
 6. `allow_promotion_codes: true` enables Stripe's promotion-code entry field on the hosted Checkout page.
 7. `success_url` returns the buyer to `/?page=success&session_id={CHECKOUT_SESSION_ID}`.
 8. `cancel_url` returns the buyer to the product page declared in `product.page`.
@@ -90,6 +89,18 @@ Checkout buttons in `site/luts.jsx` and `site/plugins.jsx` pass `offerCode`, `of
 11. The browser redirects to the Stripe-hosted Checkout URL.
 
 The integration intentionally uses Stripe-hosted Checkout Sessions for one-time digital purchases.
+
+## Display Pricing
+
+Public product entries can include optional display-only pricing fields:
+
+- `price`: frontend display price. Stripe still charges the server-side Stripe Price ID.
+- `compareAtPrice`: regular/launch anchor rendered as a crossed-out price only when it is higher than `price`.
+- `priceLabel`: small supporting label such as `Launch price`.
+- `priceNote`: product-detail reassurance copy beside the price.
+- `pricingVariant`: optional stable analytics label. If omitted, `site/pricing.jsx` derives labels such as `launch-29-18`.
+
+The current LUT pricing pattern is `$29` compare-at and `$18` launch price. Do not invent fake high anchors such as `$99` unless that was a real bona fide price or a defensible planned regular price. Sidestream remains visually free while its checked-in Stripe fallback is a temporary $0 Price; do not display `$18` for it until `STRIPE_PRICE_SIDESTREAM` points at a real paid Price.
 
 ## Checkout Success Page
 
@@ -127,7 +138,6 @@ That value must match a key in `PRODUCTS`. Plugin detail pages currently post `p
 - Frontend page `lut:cinematic-01` -> checkout product `solene` -> MERIDIAN zip.
 - Frontend page `lut:onyx` -> checkout product `onyx` -> ONYX zip.
 - Frontend page `lut:haloclyne` -> checkout product `haloclyne` -> HALOCLYNE zip.
-- Frontend page `plugin:flowstate` -> checkout product `flowstate` -> FlowState ZXP.
 - Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> Sidestream ZXP.
 
 When adding a new product:
@@ -192,6 +202,8 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-05-17: LUT cards, detail pages, homepage featured cards, sticky mobile CTAs, click analytics, and Checkout Session metadata now use the shared display-pricing helper with `$29` compare-at / `$18` launch pricing for LUTs.
+- 2026-05-17: Removed the retired AI clip-search plugin from public plugin data, SEO mirrors, sitemap/LLM mirrors, checkout catalog, analytics persona copy, and README routing docs.
 - 2026-05-16: Sidestream product cards and detail pages now use an optimized 11-second plugin demo video from `videos/plugin showcase/`, with a mobile MP4 variant and poster frame for faster product-page loading.
 - 2026-05-16: Sidestream is temporarily free through a new $0 Stripe Price fallback, with the plugin listing/detail copy updated to show the free email-link flow.
 - 2026-05-16: Sidestream 1.0.2 is released on the plugins page with a private Vercel Blob ZXP, a dedicated Stripe one-time price fallback, and email-delivered download fulfillment through the existing plugin checkout flow.
@@ -209,6 +221,5 @@ The current location is derived automatically at page load using the current dat
 - 2026-05-09: Homepage hero centers `EVERY FRAME TELLS A STORY.` at half the previous headline size, places a 20%-smaller original product-card `BUY LUTS` CTA directly underneath, and removes the byline/tagline copy.
 - 2026-05-07: Mobile homepage hero name now renders smaller on one line while keeping the desktop two-line name treatment.
 - 2026-05-07: Mobile homepage hero copy and the primary LUT CTA now sit about 20vh higher over the hero media while leaving the desktop immersive hero layout unchanged.
-- 2026-05-05: FlowState 1.0.0 is released on the plugins page with a blank visual placeholder, email-delivered ZXP fulfillment, a private Vercel Blob fallback URL, and a dedicated Stripe one-time price fallback.
 - 2026-05-05: OMI case-study proof copy now spells out `6 million` instead of `6M` across homepage, portfolio, and service fallback copy.
 - 2026-05-05: First-visit promo `Unlock` now reveals and copies `HIFRIEND` immediately after client-side email validation. Email capture, lead storage, promo email send, token creation, and analytics continue in the background. Checkout can auto-apply the LUT promo from the saved front-end claim so the button is not blocked by external API latency.

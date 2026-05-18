@@ -1,6 +1,7 @@
 import React from 'react';
 import { getScrollBlur, useScrollBlur } from './scroll-blur.js';
 import { getVideoPosterSrc, useResponsiveVideoSrc } from './media.js';
+import { PriceDisplay, pricingTrackingAttrs } from './pricing.jsx';
 
 // Home page. personal site first, shop second
 
@@ -781,6 +782,9 @@ function Home({ go }) {
     name: 'MERIDIAN',
     oneline: 'Warm, polished color for footage shot in natural light.',
     price: 18,
+    compareAtPrice: 29,
+    priceLabel: 'Launch price',
+    priceNote: 'ONE-TIME · SENT BY EMAIL',
     formats: '.CUBE',
     badge: 'BESTSELLER',
     tone: 'teal-orange',
@@ -824,6 +828,9 @@ function Home({ go }) {
     name: 'ONYX',
     oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
     price: 18,
+    compareAtPrice: 29,
+    priceLabel: 'Launch price',
+    priceNote: 'ONE-TIME · SENT BY EMAIL',
     formats: '.CUBE',
     badge: 'NEW',
     tone: 'onyx-night',
@@ -843,6 +850,9 @@ function Home({ go }) {
     name: 'HALOCLYNE',
     oneline: 'A one-click underwater grade that separates foreground from background by warming up skin and ocean life into vivid oranges while holding a beautiful turquoise sea, killing haze and quieting sand.',
     price: 18,
+    compareAtPrice: 29,
+    priceLabel: 'Launch price',
+    priceNote: 'ONE-TIME · SENT BY EMAIL',
     formats: '.CUBE',
     badge: 'NEW',
     tone: 'warm-film',
@@ -896,7 +906,7 @@ function Home({ go }) {
           {featuredLuts.map(lut => (
             <div key={lut.id} data-home-scroll-blur>
               <p className="section-title">FEATURED · LUT</p>
-              <div className="card card-featured" onClick={() => go('lut:' + lut.id)} style={{ cursor: 'pointer' }}>
+              <div className="card card-featured" onClick={() => go('lut:' + lut.id)} style={{ cursor: 'pointer' }} {...pricingTrackingAttrs(lut)}>
                 <div className="card-media"><LutPreview tone={lut.tone || 'teal-orange'} interactive compare={lut.compare} scrollLinked /></div>
                 <div className="card-body">
                   <div className="card-eyebrow">
@@ -906,8 +916,8 @@ function Home({ go }) {
                   <h3 className="card-title">{lut.name}</h3>
                   <p className="card-desc">{lut.oneline}</p>
                   <div className="card-foot">
-                    <div className="card-price">${lut.price}<span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: 12, marginLeft: 4 }}>one-time</span></div>
-                    <a className="btn btn-primary" href={hrefFor('lut:' + lut.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('lut:' + lut.id); }}>View <ArrowIcon /></a>
+                    <div className="card-price"><PriceDisplay product={lut} showLabel={false} /></div>
+                    <a className="btn btn-primary" href={hrefFor('lut:' + lut.id)} {...pricingTrackingAttrs(lut)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('lut:' + lut.id); }}>View <ArrowIcon /></a>
                   </div>
                 </div>
               </div>

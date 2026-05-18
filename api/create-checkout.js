@@ -28,6 +28,10 @@ function normalizeOfferCode(value) {
   return String(value || '').trim().toUpperCase();
 }
 
+function normalizePricingVariant(value) {
+  return String(value || '').trim().replace(/[^\w.-]/g, '').slice(0, 64);
+}
+
 function firstHeaderValue(value) {
   if (Array.isArray(value)) return value[0] || '';
   return String(value || '').split(',')[0].trim();
@@ -70,6 +74,7 @@ module.exports = async function handler(req, res) {
   }
 
   const { productId, offerCode, offerEmail, offerToken } = body || {};
+  const pricingVariant = normalizePricingVariant(body?.pricingVariant);
   const product = PRODUCTS[productId];
   if (!product) return res.status(400).json({ error: 'Unknown product' });
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -112,7 +117,10 @@ module.exports = async function handler(req, res) {
       line_items: [{ price: product.stripePriceId, quantity: 1 }],
       success_url: `${origin}/?page=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?page=${returnPage}`,
-      metadata: { productId },
+      metadata: {
+        productId,
+        ...(pricingVariant ? { pricingVariant } : {}),
+      },
       allow_promotion_codes: true,
     };
 
@@ -138,6 +146,7 @@ module.exports = async function handler(req, res) {
     productId,
     productName: product.name,
     productPage: product.page,
+    pricingVariant,
     stripeSessionId: session.id,
     stripeSessionStatus: session.status,
     paymentStatus: session.payment_status,

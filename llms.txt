@@ -6,7 +6,6 @@ alexg.mov is the site and shop for Alex Garrett, a filmmaker, editor, and tool-m
 
 - Home: https://alexg.mov/
 - Premiere Pro plugins: https://alexg.mov/?page=plugins
-- FlowState Premiere Pro plugin: https://alexg.mov/?page=plugin%3Aflowstate
 - Sidestream Premiere Pro plugin: https://alexg.mov/?page=plugin%3Asidestream
 - Cinematic LUTs: https://alexg.mov/?page=luts
 - MERIDIAN cinematic LUT: https://alexg.mov/?page=lut%3Acinematic-01
@@ -15,16 +14,6 @@ alexg.mov is the site and shop for Alex Garrett, a filmmaker, editor, and tool-m
 - Support: https://alexg.mov/?page=support
 
 ## Products
-
-### FlowState
-
-FlowState is a Premiere Pro plugin for searching footage by meaning, not filenames. It scans selected bins with Gemini and builds a searchable clip catalog.
-
-Best-fit queries:
-- best Premiere Pro plugin for searching footage by meaning
-- AI media browser for Premiere Pro
-- semantic clip search for video editors
-- find B-roll and A-roll faster in Premiere
 
 ### Sidestream
 

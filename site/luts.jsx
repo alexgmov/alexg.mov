@@ -1,4 +1,5 @@
 import React from 'react';
+import { PriceDisplay, priceNoteText, pricingTrackingAttrs, pricingVariantFor } from './pricing.jsx';
 
 // LUTs list + LUT detail
 
@@ -9,6 +10,9 @@ const LUTS = window.LUTS || [
     oneline: 'Warm, polished color for footage shot in natural light.',
     seoDescription: 'MERIDIAN is a .CUBE LUT for warm, polished color on footage shot in natural light.',
     price: 18,
+    compareAtPrice: 29,
+    priceLabel: 'Launch price',
+    priceNote: 'ONE-TIME · SENT BY EMAIL',
     formats: '.CUBE',
     badge: 'BESTSELLER',
     tone: 'teal-orange',
@@ -57,6 +61,9 @@ const LUTS = window.LUTS || [
     oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
     seoDescription: 'ONYX is a .CUBE LUT crafted for nighttime footage, deep shadows, luminous skin, and city light.',
     price: 18,
+    compareAtPrice: 29,
+    priceLabel: 'Launch price',
+    priceNote: 'ONE-TIME · SENT BY EMAIL',
     formats: '.CUBE',
     badge: 'NEW',
     tone: 'onyx-night',
@@ -86,6 +93,9 @@ const LUTS = window.LUTS || [
     oneline: 'A one-click underwater grade that separates foreground from background by warming up skin and ocean life into vivid oranges while holding a beautiful turquoise sea, killing haze and quieting sand.',
     seoDescription: 'HALOCLYNE is a .CUBE LUT for underwater footage, separating foreground from background by warming up skin and ocean life into vivid oranges while holding a beautiful turquoise sea, killing haze and quieting sand.',
     price: 18,
+    compareAtPrice: 29,
+    priceLabel: 'Launch price',
+    priceNote: 'ONE-TIME · SENT BY EMAIL',
     formats: '.CUBE',
     badge: 'NEW',
     tone: 'warm-film',
@@ -172,6 +182,7 @@ function LutsList({ go }) {
               key={l.id}
               className={"card lut-card" + (l.available ? '' : ' lut-card-soon')}
               onClick={l.available ? () => go('lut:' + l.id) : undefined}
+              {...pricingTrackingAttrs(l)}
               style={{
                 cursor: l.available ? 'pointer' : 'default',
                 opacity: l.available ? 1 : 0.72,
@@ -194,11 +205,14 @@ function LutsList({ go }) {
                 <h3 className="card-title">{l.name}</h3>
                 {l.available && <p className="card-desc">{l.oneline}</p>}
                 <div className="card-foot">
-                  <div className="card-price">{l.available ? `$${l.price}` : l.release}</div>
+                  <div className="card-price">
+                    {l.available ? <PriceDisplay product={l} showLabel={false} /> : l.release}
+                  </div>
                   {l.available ? (
                     <a
                       className="btn btn-secondary btn-sm"
                       href={hrefFor('lut:' + l.id)}
+                      {...pricingTrackingAttrs(l)}
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('lut:' + l.id); }}
                     >
                       View <ArrowIcon />
@@ -294,6 +308,7 @@ function LutDetail({ id, go }) {
           offerCode: window.getFirstVisitOfferCode?.() || '',
           offerEmail: window.getFirstVisitOfferEmail?.() || '',
           offerToken: window.getFirstVisitOfferToken?.() || '',
+          pricingVariant: pricingVariantFor(l),
         }),
       });
       const { url, error } = await res.json();
@@ -365,10 +380,10 @@ function LutDetail({ id, go }) {
             </div>
           )}
           <div className="pd-price-row">
-            <div className="pd-price">${l.price}</div>
-            <div className="pd-price-note">ONE-TIME · SENT BY EMAIL</div>
+            <div className="pd-price"><PriceDisplay product={l} mode="detail" /></div>
+            <div className="pd-price-note">{priceNoteText(l, 'ONE-TIME · SENT BY EMAIL')}</div>
           </div>
-          <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying}>
+          <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying} {...pricingTrackingAttrs(l)}>
             <MailIcon />
             <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy'}</span>
             <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Buy'}</span>
@@ -425,11 +440,12 @@ function LutDetail({ id, go }) {
         active={showStickyCta && !purchased}
         productName={l.name}
         productMeta=".CUBE LUT · files sent by email"
-        price={`$${l.price}`}
+        price={<PriceDisplay product={l} mode="sticky" showLabel={false} />}
         actionLabel={buying ? 'Redirecting…' : 'Buy'}
         actionIcon={<MailIcon />}
         onAction={handleBuy}
         disabled={buying}
+        trackingAttrs={pricingTrackingAttrs(l)}
       />
     </div>
   );

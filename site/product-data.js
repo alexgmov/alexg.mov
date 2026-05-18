@@ -2,34 +2,6 @@
 
 const PLUGINS = [
   {
-    id: 'flowstate',
-    name: 'FlowState',
-    oneline: 'Search Premiere footage by meaning, not filenames.',
-    price: 18,
-    version: '1.0.0',
-    badge: 'LIVE',
-    status: 'released',
-    variant: 'ai-media-browser',
-    visual: 'blank',
-    what: 'FlowState scans a bin, analyzes clips with Gemini, and builds a searchable catalog.',
-    who: 'Editors sorting A-roll, B-roll, transcripts, lighting, motion, and shot details across raw media.',
-    get: 'FlowState 1.0.0 ZXP · Premiere panel · Gemini workflow · searchable catalog.json · results bin · lifetime download.',
-    install: [
-      'Buy once and check your email for the FlowState download link.',
-      'Download FlowState-1.0.0.zxp on your editing computer.',
-      'Install the ZXP with your Adobe extension installer.',
-      'Open Window → Extensions → FlowState in Premiere.',
-      'Select a bin subtree, run analysis, then search and send matches to a results bin.',
-    ],
-    specs: [
-      'Adobe Premiere Pro 2024 (24.0) or later',
-      'macOS 13+ · Windows 10/11',
-      'Gemini API access required',
-      'ZXP extension package',
-      'Version 1.0.0',
-    ],
-  },
-  {
     id: 'sidestream',
     name: 'Sidestream',
     oneline: 'Search YouTube, preview, download, convert, and import media without leaving Premiere.',
@@ -125,7 +97,7 @@ const PLUGINS = [
 const PLUGIN_FAQS = [
   {
     q: 'Which Premiere plugin should I start with?',
-    a: 'Use FlowState when you need AI clip search across your own footage. Use Sidestream when you need YouTube-first media intake, preview, download, conversion, and import inside Premiere.',
+    a: 'Use Sidestream when you need YouTube-first media intake, preview, download, conversion, and import inside Premiere.',
   },
   {
     q: 'Do these plugins replace a normal editing workflow?',
@@ -139,20 +111,20 @@ const PLUGIN_FAQS = [
 
 const PLUGIN_DETAIL_FAQS = [
   {
-    q: 'What does FlowState do in Premiere Pro?',
-    a: 'It scans selected bins with AI and turns clip details into searchable metadata.',
+    q: 'What do these Premiere plugins do?',
+    a: 'They handle focused edit-room bottlenecks inside Premiere, from media intake to faster selects.',
   },
   {
-    q: 'What does FlowState help me find?',
-    a: 'A-roll, B-roll, shot type, motion, lighting, subject matter, and clip context.',
+    q: 'Are they full editing replacements?',
+    a: 'No. They stay narrow so the plugin helps with one workflow without taking over the edit.',
   },
   {
     q: 'What software do I need?',
-    a: 'FlowState is built for Adobe Premiere Pro 2024 or later on macOS 13+ or Windows 10/11. Gemini API access is required for analysis.',
+    a: 'Released plugins ship as ZXP extensions for Premiere Pro on macOS and Windows. Check each plugin page for exact version support.',
   },
   {
-    q: 'How do I receive FlowState after checkout?',
-    a: 'The FlowState ZXP download link is sent to the email you use at checkout, so you can buy on your phone and install it later on your editing computer.',
+    q: 'How do I receive a plugin after checkout?',
+    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install it later on your editing computer.',
   },
 ];
 
@@ -163,6 +135,9 @@ const LUTS = [
     oneline: 'Warm, polished color for footage shot in natural light.',
     seoDescription: 'MERIDIAN is a .CUBE LUT for warm, polished color on footage shot in natural light.',
     price: 18,
+    compareAtPrice: 29,
+    priceLabel: 'Launch price',
+    priceNote: 'ONE-TIME · SENT BY EMAIL',
     formats: '.CUBE',
     badge: 'BESTSELLER',
     tone: 'teal-orange',
@@ -211,6 +186,9 @@ const LUTS = [
     oneline: 'Crafted for the night, where deep shadows meet luminous skin and city light.',
     seoDescription: 'ONYX is a .CUBE LUT crafted for nighttime footage, deep shadows, luminous skin, and city light.',
     price: 18,
+    compareAtPrice: 29,
+    priceLabel: 'Launch price',
+    priceNote: 'ONE-TIME · SENT BY EMAIL',
     formats: '.CUBE',
     badge: 'NEW',
     tone: 'onyx-night',
@@ -240,6 +218,9 @@ const LUTS = [
     oneline: 'A one-click underwater grade that separates foreground from background by warming up skin and ocean life into vivid oranges while holding a beautiful turquoise sea, killing haze and quieting sand.',
     seoDescription: 'HALOCLYNE is a .CUBE LUT for underwater footage, separating foreground from background by warming up skin and ocean life into vivid oranges while holding a beautiful turquoise sea, killing haze and quieting sand.',
     price: 18,
+    compareAtPrice: 29,
+    priceLabel: 'Launch price',
+    priceNote: 'ONE-TIME · SENT BY EMAIL',
     formats: '.CUBE',
     badge: 'NEW',
     tone: 'warm-film',
@@ -301,7 +282,7 @@ const LUT_DETAIL_FAQS = [
 ];
 
 const FAQS = [
-  { q: 'Do your plugins work on Windows?', a: 'FlowState and Sidestream ship as ZXP extensions for Premiere Pro on macOS and Windows. FlowState requires Gemini API access for analysis.' },
+  { q: 'Do your plugins work on Windows?', a: 'Released plugins ship as ZXP extensions for Premiere Pro on macOS and Windows. Check each plugin page for exact version support.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
   { q: 'Do you offer refunds?', a: 'No. These are digital downloads, so all sales are final. If something is broken on my end, email me and I will fix or replace it.' },
   { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Include your OS, Premiere version, and a screen recording if possible.' },

@@ -149,7 +149,6 @@ function breadcrumbSchema(items) {
 function pageSeo(page) {
   const plugins = window.PLUGINS || [];
   const luts = window.LUTS || [];
-  const flowState = plugins.find(p => p.id === 'flowstate');
   const meridian = luts.find(l => l.id === 'cinematic-01');
   const pageKey = page || 'home';
 
@@ -178,8 +177,8 @@ function pageSeo(page) {
     };
     return {
       ...defaults,
-      title: 'Premiere Pro Plugins for Editors | FlowState & Sidestream',
-      description: 'Small Premiere plugins, including FlowState for AI clip search and Sidestream for YouTube-first media intake.',
+      title: 'Premiere Pro Plugins for Editors | Sidestream & More',
+      description: 'Small Premiere plugins for YouTube-first media intake, faster source gathering, and focused edit-room workflows.',
       canonical: absoluteRoute('plugins'),
       graph: [...baseGraph(), itemList, faqSchema(window.PLUGIN_FAQS)].filter(Boolean),
     };
@@ -187,7 +186,7 @@ function pageSeo(page) {
 
   if (pageKey.startsWith('plugin:')) {
     const id = pageKey.slice(7);
-    const plugin = plugins.find(p => p.id === id) || flowState;
+    const plugin = plugins.find(p => p.id === id) || plugins.find(p => p.status === 'released') || plugins[0];
     if (plugin) {
       return {
         ...defaults,
