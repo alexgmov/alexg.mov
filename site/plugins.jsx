@@ -22,20 +22,20 @@ const PLUGINS = window.PLUGINS || [
     seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
     what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
-    get: 'Sidestream 1.0.2 ZXP · guided web install · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
+    get: 'Sidestream 1.0.2 Mac install package · signed ZXP inside · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
     install: [
-      'Free for now: enter your email at checkout and Sidestream sends the ZXP download link.',
-      'Open the guided install page from the email.',
-      'Install the free aescripts ZXP/UXP Installer if you do not already have it.',
-      'Open Sidestream-1.0.2.zxp with the ZXP/UXP Installer.',
+      'Free for now: enter your email at checkout and Sidestream sends one Mac install package.',
+      'Open Sidestream-1.0.2-Mac-ZXP-Installer.dmg on your editing Mac.',
+      'If the ZXP Installer target is missing, open Get ZXP Installer inside the package and install it.',
+      'Drag Sidestream-1.0.2.zxp onto the ZXP Installer target in the Finder window.',
       'Open Window → Extensions → Sidestream in Premiere.',
       'Search YouTube, preview a result, download video or audio, then import the finished file.',
     ],
     specs: [
       'Adobe Premiere Pro 2020 (14.0) or later',
-      'macOS and Windows ZXP installer flow',
+      'macOS Finder-style install package',
       'YouTube-first media intake workflow',
-      'Signed ZXP package',
+      'Signed ZXP package included inside the DMG',
       'Version 1.0.2',
     ],
     detailGuide: {
@@ -67,7 +67,7 @@ const PLUGINS = window.PLUGINS || [
       },
       {
         q: 'How do I receive Sidestream after checkout?',
-        a: 'The free Sidestream checkout sends the raw ZXP download link and a guided install page to your email, so you can claim it on your phone and install it later on your editing computer.',
+        a: 'The free Sidestream checkout sends one Mac install package to your email, so you can claim it on your phone and install it later on your editing Mac.',
       },
     ],
   },
@@ -323,7 +323,7 @@ function PluginsList({ go }) {
             <div className="how-item">
               <div className="how-num">02 / INSTALL FAST</div>
               <h4 className="how-h">Install the package</h4>
-              <p className="how-p">Download the ZXP on your editing computer, follow the guided install page, and open the panel inside Premiere.</p>
+              <p className="how-p">Download the Mac install package on your editing computer, drag the ZXP onto the installer target, and open the panel inside Premiere.</p>
             </div>
             <div className="how-item">
               <div className="how-num">03 / EDIT FASTER</div>
@@ -351,12 +351,12 @@ function SidestreamInstallGuide({ go }) {
   const steps = [
     {
       eyebrow: '01 / GET THE PACKAGE',
-      title: 'Download Sidestream-1.0.2.zxp',
-      body: 'Use the private download button in your email. Keep the file as a .zxp; there is nothing to unzip and no extra guide file to download.',
+      title: 'Download the Mac install package',
+      body: 'Use the private download button in your email. Open the DMG on your editing Mac; do not unzip it or hunt for a separate guide.',
       action: downloadUrl ? (
         <a className="btn btn-primary" href={downloadUrl}>
           <DownloadIcon />
-          Download ZXP
+          Download Package
         </a>
       ) : (
         <a
@@ -373,8 +373,8 @@ function SidestreamInstallGuide({ go }) {
     },
     {
       eyebrow: '02 / INSTALLER CHECK',
-      title: 'Open the aescripts ZXP/UXP Installer',
-      body: 'If you already have it, keep going. If not, download the free installer from aescripts, install it, then come back here.',
+      title: 'Check the ZXP Installer target',
+      body: 'The DMG points at the normal ZXP Installer app in Applications. If that target is missing, use the installer link inside the package, install it, then come back.',
       action: (
         <div className="install-segment" role="group" aria-label="ZXP installer status">
           <button
@@ -392,8 +392,8 @@ function SidestreamInstallGuide({ go }) {
     },
     {
       eyebrow: '03 / RUN THE INSTALL',
-      title: 'Install the ZXP',
-      body: 'Quit Premiere Pro, open the ZXP/UXP Installer, then drag Sidestream-1.0.2.zxp onto the installer window or use File > Open.',
+      title: 'Drag the ZXP onto the target',
+      body: 'Quit Premiere Pro, then drag Sidestream-1.0.2.zxp onto Drop Sidestream here - ZXP Installer.app inside the DMG window.',
       action: (
         <button
           type="button"
@@ -432,8 +432,8 @@ function SidestreamInstallGuide({ go }) {
             <p className="section-title">SIDESTREAM INSTALL</p>
             <h1 id="sidestream-install-title">Install Sidestream step by step.</h1>
             <p>
-              This page walks through the clean supported route: download the raw Sidestream ZXP,
-              install it with the free aescripts ZXP/UXP Installer, then open Sidestream inside Premiere.
+              This page backs up the Mac install package: open the DMG, drag the signed ZXP onto
+              the ZXP Installer target, then open Sidestream inside Premiere.
             </p>
           </div>
           <div className="install-status-panel" aria-label="Install status">
@@ -442,9 +442,9 @@ function SidestreamInstallGuide({ go }) {
               <strong>Sidestream 1.0.2</strong>
             </div>
             <div className="install-status-list">
-              <span><CheckIcon /> Raw .zxp download</span>
-              <span><CheckIcon /> Guided web install</span>
-              <span><CheckIcon /> ZXP/UXP Installer handoff</span>
+              <span><CheckIcon /> One DMG download</span>
+              <span><CheckIcon /> Signed ZXP inside</span>
+              <span><CheckIcon /> Drag-and-drop installer handoff</span>
             </div>
           </div>
         </section>
@@ -479,7 +479,7 @@ function SidestreamInstallGuide({ go }) {
             </details>
             <details>
               <summary>If drag and drop does not work.</summary>
-              <p>Use File &gt; Open in the ZXP/UXP Installer and select Sidestream-1.0.2.zxp directly.</p>
+              <p>Open the ZXP/UXP Installer, choose File &gt; Open, and select Sidestream-1.0.2.zxp from the mounted DMG.</p>
             </details>
           </div>
           <div className="install-foot-actions">
@@ -609,7 +609,7 @@ function PluginDetail({ id, go }) {
                 <span className="cta-copy-mobile">{buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}</span>
               </button>
             : <button className="btn btn-secondary btn-lg pd-buy">Join Launch List</button>}
-          <div className="pd-reassure"><CheckIcon /> {isFreePlugin(p) ? 'Free ZXP link sent to checkout email · guided install page included' : (p.status === 'released' ? 'Download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues')}</div>
+          <div className="pd-reassure"><CheckIcon /> {isFreePlugin(p) ? 'Free Mac install package sent to checkout email · ZXP Installer link included' : (p.status === 'released' ? 'Download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues')}</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{p.what}</div></div>
@@ -644,7 +644,7 @@ function PluginDetail({ id, go }) {
       <MobileProductStickyCta
         active={p.status === 'released' && showStickyCta && !purchased}
         productName={p.name}
-        productMeta="Premiere plugin · ZXP link"
+        productMeta="Premiere plugin · Mac package"
         price={<PriceDisplay product={p} mode="sticky" showLabel={false} />}
         actionLabel={buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}
         onAction={handleBuy}

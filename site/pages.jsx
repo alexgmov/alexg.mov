@@ -884,7 +884,7 @@ function Services({ go }) {
 }
 
 const FAQS = window.FAQS || [
-  { q: 'Do your plugins work on Windows?', a: 'Sidestream ships as a signed ZXP package. Install it with the free aescripts ZXP/UXP Installer and email support if Premiere does not show the panel.' },
+  { q: 'Do your plugins work on Windows?', a: 'Sidestream is built as a signed ZXP, but the polished download package is Mac-first right now. Email support if you need the raw Windows ZXP.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
   { q: 'Do you offer refunds?', a: 'No. These are digital downloads, so all sales are final. If something is broken on my end, email me and I will fix or replace it.' },
   { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Include your OS, Premiere version, and a screen recording if possible.' },

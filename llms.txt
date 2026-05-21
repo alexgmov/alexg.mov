@@ -20,7 +20,7 @@ alexg.mov is the site and shop for Alex Garrett, a filmmaker, editor, and tool-m
 ### Sidestream
 
 Sidestream is a Premiere Pro plugin for YouTube-first media intake. It searches YouTube from the panel, previews sources, downloads video or audio, converts media when needed, and imports the finished file into Premiere.
-Sidestream is temporarily free and uses Stripe Checkout only to collect the email address for the raw ZXP download link. The fulfillment email also links to a guided install page for the free aescripts ZXP/UXP Installer flow.
+Sidestream is temporarily free and uses Stripe Checkout only to collect the email address for a single Mac install package. The package contains the signed ZXP, a Finder-visible ZXP Installer target, and a link to get the free aescripts ZXP/UXP Installer if needed.
 
 Best-fit queries:
 - Premiere Pro plugin for YouTube download and import

@@ -69,7 +69,7 @@ function pluginProductSchema(plugin, page = `plugin:${plugin.id}`) {
     brand: { '@id': `${SITE_ORIGIN}/#organization` },
     category: 'Adobe Premiere Pro plugin',
     applicationCategory: 'MultimediaApplication',
-    operatingSystem: 'macOS 13+, Windows 10/11',
+    operatingSystem: plugin.id === 'sidestream' ? 'macOS 13+' : 'macOS 13+, Windows 10/11',
     softwareVersion: plugin.version,
     offers: productOffer(plugin.price, url, plugin.status === 'released'),
     url,
@@ -171,7 +171,7 @@ function pageSeo(page) {
           '@type': 'SoftwareApplication',
           name: `${plugin.name} Premiere Pro plugin`,
           applicationCategory: 'MultimediaApplication',
-          operatingSystem: 'macOS 13+, Windows 10/11',
+          operatingSystem: plugin.id === 'sidestream' ? 'macOS 13+' : 'macOS 13+, Windows 10/11',
         },
       })),
     };
@@ -211,7 +211,7 @@ function pageSeo(page) {
     return {
       ...defaults,
       title: 'Install Sidestream with the ZXP/UXP Installer | alexg.mov',
-      description: 'Guided Sidestream install steps for downloading the raw ZXP, getting the free aescripts ZXP/UXP Installer, and opening the panel in Premiere Pro.',
+      description: 'Guided Sidestream install steps for opening the Mac install package, dragging the signed ZXP onto the ZXP Installer target, and opening the panel in Premiere Pro.',
       canonical: absoluteRoute('sidestream-install'),
       graph: [
         ...baseGraph(),
