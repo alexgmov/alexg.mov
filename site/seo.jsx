@@ -69,7 +69,7 @@ function pluginProductSchema(plugin, page = `plugin:${plugin.id}`) {
     brand: { '@id': `${SITE_ORIGIN}/#organization` },
     category: 'Adobe Premiere Pro plugin',
     applicationCategory: 'MultimediaApplication',
-    operatingSystem: 'macOS 13+, Windows 10/11',
+    operatingSystem: plugin.id === 'sidestream' ? 'macOS 13+' : 'macOS 13+, Windows 10/11',
     softwareVersion: plugin.version,
     offers: productOffer(plugin.price, url, plugin.status === 'released'),
     url,
@@ -81,11 +81,11 @@ function lutProductSchema(lut, page = `lut:${lut.id}`) {
   return {
     '@type': 'Product',
     '@id': `${url}#product`,
-    name: `${lut.name} cinematic LUT`,
+    name: lut.isBundle ? `${lut.name} cinematic LUT pack` : `${lut.name} cinematic LUT`,
     description: lut.oneline,
     image: imageUrl(lut.mockupSrc),
     brand: { '@id': `${SITE_ORIGIN}/#organization` },
-    category: 'Digital color grading LUT',
+    category: lut.isBundle ? 'Digital color grading LUT pack' : 'Digital color grading LUT',
     additionalProperty: [
       { '@type': 'PropertyValue', name: 'File format', value: lut.formats || '.CUBE' },
       { '@type': 'PropertyValue', name: 'Compatible software', value: 'Adobe Premiere Pro, DaVinci Resolve, Final Cut Pro, Adobe After Effects, CapCut Desktop' },
@@ -171,7 +171,7 @@ function pageSeo(page) {
           '@type': 'SoftwareApplication',
           name: `${plugin.name} Premiere Pro plugin`,
           applicationCategory: 'MultimediaApplication',
-          operatingSystem: 'macOS 13+, Windows 10/11',
+          operatingSystem: plugin.id === 'sidestream' ? 'macOS 13+' : 'macOS 13+, Windows 10/11',
         },
       })),
     };
@@ -224,7 +224,7 @@ function pageSeo(page) {
     return {
       ...defaults,
       title: 'Cinematic LUTs for Premiere, Resolve, FCP, AE & CapCut | alexg.mov',
-      description: 'Cinematic .CUBE LUTs for Premiere, Resolve, Final Cut, After Effects, and CapCut Desktop, including natural-light and underwater looks.',
+      description: 'Cinematic .CUBE LUTs and the Complete LUT Bundle for Premiere, Resolve, Final Cut, After Effects, and CapCut Desktop.',
       canonical: absoluteRoute('luts'),
       graph: [...baseGraph(), itemList, faqSchema(window.LUT_FAQS)].filter(Boolean),
     };
@@ -236,7 +236,9 @@ function pageSeo(page) {
     if (lut) {
       return {
         ...defaults,
-        title: `${lut.name} LUT | Cinematic .CUBE LUT for Premiere, Resolve, FCP, AE & CapCut`,
+        title: lut.isBundle
+          ? `${lut.name} | Cinematic .CUBE LUT Pack for Premiere, Resolve, FCP, AE & CapCut`
+          : `${lut.name} LUT | Cinematic .CUBE LUT for Premiere, Resolve, FCP, AE & CapCut`,
         description: lut.seoDescription || `${lut.name} is a .CUBE LUT for focused cinematic color after a clean base correction.`,
         canonical: absoluteRoute(`lut:${lut.id}`),
         image: imageUrl(lut.mockupSrc),

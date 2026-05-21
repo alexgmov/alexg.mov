@@ -8,6 +8,7 @@ alexg.mov is the site and shop for Alex Garrett, a filmmaker, editor, and tool-m
 - Premiere Pro plugins: https://alexg.mov/?page=plugins
 - Sidestream Premiere Pro plugin: https://alexg.mov/?page=plugin%3Asidestream
 - Cinematic LUTs: https://alexg.mov/?page=luts
+- Complete LUT Bundle: https://alexg.mov/?page=lut%3Acomplete-lut-bundle
 - MERIDIAN cinematic LUT: https://alexg.mov/?page=lut%3Acinematic-01
 - ONYX cinematic LUT: https://alexg.mov/?page=lut%3Aonyx
 - HALOCLYNE cinematic LUT: https://alexg.mov/?page=lut%3Ahaloclyne
@@ -18,13 +19,23 @@ alexg.mov is the site and shop for Alex Garrett, a filmmaker, editor, and tool-m
 ### Sidestream
 
 Sidestream is a Premiere Pro plugin for YouTube-first media intake. It searches YouTube from the panel, previews sources, downloads video or audio, converts media when needed, and imports the finished file into Premiere.
-Sidestream is temporarily free and uses Stripe Checkout only to collect the email address for the ZXP download link.
+Sidestream is temporarily free and uses Stripe Checkout only to collect the email address for the setup-wizard download link.
 
 Best-fit queries:
 - Premiere Pro plugin for YouTube download and import
 - YouTube media intake plugin for Premiere Pro
 - download video or audio inside Premiere
 - preview and import web media in Premiere Pro
+
+### Complete LUT Bundle
+
+Complete LUT Bundle includes every current alexg.mov cinematic .CUBE LUT in one download: MERIDIAN for warm natural-light footage, ONYX for nighttime city light, and HALOCLYNE for underwater ocean footage.
+
+Best-fit queries:
+- complete cinematic LUT bundle
+- .CUBE LUT pack for Premiere Pro and DaVinci Resolve
+- LUT bundle for natural light, night, and underwater footage
+- alexg.mov LUT pack
 
 ### MERIDIAN
 

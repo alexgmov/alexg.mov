@@ -22,19 +22,19 @@ const PLUGINS = window.PLUGINS || [
     seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
     what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
-    get: 'Sidestream 1.0.2 ZXP · Premiere panel · YouTube search · video/audio downloads · Premiere-safe MP4 conversion · lifetime download.',
+    get: 'Sidestream 1.0.2 setup wizard · Premiere panel · YouTube search · video/audio downloads · Premiere-safe MP4 conversion · lifetime download.',
     install: [
-      'Free for now: enter your email at checkout and Sidestream sends the download link.',
-      'Download Sidestream-1.0.2.zxp on your editing computer.',
-      'Install the ZXP with your Adobe extension installer.',
+      'Free for now: enter your email at checkout and Sidestream sends the setup download link.',
+      'Download Sidestream-1.0.2-Setup.dmg on your editing Mac.',
+      'Open Sidestream Setup.app and follow the guided install steps.',
       'Open Window → Extensions → Sidestream in Premiere.',
       'Search YouTube, preview a result, download video or audio, then import the finished file.',
     ],
     specs: [
       'Adobe Premiere Pro 2020 (14.0) or later',
-      'macOS · Windows',
+      'macOS setup wizard',
       'YouTube-first media intake workflow',
-      'ZXP extension package',
+      'Signed ZXP package inside the setup download',
       'Version 1.0.2',
     ],
     detailGuide: {
@@ -66,7 +66,7 @@ const PLUGINS = window.PLUGINS || [
       },
       {
         q: 'How do I receive Sidestream after checkout?',
-        a: 'The free Sidestream checkout sends the ZXP download link to your email, so you can claim it on your phone and install it later on your editing computer.',
+        a: 'The free Sidestream checkout sends the setup-wizard download link to your email, so you can claim it on your phone and install it later on your editing Mac.',
       },
     ],
   },
@@ -124,7 +124,7 @@ const PLUGIN_FAQS = window.PLUGIN_FAQS || [
   },
   {
     q: 'How do I receive a plugin after checkout?',
-    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install later on your editing computer.',
+    a: 'The setup download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install later on your editing computer.',
   },
 ];
 
@@ -139,11 +139,11 @@ const PLUGIN_DETAIL_FAQS = window.PLUGIN_DETAIL_FAQS || [
   },
   {
     q: 'What software do I need?',
-    a: 'Released plugins ship as ZXP extensions for Premiere Pro on macOS and Windows. Check each plugin page for exact version support.',
+    a: 'Released plugins ship as setup downloads or ZXP extension packages for Premiere Pro. Check each plugin page for exact version support.',
   },
   {
     q: 'How do I receive a plugin after checkout?',
-    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install it later on your editing computer.',
+    a: 'The setup download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install it later on your editing computer.',
   },
 ];
 
@@ -319,7 +319,7 @@ function PluginsList({ go }) {
             <div className="how-item">
               <div className="how-num">02 / INSTALL FAST</div>
               <h4 className="how-h">Install the package</h4>
-              <p className="how-p">Download the ZXP on your editing computer and open the panel inside Premiere.</p>
+              <p className="how-p">Download the setup wizard on your editing computer and open the panel inside Premiere.</p>
             </div>
             <div className="how-item">
               <div className="how-num">03 / EDIT FASTER</div>
@@ -446,7 +446,7 @@ function PluginDetail({ id, go }) {
                 <span className="cta-copy-mobile">{buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}</span>
               </button>
             : <button className="btn btn-secondary btn-lg pd-buy">Join Launch List</button>}
-          <div className="pd-reassure"><CheckIcon /> {isFreePlugin(p) ? 'Free ZXP link sent to checkout email · 24h support reply' : (p.status === 'released' ? 'ZXP download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues')}</div>
+          <div className="pd-reassure"><CheckIcon /> {isFreePlugin(p) ? 'Free setup link sent to checkout email · 24h support reply' : (p.status === 'released' ? 'Setup download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues')}</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{p.what}</div></div>
@@ -481,7 +481,7 @@ function PluginDetail({ id, go }) {
       <MobileProductStickyCta
         active={p.status === 'released' && showStickyCta && !purchased}
         productName={p.name}
-        productMeta="Premiere plugin · email link"
+        productMeta="Premiere plugin · setup link"
         price={<PriceDisplay product={p} mode="sticky" showLabel={false} />}
         actionLabel={buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}
         onAction={handleBuy}

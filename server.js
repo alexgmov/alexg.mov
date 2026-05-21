@@ -18,6 +18,7 @@ const apiRoutes = {
   '/api/create-checkout': './api/create-checkout',
   '/api/download': './api/download',
   '/api/email-capture': './api/email-capture',
+  '/api/plugin-telemetry': './api/plugin-telemetry',
   '/api/webhook': './api/webhook',
   '/analytics': './api/analytics-dashboard',
   '/analytics/': './api/analytics-dashboard',

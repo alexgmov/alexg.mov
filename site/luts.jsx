@@ -5,6 +5,38 @@ import { PriceDisplay, priceNoteText, pricingTrackingAttrs, pricingVariantFor } 
 
 const LUTS = window.LUTS || [
   {
+    id: 'complete-lut-bundle',
+    name: 'Complete LUT Bundle',
+    oneline: 'All current alexg.mov LUTs in one download: warm natural light, nighttime city glow, and underwater color.',
+    seoDescription: 'Complete LUT Bundle includes every current alexg.mov .CUBE LUT: MERIDIAN, ONYX, and HALOCLYNE for Premiere Pro, DaVinci Resolve, Final Cut Pro, After Effects, CapCut Desktop, and modern color workflows.',
+    price: 39,
+    compareAtPrice: 87,
+    priceLabel: 'Bundle launch price',
+    priceNote: 'ALL CURRENT LUTS · SENT BY EMAIL',
+    formats: '3 .CUBE LUTS',
+    badge: 'BEST VALUE',
+    tone: 'teal-orange',
+    available: true,
+    isBundle: true,
+    checkoutProductId: 'complete-lut-bundle',
+    demoLabel: 'Bundle',
+    mockupAlt: 'Complete LUT Bundle product mockup',
+    details: {
+      whatItDoes: 'Packages every current alexg.mov LUT into one download, covering natural light, night footage, and underwater color.',
+      whoItsFor: 'Editors who want the full current LUT shelf instead of choosing one look at a time.',
+      whatYouGet: 'ZIP containing MERIDIAN, ONYX, and HALOCLYNE as .CUBE LUTs.',
+    },
+    compare: {
+      title: 'Complete LUT Bundle',
+      beforeLabel: 'Ungraded',
+      afterLabel: 'Graded',
+      beforeTitle: 'Complete LUT Bundle MERIDIAN ungraded preview',
+      afterTitle: 'Complete LUT Bundle MERIDIAN graded preview',
+      beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
+      afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
+    },
+  },
+  {
     id: 'cinematic-01',
     name: 'MERIDIAN',
     oneline: 'Warm, polished color for footage shot in natural light.',
@@ -144,7 +176,7 @@ const LUT_FAQS = window.LUT_FAQS || [
 const LUT_DETAIL_FAQS = window.LUT_DETAIL_FAQS || [
   {
     q: 'Who are these LUTs best for?',
-    a: 'Editors who want focused looks for specific lighting conditions instead of a giant bundle.',
+    a: 'Individual LUTs are for focused lighting conditions. Complete LUT Bundle is for editors who want every current look in one download.',
   },
   {
     q: 'What software can open these LUTs?',
@@ -156,9 +188,60 @@ const LUT_DETAIL_FAQS = window.LUT_DETAIL_FAQS || [
   },
 ];
 
+function compareScenesFor(lut) {
+  return (
+    Array.isArray(lut?.compareScenes) && lut.compareScenes.length
+      ? lut.compareScenes
+      : (lut?.compare ? [lut.compare] : [])
+  ).map((compare, index) => ({
+    ...compare,
+    id: compare.id || `scene-${index + 1}`,
+    label: compare.label || `Scene ${String(index + 1).padStart(2, '0')}`,
+  }));
+}
+
+function individualLuts() {
+  return LUTS.filter(lut => lut.available && !lut.isBundle);
+}
+
+function bundleLutsFor(lut) {
+  if (!lut?.isBundle) return [];
+  const pool = individualLuts();
+  if (!Array.isArray(lut.bundleIncludeIds) || lut.bundleIncludeIds.length === 0) return pool;
+
+  const byId = new Map(pool.map(item => [item.id, item]));
+  return lut.bundleIncludeIds.map(id => byId.get(id)).filter(Boolean);
+}
+
+function detailCopyFor(lut, bundleItems = []) {
+  if (lut?.details) return lut.details;
+  if (lut?.isBundle) {
+    const names = bundleItems.map(item => item.name).join(', ');
+    return {
+      whatItDoes: 'Packages every current alexg.mov LUT into one download.',
+      whoItsFor: 'Editors who want the full current LUT shelf instead of choosing one look at a time.',
+      whatYouGet: `ZIP containing ${names || 'all current LUTs'} as .CUBE LUTs.`,
+    };
+  }
+  return {
+    whatItDoes: 'Adds a finished warm look after base correction. Tune with opacity and exposure.',
+    whoItsFor: 'Editors who want one focused look for a specific lighting condition.',
+    whatYouGet: '1 x .CUBE',
+  };
+}
+
+function lutKindLabel(lut, bundleItems = []) {
+  if (lut?.isBundle) {
+    const count = bundleItems.length || individualLuts().length;
+    return `COMPLETE BUNDLE · ${count} ${count === 1 ? 'LUT' : 'LUTS'} · .CUBE`;
+  }
+  return `INDIVIDUAL LUT · ${lut.formats}`;
+}
+
 function LutsList({ go }) {
   const hrefFor = window.routeHref || ((id) => '#');
-  const releasedCount = LUTS.filter(l => l.available).length;
+  const releasedCount = individualLuts().length;
+  const bundleCount = LUTS.filter(l => l.available && l.isBundle).length;
 
   return (
     <>
@@ -168,6 +251,12 @@ function LutsList({ go }) {
           <p>Cinematic .CUBE LUTs for Premiere, Resolve, Final Cut, After Effects, and CapCut Desktop.</p>
           <div className="list-meta">
             <span>{releasedCount} RELEASED {releasedCount === 1 ? 'LOOK' : 'LOOKS'}</span>
+            {bundleCount ? (
+              <>
+                <span>·</span>
+                <span>{bundleCount} {bundleCount === 1 ? 'BUNDLE' : 'BUNDLES'}</span>
+              </>
+            ) : null}
             <span>·</span>
             <span>.CUBE FILES</span>
             <span>·</span>
@@ -177,51 +266,54 @@ function LutsList({ go }) {
       </section>
       <div className="wrap">
         <div className="list-grid lut-grid">
-          {LUTS.map(l => (
-            <article
-              key={l.id}
-              className={"card lut-card" + (l.available ? '' : ' lut-card-soon')}
-              onClick={l.available ? () => go('lut:' + l.id) : undefined}
-              {...pricingTrackingAttrs(l)}
-              style={{
-                cursor: l.available ? 'pointer' : 'default',
-                opacity: l.available ? 1 : 0.72,
-                borderStyle: l.available ? 'solid' : 'dashed',
-                background: l.available ? 'var(--bg)' : 'var(--surface)',
-              }}
-            >
-              <div className="card-media">
-                {l.available ? (
-                  <LutPreview tone={l.tone} interactive compare={l.compare} />
-                ) : (
-                  <div className="lut-card-soon-art" />
-                )}
-              </div>
-              <div className="card-body">
-                <div className="card-eyebrow">
-                  <span>{l.available ? `INDIVIDUAL LUT · ${l.formats}` : 'COMING SOON'}</span>
-                  {l.badge && <span style={{ color: l.available ? 'var(--orange-ink)' : 'var(--muted)' }}>{l.available ? '★ ' : ''}{l.badge}</span>}
-                </div>
-                <h3 className="card-title">{l.name}</h3>
-                {l.available && <p className="card-desc">{l.oneline}</p>}
-                <div className="card-foot">
-                  <div className="card-price">
-                    {l.available ? <PriceDisplay product={l} showLabel={false} /> : l.release}
-                  </div>
+          {LUTS.map(l => {
+            const bundleItems = bundleLutsFor(l);
+            return (
+              <article
+                key={l.id}
+                className={"card lut-card" + (l.available ? '' : ' lut-card-soon')}
+                onClick={l.available ? () => go('lut:' + l.id) : undefined}
+                {...pricingTrackingAttrs(l)}
+                style={{
+                  cursor: l.available ? 'pointer' : 'default',
+                  opacity: l.available ? 1 : 0.72,
+                  borderStyle: l.available ? 'solid' : 'dashed',
+                  background: l.available ? 'var(--bg)' : 'var(--surface)',
+                }}
+              >
+                <div className="card-media">
                   {l.available ? (
-                    <a
-                      className="btn btn-secondary btn-sm"
-                      href={hrefFor('lut:' + l.id)}
-                      {...pricingTrackingAttrs(l)}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('lut:' + l.id); }}
-                    >
-                      View <ArrowIcon />
-                    </a>
-                  ) : null}
+                    <LutPreview tone={l.tone} interactive compare={l.compare} />
+                  ) : (
+                    <div className="lut-card-soon-art" />
+                  )}
                 </div>
-              </div>
-            </article>
-          ))}
+                <div className="card-body">
+                  <div className="card-eyebrow">
+                    <span>{l.available ? lutKindLabel(l, bundleItems) : 'COMING SOON'}</span>
+                    {l.badge && <span style={{ color: l.available ? 'var(--orange-ink)' : 'var(--muted)' }}>{l.available ? '★ ' : ''}{l.badge}</span>}
+                  </div>
+                  <h3 className="card-title">{l.name}</h3>
+                  {l.available && <p className="card-desc">{l.oneline}</p>}
+                  <div className="card-foot">
+                    <div className="card-price">
+                      {l.available ? <PriceDisplay product={l} showLabel={false} /> : l.release}
+                    </div>
+                    {l.available ? (
+                      <a
+                        className="btn btn-secondary btn-sm"
+                        href={hrefFor('lut:' + l.id)}
+                        {...pricingTrackingAttrs(l)}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); go('lut:' + l.id); }}
+                      >
+                        View <ArrowIcon />
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
       <section className="section-sm">
@@ -265,20 +357,22 @@ function LutDetail({ id, go }) {
     setActiveMediaId(l.mockupSrc ? 'mockup' : 'compare');
   }, [l.id, l.mockupSrc]);
   if (!l.available) return null;
-  const detailCopy = {
-    whatItDoes: l.details?.whatItDoes || 'Adds a finished warm look after base correction. Tune with opacity and exposure.',
-    whoItsFor: l.details?.whoItsFor || 'Editors who want one focused LUT, not a giant bundle.',
-    whatYouGet: l.details?.whatYouGet || '1 x .CUBE',
-  };
-  const compareScenes = (
-    Array.isArray(l.compareScenes) && l.compareScenes.length
-      ? l.compareScenes
-      : (l.compare ? [l.compare] : [])
-  ).map((compare, index) => ({
-    ...compare,
-    id: compare.id || `scene-${index + 1}`,
-    label: compare.label || `Scene ${String(index + 1).padStart(2, '0')}`,
-  }));
+  const bundleItems = bundleLutsFor(l);
+  const detailCopy = detailCopyFor(l, bundleItems);
+  const compareScenes = compareScenesFor(l);
+  const isBundle = Boolean(l.isBundle);
+  const buyLabel = isBundle ? 'Buy Bundle' : 'Buy';
+  const bundleMediaScenes = isBundle
+    ? bundleItems.flatMap(item => compareScenesFor(item).map((compare, index) => ({
+      lut: item,
+      compare,
+      index,
+    })))
+    : compareScenes.map((compare, index) => ({
+      lut: l,
+      compare,
+      index,
+    }));
 
   const mediaItems = [
     l.mockupSrc ? {
@@ -288,10 +382,11 @@ function LutDetail({ id, go }) {
       src: l.mockupSrc,
       alt: l.mockupAlt || `${l.name} LUT mock-up`,
     } : null,
-    ...compareScenes.map((compare, index) => ({
-      id: `compare-${compare.id || index}`,
+    ...bundleMediaScenes.map(({ lut, compare, index }) => ({
+      id: `compare-${lut.id}-${compare.id || index}`,
       kind: 'compare',
-      label: `${l.name} ${compare.label} before and after preview`,
+      label: `${lut.name} ${compare.label} before and after preview`,
+      tone: lut.tone,
       compare,
     })),
   ].filter(Boolean);
@@ -344,7 +439,7 @@ function LutDetail({ id, go }) {
                   <img src={item.src} alt="" />
                 ) : (
                   <span className="pd-gallery-thumb-preview" aria-hidden="true">
-                    <LutPreview tone={l.tone} scale={0.55} compare={item.compare} showLabels={false} />
+                    <LutPreview tone={item.tone || l.tone} scale={0.55} compare={item.compare} showLabels={false} />
                   </span>
                 )}
               </button>
@@ -358,7 +453,7 @@ function LutDetail({ id, go }) {
               </div>
             ) : (
               <div className="pd-media">
-                <LutPreview tone={l.tone} scale={1.4} interactive compare={activeMedia.compare} />
+                <LutPreview tone={activeMedia.tone || l.tone} scale={1.4} interactive compare={activeMedia.compare} />
                 <div className="reel-meta">
                   <span>BEFORE / AFTER</span>
                   <span style={{ opacity: 0.6 }}>{activeMedia.compare?.label || l.demoLabel}</span>
@@ -369,7 +464,7 @@ function LutDetail({ id, go }) {
         </div>
 
         <div className="pd-info">
-          <div className="pd-tag"><span className="pd-tag-dot" style={{ background: 'var(--orange)' }} /> INDIVIDUAL LUT · .CUBE</div>
+          <div className="pd-tag"><span className="pd-tag-dot" style={{ background: 'var(--orange)' }} /> {lutKindLabel(l, bundleItems)}</div>
           <h1>{l.name}</h1>
           <p className="pd-benefit">{l.oneline}</p>
 
@@ -385,10 +480,10 @@ function LutDetail({ id, go }) {
           </div>
           <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying} {...pricingTrackingAttrs(l)}>
             <MailIcon />
-            <span className="cta-copy-desktop">{buying ? 'Redirecting…' : 'Buy'}</span>
-            <span className="cta-copy-mobile">{buying ? 'Redirecting…' : 'Buy'}</span>
+            <span className="cta-copy-desktop">{buying ? 'Redirecting…' : buyLabel}</span>
+            <span className="cta-copy-mobile">{buying ? 'Redirecting…' : buyLabel}</span>
           </button>
-          <div className="pd-reassure"><CheckIcon /> Files sent directly to your email.</div>
+          <div className="pd-reassure"><CheckIcon /> {isBundle ? 'All current LUT files sent directly to your email.' : 'Files sent directly to your email.'}</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{detailCopy.whatItDoes}</div></div>
@@ -398,7 +493,7 @@ function LutDetail({ id, go }) {
         </div>
       </div>
 
-      {compareScenes.length > 1 && (
+      {!isBundle && compareScenes.length > 1 && (
         <section className="pd-compare-showcase" aria-label={`${l.name} look tests`}>
           <div className="pd-compare-heading">
             <p className="section-title">LOOK TESTS</p>
@@ -424,13 +519,65 @@ function LutDetail({ id, go }) {
         </section>
       )}
 
+      {isBundle && (
+        <section className="bundle-lut-showcase" aria-label={`${l.name} included LUTs`}>
+          <div className="pd-compare-heading bundle-lut-heading">
+            <p className="section-title">INCLUDED LOOKS</p>
+            <h2>Scroll through every LUT in the bundle.</h2>
+          </div>
+          <div className="bundle-lut-stack">
+            {bundleItems.map((item, itemIndex) => {
+              const itemCopy = detailCopyFor(item);
+              const itemScenes = compareScenesFor(item);
+              return (
+                <article className="bundle-lut-section" key={item.id}>
+                  <div className="bundle-lut-copy">
+                    <p className="section-title">{String(itemIndex + 1).padStart(2, '0')} / {item.name}</p>
+                    <h2>{item.name}</h2>
+                    <p>{item.oneline}</p>
+                    <div className="pd-bullets bundle-lut-bullets">
+                      <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{itemCopy.whatItDoes}</div></div>
+                      <div className="pd-bullet"><div className="pd-bullet-k">WHO IT'S FOR</div><div className="pd-bullet-v">{itemCopy.whoItsFor}</div></div>
+                    </div>
+                  </div>
+                  <div className="bundle-lut-media">
+                    {item.mockupSrc ? (
+                      <div className="bundle-lut-mockup">
+                        <img src={item.mockupSrc} alt={item.mockupAlt || `${item.name} LUT mock-up`} />
+                      </div>
+                    ) : null}
+                    <div className="pd-compare-stack bundle-lut-previews">
+                      {itemScenes.map((compare, index) => (
+                        <article className="pd-compare-item" key={compare.id || index}>
+                          <div className="pd-compare-head">
+                            <span>{compare.label}</span>
+                            <strong>{compare.title || `${item.name} scene ${index + 1}`}</strong>
+                          </div>
+                          <div className="pd-media pd-compare-media">
+                            <LutPreview tone={item.tone} scale={1.15} interactive compare={compare} />
+                            <div className="reel-meta">
+                              <span>BEFORE / AFTER</span>
+                              <span style={{ opacity: 0.6 }}>{compare.label}</span>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <div className="pd-blocks" style={{ paddingBottom: 72 }}>
         <div className="pd-block">
           <h3>Install steps</h3>
           <ol>
             <li>Download and unzip the .zip file from the email link.</li>
             <li>Premiere → Lumetri Color panel → Creative → Look dropdown → Browse…</li>
-            <li>Point to the .cube file. Done.</li>
+            <li>Point to the .cube file you want to use. Done.</li>
             <li>For DaVinci, Final Cut, After Effects, or CapCut Desktop, import or copy the .cube file into the app's LUT workflow.</li>
             <li>Apply on an adjustment layer. Tune intensity 20–100%, usually 30–60%.</li>
           </ol>
@@ -439,9 +586,9 @@ function LutDetail({ id, go }) {
       <MobileProductStickyCta
         active={showStickyCta && !purchased}
         productName={l.name}
-        productMeta=".CUBE LUT · files sent by email"
+        productMeta={isBundle ? `${bundleItems.length || 3} .CUBE LUTs · files sent by email` : '.CUBE LUT · files sent by email'}
         price={<PriceDisplay product={l} mode="sticky" showLabel={false} />}
-        actionLabel={buying ? 'Redirecting…' : 'Buy'}
+        actionLabel={buying ? 'Redirecting…' : buyLabel}
         actionIcon={<MailIcon />}
         onAction={handleBuy}
         disabled={buying}

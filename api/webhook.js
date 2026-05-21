@@ -3,6 +3,12 @@ const { Resend } = require('resend');
 const { PRODUCTS } = require('../lib/products');
 const { makeLink } = require('./download');
 const { logEvent } = require('../lib/analytics-store');
+const {
+  recordCheckoutSession,
+  recordFulfilledPurchase,
+  recordStripeEvent,
+  tryRecord,
+} = require('../lib/supabase-db');
 
 const CANONICAL_ORIGIN = normalizeOrigin(process.env.SITE_URL || 'https://alexg.mov');
 
@@ -80,17 +86,25 @@ module.exports = async function handler(req, res) {
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object || {};
+      const productId = session.metadata?.productId;
+      const product = PRODUCTS[productId];
+
       await logEvent({
         type: 'stripe_webhook_checkout_completed',
         source: 'stripe_webhook',
         stripeEventId: event.id,
         stripeSessionId: session.id,
-        productId: session.metadata?.productId,
+        productId,
         stripeSessionStatus: session.status,
         paymentStatus: session.payment_status,
         amountTotal: session.amount_total,
         currency: session.currency,
       });
+      await tryRecord('checkout session completed', () => recordCheckoutSession(session, {
+        productId,
+        product,
+      }));
+      await tryRecord('stripe webhook event received', () => recordStripeEvent(event, session));
 
       if (!isFulfilledCheckoutStatus(session.payment_status)) {
         console.warn('Checkout session is not ready for fulfillment:', {
@@ -102,12 +116,14 @@ module.exports = async function handler(req, res) {
 
       try {
         await fulfillCheckoutSession(session, req);
+        await tryRecord('stripe webhook event processed', () => recordStripeEvent(event, session, 'processed'));
       } catch (err) {
         console.error('Checkout fulfillment failed:', {
           eventId: event.id,
           sessionId: session.id,
           message: err.message,
         });
+        await tryRecord('stripe webhook event failed', () => recordStripeEvent(event, session, 'failed', err.message));
       }
     }
 
@@ -148,6 +164,14 @@ async function fulfillCheckoutSession(session, req) {
   if (result?.error) {
     throw new Error(result.error.message || 'Resend rejected the email');
   }
+
+  await tryRecord('purchase fulfillment', () => recordFulfilledPurchase(session, {
+    productId,
+    product,
+    email,
+    downloadUrl,
+    emailDeliveryId: result?.data?.id || '',
+  }));
 }
 
 function buildEmail(productName, downloadUrl) {
@@ -156,11 +180,25 @@ function buildEmail(productName, downloadUrl) {
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#111;max-width:560px;margin:0 auto;padding:48px 24px">
   <p style="font-family:monospace;font-size:11px;color:#888;letter-spacing:.06em;margin:0 0 40px">ALEXG.MOV · DOWNLOAD READY</p>
-  <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:34px;font-weight:500;letter-spacing:-.02em;margin:0 0 16px">${productName}</h1>
-  <p style="font-size:15px;color:#555;line-height:1.65;margin:0 0 36px">Your purchase is confirmed. Click below to download your files.<br>This link expires in 48 hours — save the files somewhere safe.</p>
-  <a href="${downloadUrl}" style="display:inline-block;background:#111;color:#fff;padding:14px 28px;font-family:monospace;font-size:13px;letter-spacing:.04em;text-decoration:none;border-radius:2px">↓ Download ${productName}</a>
+  <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:34px;font-weight:500;letter-spacing:-.02em;margin:0 0 16px">${escapeHtml(productName)}</h1>
+  <p style="font-size:15px;color:#555;line-height:1.65;margin:0 0 36px">Your purchase is confirmed. Download the Sidestream setup wizard, open the DMG, and follow the steps.<br>This link expires in 48 hours — save the file somewhere safe.</p>
+  <a href="${escapeAttribute(downloadUrl)}" style="display:inline-block;background:#111;color:#fff;padding:14px 28px;font-family:monospace;font-size:13px;letter-spacing:.04em;text-decoration:none;border-radius:2px">Download Sidestream Setup</a>
   <hr style="border:none;border-top:1px solid #eee;margin:48px 0 24px">
   <p style="font-size:13px;color:#888;line-height:1.6;margin:0">Hit an install bug? Email <a href="mailto:alex@alexg.mov" style="color:#111;text-decoration:none;font-family:monospace">alex@alexg.mov</a> — reply within 24 hours.</p>
 </body>
 </html>`;
+}
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/`/g, '&#96;');
 }

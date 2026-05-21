@@ -1,6 +1,10 @@
 const Stripe = require('stripe');
 const { PRODUCTS } = require('../lib/products');
 const {
+  recordCheckoutSession,
+  tryRecord,
+} = require('../lib/supabase-db');
+const {
   OFFER_CODE,
   hashEmail,
   isValidEmail,
@@ -135,6 +139,11 @@ module.exports = async function handler(req, res) {
     }
 
     session = await stripe.checkout.sessions.create(checkoutParams);
+    await tryRecord('checkout session created', () => recordCheckoutSession(session, {
+      productId,
+      product,
+      pricingVariant,
+    }));
   } catch (err) {
     console.error('Stripe error:', err.message);
     return res.status(502).json({ error: 'Payment provider error. Please try again.' });

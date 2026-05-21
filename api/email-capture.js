@@ -18,6 +18,10 @@ const {
   readBody,
   safeJsonParse,
 } = require('../lib/analytics-store');
+const {
+  isDatabaseConfigured,
+  recordEmailLead,
+} = require('../lib/supabase-db');
 
 const DEFAULT_AUDIENCE_NAME = 'alexg.mov first-visit offers';
 
@@ -48,7 +52,7 @@ module.exports = async function handler(req, res) {
   const emailHash = hashEmail(email);
 
   try {
-    const storage = await storeLead(email, body);
+    const storage = await storeLead(email, body, ids);
     const offerToken = createOfferToken(email);
     const emailDelivery = await sendOfferEmail(email, emailHash);
 
@@ -141,7 +145,7 @@ async function sendOfferEmail(email, emailHash) {
   }
 }
 
-async function storeLead(email, body) {
+async function storeLead(email, body, ids) {
   const storage = [];
   const errors = [];
 
@@ -164,6 +168,25 @@ async function storeLead(email, body) {
     } catch (err) {
       errors.push(`Stripe: ${err.message}`);
       console.error('Stripe lead storage failed:', err.message);
+    }
+  }
+
+  if (isDatabaseConfigured()) {
+    try {
+      await recordEmailLead({
+        email,
+        emailHash: hashEmail(email),
+        offerCode: OFFER_CODE,
+        page: body.page,
+        path: body.path,
+        ids,
+        body,
+        storageTargets: storage.concat('supabase'),
+      });
+      storage.push('supabase');
+    } catch (err) {
+      errors.push(`Supabase: ${err.message}`);
+      console.error('Supabase lead storage failed:', err.message);
     }
   }
 

@@ -1,5 +1,10 @@
 const crypto = require('crypto');
+const { Readable } = require('stream');
 const { PRODUCTS } = require('../lib/products');
+const {
+  recordDownloadEvent,
+  tryRecord,
+} = require('../lib/supabase-db');
 
 function sign(productId, exp) {
   return crypto
@@ -28,18 +33,24 @@ module.exports = async function handler(req, res) {
       new URL(req.url, 'http://x').searchParams
     );
 
-    if (!productId || !exp || !sig) return res.status(400).end();
+    if (!productId || !exp || !sig) {
+      await logDownload(req, { productId, exp, status: 'missing_params', httpStatus: 400 });
+      return res.status(400).end();
+    }
 
     if (!process.env.DOWNLOAD_SECRET) {
       console.error('DOWNLOAD_SECRET is not configured');
+      await logDownload(req, { productId, exp, status: 'missing_download_secret', httpStatus: 500 });
       return res.status(500).send('Download is not configured.');
     }
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
       console.error('BLOB_READ_WRITE_TOKEN is not configured');
+      await logDownload(req, { productId, exp, status: 'missing_blob_token', httpStatus: 500 });
       return res.status(500).send('Download storage is not configured.');
     }
 
     if (Date.now() > parseInt(exp, 10)) {
+      await logDownload(req, { productId, exp, status: 'expired', httpStatus: 410 });
       return res.status(410).send('This download link has expired.');
     }
 
@@ -48,10 +59,16 @@ module.exports = async function handler(req, res) {
     try {
       valid = crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(expected, 'hex'));
     } catch {}
-    if (!valid) return res.status(403).end();
+    if (!valid) {
+      await logDownload(req, { productId, exp, status: 'invalid_signature', httpStatus: 403 });
+      return res.status(403).end();
+    }
 
     const product = PRODUCTS[productId];
-    if (!product?.blobUrl) return res.status(404).end();
+    if (!product?.blobUrl) {
+      await logDownload(req, { productId, exp, status: 'missing_product', httpStatus: 404 });
+      return res.status(404).end();
+    }
 
     const upstream = await fetch(product.blobUrl, {
       headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
@@ -59,16 +76,42 @@ module.exports = async function handler(req, res) {
 
     if (!upstream.ok) {
       console.error('Blob download failed:', { status: upstream.status, productId });
+      await logDownload(req, {
+        productId,
+        exp,
+        status: 'blob_failed',
+        httpStatus: 502,
+        metadata: { upstreamStatus: upstream.status },
+      });
       return res.status(502).send('File unavailable.');
     }
 
     const filename = product.downloadFilename || decodeURIComponent(product.blobUrl.split('/').pop() || 'download.zip');
-    const file = Buffer.from(await upstream.arrayBuffer());
+    const contentLength = upstream.headers.get('content-length');
     res.setHeader('Content-Type', upstream.headers.get('content-type') || 'application/octet-stream');
-    res.setHeader('Content-Length', file.length);
+    if (contentLength) res.setHeader('Content-Length', contentLength);
     res.setHeader('Content-Disposition', contentDisposition(filename));
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.end(file);
+    await logDownload(req, {
+      productId,
+      exp,
+      status: 'served',
+      httpStatus: 200,
+      metadata: { bytes: contentLength ? Number(contentLength) : null, filename },
+    });
+
+    if (!upstream.body || typeof res.write !== 'function') {
+      const file = Buffer.from(await upstream.arrayBuffer());
+      return res.end(file);
+    }
+
+    await new Promise((resolve, reject) => {
+      const stream = Readable.fromWeb(upstream.body);
+      stream.on('error', reject);
+      res.on('finish', resolve);
+      res.on('close', resolve);
+      stream.pipe(res);
+    });
   } catch (err) {
     console.error('Download failed:', err);
     return res.status(500).send('Download failed.');
@@ -76,3 +119,10 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.makeLink = makeLink;
+
+async function logDownload(req, details) {
+  await tryRecord('download event', () => recordDownloadEvent({
+    req,
+    ...details,
+  }));
+}

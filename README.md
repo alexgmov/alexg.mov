@@ -41,11 +41,13 @@ Commerce and fulfillment use these variables:
 - `STRIPE_PRICE_SOLENE`: Stripe Price ID for the MERIDIAN/Solene checkout product.
 - `STRIPE_PRICE_ONYX`: Stripe Price ID for the ONYX checkout product.
 - `STRIPE_PRICE_HALOCLYNE`: Stripe Price ID for the HALOCLYNE checkout product.
+- `STRIPE_PRICE_COMPLETE_LUT_BUNDLE`: optional Stripe Price ID override for the Complete LUT Bundle checkout product. Leave unset to use the checked-in $39 one-time Price.
 - `STRIPE_PRICE_SIDESTREAM`: optional Stripe Price ID override for the Sidestream plugin checkout product. Leave unset to use the checked-in temporary $0 Sidestream Price while the product is free.
 - `MERIDIAN_BLOB_URL`: optional private Vercel Blob URL override for MERIDIAN.
 - `ONYX_BLOB_URL`: optional private Vercel Blob URL override for ONYX.
 - `HALOCLYNE_BLOB_URL`: optional private Vercel Blob URL override for HALOCLYNE.
-- `SIDESTREAM_BLOB_URL`: optional private Vercel Blob URL override for Sidestream.
+- `COMPLETE_LUT_BUNDLE_BLOB_URL`: optional private Vercel Blob URL override for the Complete LUT Bundle ZIP.
+- `SIDESTREAM_BLOB_URL`: optional private Vercel Blob URL override for the Sidestream setup DMG.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
 - `RESEND_API_KEY`: Resend key used by the webhook fulfillment email and first-visit promo code email.
@@ -57,8 +59,45 @@ Commerce and fulfillment use these variables:
 - `EMAIL_POSTAL_ADDRESS` or `BUSINESS_POSTAL_ADDRESS`: footer address to include for commercial email compliance.
 - `ANALYTICS_LOG_DIR`: optional local analytics log directory.
 - `ANALYTICS_SALT`: optional visitor fingerprint salt. Falls back to `DOWNLOAD_SECRET`.
+- `POSTGRES_URL`, `DATABASE_URL`, or `SUPABASE_POSTGRES_URL`: optional Supabase/Postgres pooled connection string used for durable business logging. Prefer Supabase's shared pooler URL on Vercel, with the real password stored only in Vercel/local env vars.
+- `POSTGRES_POOL_MAX`: optional server-side Postgres pool size. Defaults to `3`, which is intentionally small for Vercel serverless.
+- `POSTGRES_SSL`: set to `0` only for a local non-SSL Postgres. Supabase pooler connections should keep SSL enabled.
+- `SIDESTREAM_TELEMETRY_ENABLED`: set to `0` to make `/api/plugin-telemetry` accept but drop Sidestream plugin telemetry while keeping the route deployed.
 
 Never expose Stripe secret keys, webhook secrets, Resend keys, Blob tokens, or `DOWNLOAD_SECRET` in frontend files.
+Never expose the Supabase pooler password, Postgres URL, service-role key, or any server database credential in frontend files or the Sidestream CEP extension.
+
+## Supabase Business Ledger
+
+The optional Supabase integration uses direct server-side Postgres writes through `lib/supabase-db.js`. It is intentionally server-only: Vercel API routes read the pooled Postgres URL from env vars, while browser code and the Sidestream CEP panel never receive database credentials.
+
+The initial schema lives in `supabase/migrations/20260521095933_create_business_ledger.sql` and creates private ledger tables for:
+
+- `customers`: normalized customer emails, Stripe customer IDs, country/name when Stripe provides them, and small metadata.
+- `email_leads`: first-visit offer captures with visitor/session hashes and storage targets.
+- `checkout_sessions`: Stripe Checkout Session snapshots created by `/api/create-checkout` and refreshed by the webhook.
+- `stripe_events`: received Stripe webhook events and processing status.
+- `purchases`: one row per fulfilled Checkout Session.
+- `licenses`: active product/license entitlement rows tied to purchases and Checkout Sessions.
+- `download_links`: generated fulfillment links, stored as hashes rather than raw signed URLs.
+- `download_events`: signed download-link outcomes such as served, expired, invalid signature, missing product, or Blob fetch failure.
+- `sidestream_telemetry_events`: redacted, batched Sidestream CEP telemetry events posted through `/api/plugin-telemetry`.
+
+All new tables have RLS enabled and no public policies. The app writes through the server-side pooled Postgres credential only.
+
+The Sidestream telemetry schema lives in `supabase/migrations/20260521101823_add_sidestream_plugin_telemetry.sql`. Keep it separate from the commerce ledger migration so plugin event volume can be indexed and retained independently from customer, purchase, and license tables.
+
+Apply the migration from the Supabase SQL editor or with the Supabase CLI after linking the project. For the current shared-pooler setup, set the Vercel env var to the Supabase pooler connection string with the real password, for example:
+
+```sh
+POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres"
+```
+
+## Sidestream Plugin Telemetry
+
+`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension. The plugin sends batches of up to 100 already-redacted events; the server validates size and timestamps, hashes request IP/user-agent context with the server secret, and writes to `sidestream_telemetry_events` through `lib/supabase-db.js`.
+
+The route intentionally does not expose Supabase, Stripe, Blob, or Resend secrets to the plugin. If Supabase is not configured, the route still returns success after analytics logging so telemetry never blocks the editor's search/download workflow.
 
 ## First-Visit Promo Offer
 
@@ -86,7 +125,8 @@ Checkout buttons in `site/luts.jsx` and `site/plugins.jsx` pass `offerCode`, `of
 8. `cancel_url` returns the buyer to the product page declared in `product.page`.
 9. `statement_descriptor_suffix` is set when the product defines `statementDescriptorSuffix`.
 10. The server logs a `checkout_session_created` analytics event.
-11. The browser redirects to the Stripe-hosted Checkout URL.
+11. If `POSTGRES_URL` is configured, `lib/supabase-db.js` records the Checkout Session snapshot in Supabase.
+12. The browser redirects to the Stripe-hosted Checkout URL.
 
 The integration intentionally uses Stripe-hosted Checkout Sessions for one-time digital purchases.
 
@@ -100,7 +140,7 @@ Public product entries can include optional display-only pricing fields:
 - `priceNote`: product-detail reassurance copy beside the price.
 - `pricingVariant`: optional stable analytics label. If omitted, `site/pricing.jsx` derives labels such as `launch-29-18`.
 
-The current LUT pricing pattern is `$29` compare-at and `$18` launch price. Do not invent fake high anchors such as `$99` unless that was a real bona fide price or a defensible planned regular price. Sidestream remains visually free while its checked-in Stripe fallback is a temporary $0 Price; do not display `$18` for it until `STRIPE_PRICE_SIDESTREAM` points at a real paid Price.
+The current individual LUT pricing pattern is `$29` compare-at and `$18` launch price. The Complete LUT Bundle uses the sum of the three individual compare-at prices as its `$87` anchor and a `$39` bundle launch price, which discounts below buying all three launch-price LUTs separately. Do not invent fake high anchors such as `$99` unless that was a real bona fide price or a defensible planned regular price. Sidestream remains visually free while its checked-in Stripe fallback is a temporary $0 Price; do not display `$18` for it until `STRIPE_PRICE_SIDESTREAM` points at a real paid Price.
 
 ## Checkout Success Page
 
@@ -138,7 +178,10 @@ That value must match a key in `PRODUCTS`. Plugin detail pages currently post `p
 - Frontend page `lut:cinematic-01` -> checkout product `solene` -> MERIDIAN zip.
 - Frontend page `lut:onyx` -> checkout product `onyx` -> ONYX zip.
 - Frontend page `lut:haloclyne` -> checkout product `haloclyne` -> HALOCLYNE zip.
-- Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> Sidestream ZXP.
+- Frontend page `lut:complete-lut-bundle` -> checkout product `complete-lut-bundle` -> Complete LUT Bundle zip.
+- Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> `Sidestream-1.0.2-Setup.dmg`.
+
+The Complete LUT Bundle detail page is intentionally data-driven: `site/luts.jsx` builds the scroll-through included-LUT sections from every available non-bundle item in `LUTS`. When adding a future LUT, the page will show its section automatically once that LUT is available, but the bundle ZIP, Stripe Price/display price, bundle copy, `llms.txt`, sitemap, and this README still need a deliberate update so checkout and fulfillment match the page.
 
 When adding a new product:
 
@@ -165,6 +208,8 @@ Local product files can live under `plugins/` or `luts/` while they are being up
 7. Fulfillment requires a configured product Blob URL, customer email, `DOWNLOAD_SECRET`, and `RESEND_API_KEY`.
 8. `api/download.makeLink()` creates a signed URL valid for 48 hours.
 9. Resend sends the buyer an email from `alexg.mov <downloads@alexg.mov>`.
+10. Sidestream fulfillment emails one setup-wizard DMG link, not separate plugin and guide files.
+11. If `POSTGRES_URL` is configured, the webhook records the Stripe event, checkout session, customer, purchase, active license, and hashed download-link row in Supabase.
 
 Important operational detail: fulfillment errors are logged, but the webhook still responds with `{ received: true }`. That means Stripe will not retry a failed Resend send or missing-product configuration after the handler catches the error. Check deployment logs after product launches and webhook tests.
 
@@ -179,6 +224,7 @@ Important operational detail: fulfillment errors are logged, but the webhook sti
 5. Missing products return `404`.
 6. The handler fetches the private Blob URL with `BLOB_READ_WRITE_TOKEN`.
 7. The response streams the file as an attachment using `downloadFilename`.
+8. If `POSTGRES_URL` is configured, the handler records the download outcome in `download_events`.
 
 Download links are generated server-side only and are currently valid for 48 hours.
 
@@ -202,6 +248,10 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-05-21: Switched Sidestream fulfillment to a single private Blob setup-wizard DMG so buyers get one download instead of separate plugin and install-guide files, and changed `/api/download` to stream large private Blob files instead of buffering them in memory.
+- 2026-05-21: Added `/api/plugin-telemetry` plus the `sidestream_telemetry_events` Supabase table so the Sidestream CEP extension can upload redacted batched search, preview, download, import, settings, heartbeat, and error telemetry through the server-only Postgres helper.
+- 2026-05-21: Added the first Supabase/Postgres business-ledger integration: schema migration, server-only pooled Postgres helper, Stripe Checkout/webhook persistence, lead capture storage, license rows, hashed download-link records, and download outcome logging.
+- 2026-05-19: Added the Complete LUT Bundle to the LUT shop with a `$87` compare-at / `$39` launch bundle price, private Blob ZIP, live Stripe Price fallback, checkout catalog mapping, sitemap/LLM mirrors, and a bundle detail page that scrolls through all available individual LUTs.
 - 2026-05-17: LUT cards, detail pages, homepage featured cards, sticky mobile CTAs, click analytics, and Checkout Session metadata now use the shared display-pricing helper with `$29` compare-at / `$18` launch pricing for LUTs.
 - 2026-05-17: Removed the retired AI clip-search plugin from public plugin data, SEO mirrors, sitemap/LLM mirrors, checkout catalog, analytics persona copy, and README routing docs.
 - 2026-05-16: Sidestream product cards and detail pages now use an optimized 11-second plugin demo video from `videos/plugin showcase/`, with a mobile MP4 variant and poster frame for faster product-page loading.

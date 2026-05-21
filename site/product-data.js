@@ -18,19 +18,19 @@ const PLUGINS = [
     seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
     what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
-    get: 'Sidestream 1.0.2 ZXP · Premiere panel · YouTube search · video/audio downloads · Premiere-safe MP4 conversion · lifetime download.',
+    get: 'Sidestream 1.0.2 setup wizard · Premiere panel · YouTube search · video/audio downloads · Premiere-safe MP4 conversion · lifetime download.',
     install: [
-      'Free for now: enter your email at checkout and Sidestream sends the download link.',
-      'Download Sidestream-1.0.2.zxp on your editing computer.',
-      'Install the ZXP with your Adobe extension installer.',
+      'Free for now: enter your email at checkout and Sidestream sends the setup download link.',
+      'Download Sidestream-1.0.2-Setup.dmg on your editing Mac.',
+      'Open Sidestream Setup.app and follow the guided install steps.',
       'Open Window → Extensions → Sidestream in Premiere.',
       'Search YouTube, preview a result, download video or audio, then import the finished file.',
     ],
     specs: [
       'Adobe Premiere Pro 2020 (14.0) or later',
-      'macOS · Windows',
+      'macOS setup wizard',
       'YouTube-first media intake workflow',
-      'ZXP extension package',
+      'Signed ZXP package inside the setup download',
       'Version 1.0.2',
     ],
     detailGuide: {
@@ -62,7 +62,7 @@ const PLUGINS = [
       },
       {
         q: 'How do I receive Sidestream after checkout?',
-        a: 'The free Sidestream checkout sends the ZXP download link to your email, so you can claim it on your phone and install it later on your editing computer.',
+        a: 'The free Sidestream checkout sends the setup-wizard download link to your email, so you can claim it on your phone and install it later on your editing Mac.',
       },
     ],
   },
@@ -105,7 +105,7 @@ const PLUGIN_FAQS = [
   },
   {
     q: 'How do I receive a plugin after checkout?',
-    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install later on your editing computer.',
+    a: 'The setup download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install later on your editing computer.',
   },
 ];
 
@@ -120,15 +120,47 @@ const PLUGIN_DETAIL_FAQS = [
   },
   {
     q: 'What software do I need?',
-    a: 'Released plugins ship as ZXP extensions for Premiere Pro on macOS and Windows. Check each plugin page for exact version support.',
+    a: 'Released plugins ship as setup downloads or ZXP extension packages for Premiere Pro. Check each plugin page for exact version support.',
   },
   {
     q: 'How do I receive a plugin after checkout?',
-    a: 'The ZXP download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install it later on your editing computer.',
+    a: 'The setup download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install it later on your editing computer.',
   },
 ];
 
 const LUTS = [
+  {
+    id: 'complete-lut-bundle',
+    name: 'Complete LUT Bundle',
+    oneline: 'All current alexg.mov LUTs in one download: warm natural light, nighttime city glow, and underwater color.',
+    seoDescription: 'Complete LUT Bundle includes every current alexg.mov .CUBE LUT: MERIDIAN, ONYX, and HALOCLYNE for Premiere Pro, DaVinci Resolve, Final Cut Pro, After Effects, CapCut Desktop, and modern color workflows.',
+    price: 39,
+    compareAtPrice: 87,
+    priceLabel: 'Bundle launch price',
+    priceNote: 'ALL CURRENT LUTS · SENT BY EMAIL',
+    formats: '3 .CUBE LUTS',
+    badge: 'BEST VALUE',
+    tone: 'teal-orange',
+    available: true,
+    isBundle: true,
+    checkoutProductId: 'complete-lut-bundle',
+    demoLabel: 'Bundle',
+    mockupAlt: 'Complete LUT Bundle product mockup',
+    details: {
+      whatItDoes: 'Packages every current alexg.mov LUT into one download, covering natural light, night footage, and underwater color.',
+      whoItsFor: 'Editors who want the full current LUT shelf instead of choosing one look at a time.',
+      whatYouGet: 'ZIP containing MERIDIAN, ONYX, and HALOCLYNE as .CUBE LUTs.',
+    },
+    compare: {
+      title: 'Complete LUT Bundle',
+      beforeLabel: 'Ungraded',
+      afterLabel: 'Graded',
+      beforeTitle: 'Complete LUT Bundle MERIDIAN ungraded preview',
+      afterTitle: 'Complete LUT Bundle MERIDIAN graded preview',
+      beforeSrc: 'videos/lut showcase/meridian 1 ungraded.mp4',
+      afterSrc: 'videos/lut showcase/meridian 1 graded.mp4',
+    },
+  },
   {
     id: 'cinematic-01',
     name: 'MERIDIAN',
@@ -269,7 +301,7 @@ const LUT_FAQS = [
 const LUT_DETAIL_FAQS = [
   {
     q: 'Who are these LUTs best for?',
-    a: 'Editors who want focused looks for specific lighting conditions instead of a giant bundle.',
+    a: 'Individual LUTs are for focused lighting conditions. Complete LUT Bundle is for editors who want every current look in one download.',
   },
   {
     q: 'What software can open these LUTs?',
@@ -282,7 +314,7 @@ const LUT_DETAIL_FAQS = [
 ];
 
 const FAQS = [
-  { q: 'Do your plugins work on Windows?', a: 'Released plugins ship as ZXP extensions for Premiere Pro on macOS and Windows. Check each plugin page for exact version support.' },
+  { q: 'Do your plugins work on Windows?', a: 'Sidestream currently ships as a macOS setup download. If you need the raw Windows-compatible ZXP package, email support and include your Premiere version.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
   { q: 'Do you offer refunds?', a: 'No. These are digital downloads, so all sales are final. If something is broken on my end, email me and I will fix or replace it.' },
   { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Include your OS, Premiere version, and a screen recording if possible.' },
