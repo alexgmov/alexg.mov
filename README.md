@@ -5,8 +5,9 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 ## Runtime Architecture
 
 - `site/main.jsx` boots the React app, first loading shared browser modules such as analytics, product data, SEO helpers, visuals, and chrome.
-- `site/app.jsx` owns the query-string router. Public pages are represented by `?page=...`, for example `?page=luts`, `?page=lut:cinematic-01`, and `?page=success`.
+- `site/app.jsx` owns the query-string router. Public pages are represented by `?page=...`, for example `?page=luts`, `?page=lut:cinematic-01`, `?page=sidestream-install`, and `?page=success`.
 - Route components are split into chunks: home, plugins, LUTs, and supporting pages.
+- `site/chrome.jsx` owns global nav/footer chrome. The mobile bottom nav is hidden on product detail routes and the Sidestream install guide so purchase/install actions are not covered by the floating menu.
 - `site/home.jsx` owns the homepage hero and featured product rail, with the OMI proof teaser leading the LUT cards. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
 - `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `Australia/Sydney` timezone.
 - `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, display pricing fields, media paths, and product page metadata. LUT copy also has fallback/indexable mirrors in `site/luts.jsx`, `site/home.jsx`, and `llms.txt`; keep those aligned when changing product descriptions.
@@ -47,7 +48,7 @@ Commerce and fulfillment use these variables:
 - `ONYX_BLOB_URL`: optional private Vercel Blob URL override for ONYX.
 - `HALOCLYNE_BLOB_URL`: optional private Vercel Blob URL override for HALOCLYNE.
 - `COMPLETE_LUT_BUNDLE_BLOB_URL`: optional private Vercel Blob URL override for the Complete LUT Bundle ZIP.
-- `SIDESTREAM_BLOB_URL`: optional private Vercel Blob URL override for the Sidestream setup DMG.
+- `SIDESTREAM_BLOB_URL`: optional private Vercel Blob URL override for the Sidestream signed ZXP.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
 - `RESEND_API_KEY`: Resend key used by the webhook fulfillment email and first-visit promo code email.
@@ -179,7 +180,7 @@ That value must match a key in `PRODUCTS`. Plugin detail pages currently post `p
 - Frontend page `lut:onyx` -> checkout product `onyx` -> ONYX zip.
 - Frontend page `lut:haloclyne` -> checkout product `haloclyne` -> HALOCLYNE zip.
 - Frontend page `lut:complete-lut-bundle` -> checkout product `complete-lut-bundle` -> Complete LUT Bundle zip.
-- Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> `Sidestream-1.0.2-Setup.dmg`.
+- Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> `Sidestream-1.0.2.zxp` plus the `sidestream-install` guided web page.
 
 The Complete LUT Bundle detail page is intentionally data-driven: `site/luts.jsx` builds the scroll-through included-LUT sections from every available non-bundle item in `LUTS`. When adding a future LUT, the page will show its section automatically once that LUT is available, but the bundle ZIP, Stripe Price/display price, bundle copy, `llms.txt`, sitemap, and this README still need a deliberate update so checkout and fulfillment match the page.
 
@@ -208,7 +209,7 @@ Local product files can live under `plugins/` or `luts/` while they are being up
 7. Fulfillment requires a configured product Blob URL, customer email, `DOWNLOAD_SECRET`, and `RESEND_API_KEY`.
 8. `api/download.makeLink()` creates a signed URL valid for 48 hours.
 9. Resend sends the buyer an email from `alexg.mov <downloads@alexg.mov>`.
-10. Sidestream fulfillment emails one setup-wizard DMG link, not separate plugin and guide files.
+10. Sidestream fulfillment emails the raw ZXP download link and a guided web install link that walks through the aescripts ZXP/UXP Installer setup.
 11. If `POSTGRES_URL` is configured, the webhook records the Stripe event, checkout session, customer, purchase, active license, and hashed download-link row in Supabase.
 
 Important operational detail: fulfillment errors are logged, but the webhook still responds with `{ received: true }`. That means Stripe will not retry a failed Resend send or missing-product configuration after the handler catches the error. Check deployment logs after product launches and webhook tests.
@@ -250,7 +251,7 @@ The current location is derived automatically at page load using the current dat
 
 - 2026-05-21: Moved the homepage OMI proof teaser into the first slot of the featured LUT stack so case-study proof leads the product cards.
 - 2026-05-21: Clamped LUT listing-card descriptions to a three-line block so the longer HALOCLYNE copy does not make its card taller than the other LUT cards.
-- 2026-05-21: Switched Sidestream fulfillment to a single private Blob setup-wizard DMG so buyers get one download instead of separate plugin and install-guide files, and changed `/api/download` to stream large private Blob files instead of buffering them in memory.
+- 2026-05-21: Replaced the short-lived Sidestream DMG setup path with a raw private Blob ZXP download plus the `sidestream-install` guided web flow for aescripts ZXP/UXP Installer setup; `/api/download` still streams large private Blob files instead of buffering them in memory.
 - 2026-05-21: Added `/api/plugin-telemetry` plus the `sidestream_telemetry_events` Supabase table so the Sidestream CEP extension can upload redacted batched search, preview, download, import, settings, heartbeat, and error telemetry through the server-only Postgres helper.
 - 2026-05-21: Added the first Supabase/Postgres business-ledger integration: schema migration, server-only pooled Postgres helper, Stripe Checkout/webhook persistence, lead capture storage, license rows, hashed download-link records, and download outcome logging.
 - 2026-05-19: Added the Complete LUT Bundle to the LUT shop with a `$87` compare-at / `$39` launch bundle price, private Blob ZIP, live Stripe Price fallback, checkout catalog mapping, sitemap/LLM mirrors, and a bundle detail page that scrolls through all available individual LUTs.

@@ -1318,6 +1318,231 @@ img, svg, video { display: block; max-width: 100%; }
   content: "·"; color: var(--muted); flex-shrink: 0;
 }
 
+/* ── Sidestream install guide ─────────────────── */
+.sidestream-install {
+  padding-bottom: 72px;
+}
+.install-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 28px;
+  align-items: stretch;
+  padding: 42px 0 36px;
+  border-bottom: 1px solid var(--hairline);
+}
+.install-hero-copy {
+  max-width: 700px;
+}
+.install-hero-copy h1 {
+  font-family: var(--serif);
+  font-size: clamp(38px, 5.3vw, 70px);
+  line-height: 0.98;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0 0 18px;
+}
+.install-hero-copy p:not(.section-title) {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.install-status-panel {
+  align-self: end;
+  display: grid;
+  gap: 22px;
+  min-height: 240px;
+  padding: 24px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 82%, transparent), transparent),
+    var(--bg);
+}
+.install-status-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.install-status-top strong {
+  color: var(--ink);
+  font-weight: 500;
+  text-align: right;
+}
+.install-status-list {
+  display: grid;
+  gap: 10px;
+  align-self: end;
+}
+.install-status-list span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 8px 0;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--hairline-2);
+}
+.install-status-list svg {
+  color: var(--blue-ink);
+  flex: 0 0 auto;
+}
+.install-steps {
+  display: grid;
+  gap: 12px;
+  padding: 30px 0;
+}
+.install-step {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) minmax(170px, 242px);
+  gap: 22px;
+  align-items: center;
+  min-height: 132px;
+  padding: 22px 24px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.install-step-index {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.install-step-copy {
+  min-width: 0;
+}
+.install-step-copy p {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.install-step-copy h2 {
+  margin: 0 0 7px;
+  font-family: var(--serif);
+  font-size: 25px;
+  line-height: 1.08;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+.install-step-copy span {
+  display: block;
+  max-width: 70ch;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.install-step-action {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+.install-step-action .btn {
+  width: 100%;
+}
+.install-segment {
+  width: 100%;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.install-segment button,
+.install-segment a,
+.install-state-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+}
+.install-segment button {
+  color: var(--muted);
+}
+.install-segment button.active {
+  color: var(--bg);
+  background: var(--ink);
+}
+.install-segment a {
+  color: var(--ink);
+}
+.install-state-pill {
+  width: 100%;
+  border: 1px solid var(--hairline);
+  color: var(--muted);
+  background: var(--surface);
+}
+.install-state-pill.is-ready {
+  color: var(--bg);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.install-troubleshoot {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.76fr) minmax(0, 1.24fr);
+  gap: 28px;
+  padding: 34px 0 0;
+  border-top: 1px solid var(--hairline);
+}
+.install-troubleshoot h2 {
+  max-width: 12ch;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(30px, 3.4vw, 44px);
+  line-height: 1.03;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+.install-faq-list {
+  display: grid;
+  gap: 10px;
+}
+.install-faq-list details {
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 16px 18px;
+  background: var(--bg);
+}
+.install-faq-list summary {
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 500;
+}
+.install-faq-list p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.install-foot-actions {
+  grid-column: 2;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 /* ── Checkout success ─────────────────────────── */
 .success-page {
   min-height: calc(100vh - var(--nav-height));
@@ -3903,6 +4128,46 @@ footer {
     grid-template-columns: minmax(0, 1fr);
     gap: 12px;
     justify-self: stretch;
+  }
+  .install-hero,
+  .install-troubleshoot {
+    grid-template-columns: 1fr;
+  }
+  .install-hero {
+    padding: 30px 0 28px;
+    gap: 22px;
+  }
+  .install-hero-copy h1 {
+    font-size: clamp(38px, 12vw, 50px);
+  }
+  .install-status-panel {
+    min-height: 0;
+    padding: 20px;
+  }
+  .install-step {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    min-height: 0;
+    padding: 20px;
+  }
+  .install-step-index {
+    width: 34px;
+    height: 34px;
+  }
+  .install-step-action {
+    justify-content: stretch;
+  }
+  .install-troubleshoot {
+    gap: 22px;
+  }
+  .install-troubleshoot h2 {
+    max-width: 100%;
+  }
+  .install-foot-actions {
+    grid-column: auto;
+  }
+  .install-foot-actions .btn {
+    flex: 1 1 150px;
   }
   .pd-gallery-main {
     order: 1;

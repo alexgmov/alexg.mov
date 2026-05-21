@@ -36,6 +36,7 @@ function routeForPage(page) {
   const routes = {
     home: { chunk: 'home', componentName: 'Home' },
     plugins: { chunk: 'plugins', componentName: 'PluginsList' },
+    'sidestream-install': { chunk: 'plugins', componentName: 'SidestreamInstallGuide' },
     luts: { chunk: 'luts', componentName: 'LutsList' },
     portfolio: { chunk: 'pages', componentName: 'Portfolio' },
     services: { chunk: 'pages', componentName: 'Services' },

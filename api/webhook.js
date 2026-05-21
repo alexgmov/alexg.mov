@@ -152,13 +152,21 @@ async function fulfillCheckoutSession(session, req) {
     throw new Error('RESEND_API_KEY is not configured');
   }
 
-  const downloadUrl = makeLink(getPublicOrigin(req), productId);
+  const origin = getPublicOrigin(req);
+  const downloadUrl = makeLink(origin, productId);
+  const installUrl = productId === 'sidestream'
+    ? `${origin}/?page=sidestream-install&download=${encodeURIComponent(downloadUrl)}`
+    : '';
   const resend = new Resend(process.env.RESEND_API_KEY);
   const result = await resend.emails.send({
     from: 'alexg.mov <downloads@alexg.mov>',
     to: email,
     subject: `Your ${product.name} download is ready`,
-    html: buildEmail(product.name, downloadUrl),
+    html: buildEmail(product.name, downloadUrl, {
+      downloadFilename: product.downloadFilename,
+      installUrl,
+      productId,
+    }),
   });
 
   if (result?.error) {
@@ -174,15 +182,35 @@ async function fulfillCheckoutSession(session, req) {
   }));
 }
 
-function buildEmail(productName, downloadUrl) {
+function buildEmail(productName, downloadUrl, options = {}) {
+  const isSidestream = options.productId === 'sidestream';
+  if (isSidestream) {
+    return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#111;max-width:560px;margin:0 auto;padding:48px 24px">
+  <p style="font-family:monospace;font-size:11px;color:#888;letter-spacing:.06em;margin:0 0 40px">ALEXG.MOV · DOWNLOAD READY</p>
+  <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:34px;font-weight:500;letter-spacing:-.02em;margin:0 0 16px">${escapeHtml(productName)}</h1>
+  <p style="font-size:15px;color:#555;line-height:1.65;margin:0 0 28px">Your purchase is confirmed. Download the raw Sidestream ZXP, then open the guided install page. If you do not have the aescripts ZXP/UXP Installer, the guide walks you through getting it.<br>This download link expires in 48 hours.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;margin:0 0 36px">
+    <a href="${escapeAttribute(downloadUrl)}" style="display:inline-block;background:#111;color:#fff;padding:14px 22px;font-family:monospace;font-size:13px;letter-spacing:.04em;text-decoration:none;border-radius:2px">Download Sidestream ZXP</a>
+    <a href="${escapeAttribute(options.installUrl || '')}" style="display:inline-block;background:#fff;color:#111;padding:14px 22px;font-family:monospace;font-size:13px;letter-spacing:.04em;text-decoration:none;border-radius:2px;border:1px solid #ddd">Open Install Guide</a>
+  </div>
+  <p style="font-size:13px;color:#777;line-height:1.6;margin:0">Use the install guide for the ZXP/UXP Installer steps, then open Sidestream from Premiere Pro's Window &gt; Extensions menu.</p>
+  <hr style="border:none;border-top:1px solid #eee;margin:48px 0 24px">
+  <p style="font-size:13px;color:#888;line-height:1.6;margin:0">Hit an install bug? Email <a href="mailto:alex@alexg.mov" style="color:#111;text-decoration:none;font-family:monospace">alex@alexg.mov</a> — reply within 24 hours.</p>
+</body>
+</html>`;
+  }
+
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#111;max-width:560px;margin:0 auto;padding:48px 24px">
   <p style="font-family:monospace;font-size:11px;color:#888;letter-spacing:.06em;margin:0 0 40px">ALEXG.MOV · DOWNLOAD READY</p>
   <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:34px;font-weight:500;letter-spacing:-.02em;margin:0 0 16px">${escapeHtml(productName)}</h1>
-  <p style="font-size:15px;color:#555;line-height:1.65;margin:0 0 36px">Your purchase is confirmed. Download the Sidestream setup wizard, open the DMG, and follow the steps.<br>This link expires in 48 hours — save the file somewhere safe.</p>
-  <a href="${escapeAttribute(downloadUrl)}" style="display:inline-block;background:#111;color:#fff;padding:14px 28px;font-family:monospace;font-size:13px;letter-spacing:.04em;text-decoration:none;border-radius:2px">Download Sidestream Setup</a>
+  <p style="font-size:15px;color:#555;line-height:1.65;margin:0 0 36px">Your purchase is confirmed. Download ${escapeHtml(options.downloadFilename || 'your files')} and save it somewhere safe.<br>This link expires in 48 hours.</p>
+  <a href="${escapeAttribute(downloadUrl)}" style="display:inline-block;background:#111;color:#fff;padding:14px 28px;font-family:monospace;font-size:13px;letter-spacing:.04em;text-decoration:none;border-radius:2px">Download Files</a>
   <hr style="border:none;border-top:1px solid #eee;margin:48px 0 24px">
   <p style="font-size:13px;color:#888;line-height:1.6;margin:0">Hit an install bug? Email <a href="mailto:alex@alexg.mov" style="color:#111;text-decoration:none;font-family:monospace">alex@alexg.mov</a> — reply within 24 hours.</p>
 </body>

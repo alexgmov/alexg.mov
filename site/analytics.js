@@ -589,7 +589,7 @@
       return;
     }
 
-    if (targetPage && ['plugins', 'luts', 'portfolio', 'services', 'support', 'terms', 'refund', 'home'].includes(targetPage)) {
+    if (targetPage && ['plugins', 'sidestream-install', 'luts', 'portfolio', 'services', 'support', 'terms', 'refund', 'home'].includes(targetPage)) {
       track('navigation_click', {
         label,
         targetPage,

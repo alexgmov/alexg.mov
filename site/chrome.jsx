@@ -72,6 +72,7 @@ function MobileBottomNav({ page, go }) {
   const hrefFor = window.routeHref || ((id) => '#');
   const pageKey = String(page || 'home').split(':')[0];
   const isProductDetail = String(page || '').startsWith('plugin:') || String(page || '').startsWith('lut:');
+  const isUtilityPage = pageKey === 'sidestream-install';
   const [open, setOpen] = React.useState(false);
   const navRef = React.useRef(null);
 
@@ -97,7 +98,7 @@ function MobileBottomNav({ page, go }) {
     };
   }, [open]);
 
-  if (isProductDetail) return null;
+  if (isProductDetail || isUtilityPage) return null;
 
   const items = [
     { id: 'services', label: 'Services', helper: 'Brief' },

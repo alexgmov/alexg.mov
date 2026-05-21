@@ -18,19 +18,20 @@ const PLUGINS = [
     seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
     what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
-    get: 'Sidestream 1.0.2 setup wizard · Premiere panel · YouTube search · video/audio downloads · Premiere-safe MP4 conversion · lifetime download.',
+    get: 'Sidestream 1.0.2 ZXP · guided web install · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
     install: [
-      'Free for now: enter your email at checkout and Sidestream sends the setup download link.',
-      'Download Sidestream-1.0.2-Setup.dmg on your editing Mac.',
-      'Open Sidestream Setup.app and follow the guided install steps.',
+      'Free for now: enter your email at checkout and Sidestream sends the ZXP download link.',
+      'Open the guided install page from the email.',
+      'Install the free aescripts ZXP/UXP Installer if you do not already have it.',
+      'Open Sidestream-1.0.2.zxp with the ZXP/UXP Installer.',
       'Open Window → Extensions → Sidestream in Premiere.',
       'Search YouTube, preview a result, download video or audio, then import the finished file.',
     ],
     specs: [
       'Adobe Premiere Pro 2020 (14.0) or later',
-      'macOS setup wizard',
+      'macOS and Windows ZXP installer flow',
       'YouTube-first media intake workflow',
-      'Signed ZXP package inside the setup download',
+      'Signed ZXP package',
       'Version 1.0.2',
     ],
     detailGuide: {
@@ -62,7 +63,7 @@ const PLUGINS = [
       },
       {
         q: 'How do I receive Sidestream after checkout?',
-        a: 'The free Sidestream checkout sends the setup-wizard download link to your email, so you can claim it on your phone and install it later on your editing Mac.',
+        a: 'The free Sidestream checkout sends the raw ZXP download link and a guided install page to your email, so you can claim it on your phone and install it later on your editing computer.',
       },
     ],
   },
@@ -105,7 +106,7 @@ const PLUGIN_FAQS = [
   },
   {
     q: 'How do I receive a plugin after checkout?',
-    a: 'The setup download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install later on your editing computer.',
+    a: 'The download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install later on your editing computer.',
   },
 ];
 
@@ -120,11 +121,11 @@ const PLUGIN_DETAIL_FAQS = [
   },
   {
     q: 'What software do I need?',
-    a: 'Released plugins ship as setup downloads or ZXP extension packages for Premiere Pro. Check each plugin page for exact version support.',
+    a: 'Released plugins ship as ZXP extension packages for Premiere Pro. Check each plugin page for exact version support.',
   },
   {
     q: 'How do I receive a plugin after checkout?',
-    a: 'The setup download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install it later on your editing computer.',
+    a: 'The download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install it later on your editing computer.',
   },
 ];
 
@@ -314,7 +315,7 @@ const LUT_DETAIL_FAQS = [
 ];
 
 const FAQS = [
-  { q: 'Do your plugins work on Windows?', a: 'Sidestream currently ships as a macOS setup download. If you need the raw Windows-compatible ZXP package, email support and include your Premiere version.' },
+  { q: 'Do your plugins work on Windows?', a: 'Sidestream ships as a signed ZXP package. Install it with the free aescripts ZXP/UXP Installer and email support if Premiere does not show the panel.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
   { q: 'Do you offer refunds?', a: 'No. These are digital downloads, so all sales are final. If something is broken on my end, email me and I will fix or replace it.' },
   { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Include your OS, Premiere version, and a screen recording if possible.' },
