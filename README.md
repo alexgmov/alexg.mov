@@ -7,7 +7,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `site/main.jsx` boots the React app, first loading shared browser modules such as analytics, product data, SEO helpers, visuals, and chrome.
 - `site/app.jsx` owns the query-string router. Public pages are represented by `?page=...`, for example `?page=luts`, `?page=lut:cinematic-01`, and `?page=success`.
 - Route components are split into chunks: home, plugins, LUTs, and supporting pages.
-- `site/home.jsx` owns the homepage hero, featured product rail, and OMI proof teaser. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
+- `site/home.jsx` owns the homepage hero and featured product rail, with the OMI proof teaser leading the LUT cards. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
 - `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `Australia/Sydney` timezone.
 - `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, display pricing fields, media paths, and product page metadata. LUT copy also has fallback/indexable mirrors in `site/luts.jsx`, `site/home.jsx`, and `llms.txt`; keep those aligned when changing product descriptions.
 - `site/pricing.jsx` owns display-only pricing helpers for rendered prices, compare-at launch pricing, and pricing-variant tracking attributes. Stripe Price IDs in `lib/products.js` remain the source of truth for what checkout actually charges.
@@ -248,6 +248,8 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-05-21: Moved the homepage OMI proof teaser into the first slot of the featured LUT stack so case-study proof leads the product cards.
+- 2026-05-21: Clamped LUT listing-card descriptions to a three-line block so the longer HALOCLYNE copy does not make its card taller than the other LUT cards.
 - 2026-05-21: Switched Sidestream fulfillment to a single private Blob setup-wizard DMG so buyers get one download instead of separate plugin and install-guide files, and changed `/api/download` to stream large private Blob files instead of buffering them in memory.
 - 2026-05-21: Added `/api/plugin-telemetry` plus the `sidestream_telemetry_events` Supabase table so the Sidestream CEP extension can upload redacted batched search, preview, download, import, settings, heartbeat, and error telemetry through the server-only Postgres helper.
 - 2026-05-21: Added the first Supabase/Postgres business-ledger integration: schema migration, server-only pooled Postgres helper, Stripe Checkout/webhook persistence, lead capture storage, license rows, hashed download-link records, and download outcome logging.

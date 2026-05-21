@@ -779,7 +779,6 @@ img, svg, video { display: block; max-width: 100%; }
 }
 
 /* ── Proof / stat block ─────────────────────────── */
-.proof-section { padding-top: 42px; }
 .proof {
   border: 1px solid var(--hairline);
   border-radius: var(--radius);
@@ -1493,6 +1492,11 @@ img, svg, video { display: block; max-width: 100%; }
 .lut-card .card-desc {
   font-size: 13px;
   margin-bottom: 14px;
+  min-height: 4.5em;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .lut-card .card-price {
   font-size: 14px;
@@ -4125,9 +4129,6 @@ footer {
 
   .about-strip {
     margin-top: 0;
-  }
-  .proof-section {
-    padding-top: 24px;
   }
   .proof {
     padding: 22px 18px;

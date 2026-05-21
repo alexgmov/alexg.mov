@@ -903,6 +903,46 @@ function Home({ go }) {
       {/* Featured Products */}
       <section id="featured-products" className="section-sm featured-products">
         <div className="wrap featured-products-stack">
+          <div data-home-scroll-blur>
+            <p className="section-title">PROOF · CASE STUDY</p>
+            <div className="proof">
+              <div className="proof-grid">
+                <div className="proof-stat">
+                  <h2 className="proof-num"><span className="value">{OMI_CASE_STUDY.impactValue}</span><span className="unit">{OMI_CASE_STUDY.impactUnit}</span></h2>
+                  <p className="proof-label">
+                    {OMI_CASE_STUDY.teaserLabelParts.map(part => (
+                      <span key={part}>{part}</span>
+                    ))}
+                  </p>
+                </div>
+                <div className="proof-body">
+                  <div className="proof-copy">
+                    <h3>{OMI_CASE_STUDY.teaserTitle}</h3>
+                    {OMI_CASE_STUDY.teaserSummary && <p className="proof-summary">{OMI_CASE_STUDY.teaserSummary}</p>}
+                  </div>
+                  <div className="proof-video">
+                    <video
+                      src={proofVideoSrc}
+                      poster={getVideoPosterSrc(OMI_CASE_STUDY.videoSrc)}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      aria-label="OMI launch film"
+                      title="OMI launch film"
+                      disablePictureInPicture
+                      controlsList="nodownload nofullscreen noremoteplayback"
+                    />
+                  </div>
+                  <div className="proof-actions">
+                    <button className="btn btn-primary btn-sm proof-cta" onClick={() => go('services', { target: 'service-case-studies' })}>See the case study <ArrowIcon /></button>
+                    <p className="proof-cta-note">Full breakdown: brief, execution, outcome.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           {featuredLuts.map(lut => (
             <div key={lut.id} data-home-scroll-blur>
               <p className="section-title">FEATURED · LUT</p>
@@ -943,50 +983,6 @@ function Home({ go }) {
               <div>
                 <h3 className="about-h">Systems.</h3>
                 <p className="about-p">Workflows, templates, fewer clicks, more finished work.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Proof */}
-      <section className="section-sm proof-section">
-        <div className="wrap" data-home-scroll-blur>
-          <p className="section-title">PROOF · CASE STUDY</p>
-          <div className="proof">
-            <div className="proof-grid">
-              <div className="proof-stat">
-                <h2 className="proof-num"><span className="value">{OMI_CASE_STUDY.impactValue}</span><span className="unit">{OMI_CASE_STUDY.impactUnit}</span></h2>
-                <p className="proof-label">
-                  {OMI_CASE_STUDY.teaserLabelParts.map(part => (
-                    <span key={part}>{part}</span>
-                  ))}
-                </p>
-              </div>
-              <div className="proof-body">
-                <div className="proof-copy">
-                  <h3>{OMI_CASE_STUDY.teaserTitle}</h3>
-                  {OMI_CASE_STUDY.teaserSummary && <p className="proof-summary">{OMI_CASE_STUDY.teaserSummary}</p>}
-                </div>
-                <div className="proof-video">
-                  <video
-                    src={proofVideoSrc}
-                    poster={getVideoPosterSrc(OMI_CASE_STUDY.videoSrc)}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    aria-label="OMI launch film"
-                    title="OMI launch film"
-                    disablePictureInPicture
-                    controlsList="nodownload nofullscreen noremoteplayback"
-                  />
-                </div>
-                <div className="proof-actions">
-                  <button className="btn btn-primary btn-sm proof-cta" onClick={() => go('services', { target: 'service-case-studies' })}>See the case study <ArrowIcon /></button>
-                  <p className="proof-cta-note">Full breakdown: brief, execution, outcome.</p>
-                </div>
               </div>
             </div>
           </div>
