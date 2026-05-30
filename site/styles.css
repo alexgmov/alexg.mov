@@ -3365,6 +3365,19 @@ footer {
   height: calc(var(--travel2-globe-base-height) + (var(--travel2-globe-bleed) * 2) + var(--travel2-globe-bottom-bleed));
   pointer-events: none;
 }
+.travel2-globe-hitarea {
+  position: absolute;
+  z-index: 1;
+  display: none;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.travel2-globe-hitarea.is-dragging {
+  cursor: grabbing;
+}
 @media (min-width: 1021px) {
   .travel2-globe-canvas {
     left: calc(((100vw - min(100vw, var(--max))) / -2) - 32px);

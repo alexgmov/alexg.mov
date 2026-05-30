@@ -9,7 +9,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - Route components are split into chunks: home, plugins, LUTs, and supporting pages.
 - `site/chrome.jsx` owns global nav/footer chrome. The mobile bottom nav is hidden on product detail routes and the Sidestream install guide so purchase/install actions are not covered by the floating menu.
 - `site/home.jsx` owns the homepage hero and featured product rail, with the OMI proof teaser leading the LUT cards. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
-- `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `Australia/Sydney` timezone.
+- `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `America/Los_Angeles` timezone.
 - `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, display pricing fields, media paths, and product page metadata. LUT copy also has fallback/indexable mirrors in `site/luts.jsx`, `site/home.jsx`, and `llms.txt`; keep those aligned when changing product descriptions.
 - `site/pricing.jsx` owns display-only pricing helpers for rendered prices, compare-at launch pricing, and pricing-variant tracking attributes. Stripe Price IDs in `lib/products.js` remain the source of truth for what checkout actually charges.
 - `site/visuals.jsx` owns reusable visual previews such as `LutPreview`. `site/media.js` owns responsive video helpers plus the constrained in-app browser detector; LUT previews render poster-based before/after layers in TikTok/Instagram-style WebViews so autoplay preview videos cannot jump into native fullscreen.
@@ -243,12 +243,14 @@ Stripe-hosted Checkout does not expose internal Checkout page clicks, field focu
 
 `site/travel.js` is the source of truth for the homepage location list. To update travel, add or edit rows in `TRAVEL_ITINERARY`, keep `startsOn` sorted oldest to newest, and make sure each `key` exists in the `LOCATIONS` map in `site/home.jsx`. `LOCATIONS` entries usually render as `City, Country`; country-level stops can leave `country` blank and the travel list will omit the comma suffix.
 
-The current location is derived automatically at page load using the current date in the `Australia/Sydney` timezone. The latest row whose `startsOn` date is today or earlier becomes `here`; earlier rows become `past`; later rows become `next`.
+The current location is derived automatically at page load using the current date in the `America/Los_Angeles` timezone. The latest row whose `startsOn` date is today or earlier becomes `here`; earlier rows become `past`; later rows become `next`. The current open-ended stop is represented as the final row in `TRAVEL_ITINERARY`.
 
-`HologramGlobe()` in `site/home.jsx` applies a visual +60 degree longitude rotation after centering the current location. Keep that offset separate from `LOCATIONS` latitude/longitude data so the list and date logic remain geographically correct while the planet framing can be art-directed.
+`HologramGlobe()` in `site/home.jsx` applies a visual +60 degree longitude rotation after centering the current location. Keep that offset separate from `LOCATIONS` latitude/longitude data so the list and date logic remain geographically correct while the planet framing can be art-directed. The globe canvas stays pointer-transparent; `site/home.jsx` positions a circular `.travel2-globe-hitarea` over the rendered sphere so pointer drag can rotate the D3 projection without blocking the travel list or content below the globe bleed.
 
 ## Recent Change Log
 
+- 2026-05-28: Added pointer-drag rotation to the homepage travel globe with a circular hit area layered over the planet, keeping the oversized canvas non-blocking for surrounding page content.
+- 2026-05-28: Homepage travel now sets San Francisco, USA as the current open-ended location from May 25 onward, removes the Madrid/Croatia future stops, and switches travel-date status checks to `America/Los_Angeles`.
 - 2026-05-21: Moved the homepage OMI proof teaser into the first slot of the featured LUT stack so case-study proof leads the product cards.
 - 2026-05-21: Clamped LUT listing-card descriptions to a three-line block so the longer HALOCLYNE copy does not make its card taller than the other LUT cards.
 - 2026-05-21: Switched Sidestream fulfillment to the private Blob Mac install package DMG so the email sends one polished Finder-style package with the signed ZXP, ZXP Installer target, and fallback installer link; `/api/download` still streams large private Blob files instead of buffering them in memory.

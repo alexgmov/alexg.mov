@@ -11,7 +11,7 @@
 // when: display label shown in the list (e.g. "JAN 2026", "APR 17–MAY 6")
 // startsOn: ISO date that flips this row to the current location.
 
-export const TRAVEL_TIME_ZONE = 'Australia/Sydney';
+export const TRAVEL_TIME_ZONE = 'America/Los_Angeles';
 
 export const TRAVEL_ITINERARY = [
   { key: 'rio',         when: 'FEB 7–22',      startsOn: '2026-02-07' },
@@ -21,9 +21,8 @@ export const TRAVEL_ITINERARY = [
   { key: 'victoria-bc', when: 'APR 1–15',      startsOn: '2026-04-01' },
   { key: 'bangkok',    when: 'APR 15–17',      startsOn: '2026-04-15' },
   { key: 'ko-samui',   when: 'APR 17–MAY 6',   startsOn: '2026-04-17' },
-  { key: 'sydney',     when: 'MAY 6–JUN 6',    startsOn: '2026-05-06' },
-  { key: 'madrid',     when: 'JUN 7–JUL 6',    startsOn: '2026-06-07' },
-  { key: 'croatia',    when: 'JUL 6–AUG 6',    startsOn: '2026-07-06' },
+  { key: 'sydney',     when: 'MAY 6–25',       startsOn: '2026-05-06' },
+  { key: 'san-francisco', when: 'MAY 25–ONWARD', startsOn: '2026-05-25' },
 ];
 
 function dateValueInTimeZone(date, timeZone) {

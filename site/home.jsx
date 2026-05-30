@@ -138,35 +138,22 @@ const LOCATIONS = {
       scale: '~20 KM ACROSS',
     }
   },
-  'madrid': {
-    city: 'Madrid', country: 'Spain', lat: 40.4168, lng: -3.7038,
+  'san-francisco': {
+    city: 'San Francisco', country: 'USA', lat: 37.7749, lng: -122.4194,
     map: {
       shapes: [
-        // Manzanares river corridor and city core, stylized
-        "M360,0 C350,70 348,135 365,205 C382,275 370,345 340,420 C320,470 318,535 330,600",
-        "M280,250 C345,210 430,195 505,210 C585,226 640,275 660,340 C680,410 645,470 580,500 C505,535 410,520 350,470 C292,420 260,340 280,250 Z",
+        // Peninsula west coast and city/bay shoreline, stylized
+        "M250,50 C300,85 340,150 355,230 C370,305 350,385 315,470 C295,520 300,560 335,600",
+        "M430,70 C500,130 545,205 540,290 C535,375 480,455 400,520 C365,548 350,575 350,600",
+        // Golden Gate and Bay edge
+        "M250,165 C325,145 395,145 465,165",
+        "M505,235 C570,250 640,285 700,340 C750,390 810,415 900,405 L1000,395",
       ],
       roads: [
-        "M0,305 L1000,295", "M500,0 L492,600", "M160,150 L820,500", "M800,120 L210,520",
+        "M340,130 L420,540", "M260,270 L560,250", "M285,350 L540,335", "M315,430 L500,445",
       ],
-      pin: { x: 500, y: 315 },
+      pin: { x: 405, y: 300 },
       scale: '~12 KM ACROSS',
-    }
-  },
-  'croatia': {
-    city: 'Croatia', country: '', lat: 45.1, lng: 15.2,
-    map: {
-      shapes: [
-        // Mainland spine and Adriatic coastline, stylized
-        "M390,70 C460,45 550,55 610,110 C660,160 650,225 590,250 C540,272 520,310 540,350 C565,400 520,455 455,470 C390,485 330,450 310,395 C290,340 320,300 365,275 C410,250 425,215 400,175 C375,135 350,92 390,70 Z",
-        "M320,290 C290,335 282,390 300,445 C320,510 370,555 440,585",
-        // Dalmatian islands
-        "M250,345 C270,338 292,345 300,362 C308,380 292,398 270,395 C248,392 238,372 250,345 Z",
-        "M220,445 C240,438 260,445 267,462 C274,480 258,494 238,492 C218,490 208,468 220,445 Z",
-        "M295,520 C310,514 326,520 332,534 C338,548 326,560 310,558 C294,556 286,538 295,520 Z",
-      ],
-      pin: { x: 410, y: 345 },
-      scale: '~300 KM ACROSS',
     }
   },
 };
@@ -267,6 +254,7 @@ function withAlpha(color, alpha) {
 
 function HologramGlobe({ locKey }) {
   const canvasRef = React.useRef(null);
+  const hitAreaRef = React.useRef(null);
   const geoRef    = React.useRef(_geoCache);
   const [depsReady, setDepsReady] = React.useState(Boolean(window.d3 && window.topojson));
   const [geoReady, setGeoReady] = React.useState(Boolean(_geoCache));
@@ -295,6 +283,7 @@ function HologramGlobe({ locKey }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    const hitArea = hitAreaRef.current;
     const dpr = window.devicePixelRatio || 1;
     let scrollY = window.scrollY;
     let phase = 0;
@@ -305,9 +294,15 @@ function HologramGlobe({ locKey }) {
     let waitFrames = 0;
     let lastLayoutSignature = '';
     let fontsReady = !document.fonts || document.fonts.status === 'loaded';
+    let dragRotLng = 0;
+    let dragRotLat = 0;
+    let dragState = null;
     const currentLocHorizontalBias = 2;
     // Positive longitude rotation turns the globe counterclockwise from a north-pole view.
     const globeCounterClockwiseLngOffset = 60;
+    const dragDegreesPerPixel = 0.26;
+    const maxDragLat = 62;
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
     if (document.fonts && !fontsReady) {
       document.fonts.ready.then(() => { fontsReady = true; });
@@ -315,6 +310,47 @@ function HologramGlobe({ locKey }) {
 
     const onScroll = () => { scrollY = window.scrollY; };
     window.addEventListener('scroll', onScroll, { passive: true });
+
+    const stopDrag = (event) => {
+      if (!dragState || (event && event.pointerId !== dragState.pointerId)) return;
+      if (hitArea && hitArea.releasePointerCapture) {
+        try { hitArea.releasePointerCapture(dragState.pointerId); }
+        catch {}
+        hitArea.classList.remove('is-dragging');
+      }
+      dragState = null;
+    };
+
+    const onPointerDown = (event) => {
+      if (event.button && event.button !== 0) return;
+      dragState = {
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        rotLng: dragRotLng,
+        rotLat: dragRotLat,
+      };
+      if (hitArea && hitArea.setPointerCapture) hitArea.setPointerCapture(event.pointerId);
+      if (hitArea) hitArea.classList.add('is-dragging');
+      event.preventDefault();
+    };
+
+    const onPointerMove = (event) => {
+      if (!dragState || event.pointerId !== dragState.pointerId) return;
+      const dx = event.clientX - dragState.x;
+      const dy = event.clientY - dragState.y;
+      dragRotLng = dragState.rotLng + dx * dragDegreesPerPixel;
+      dragRotLat = clamp(dragState.rotLat - dy * dragDegreesPerPixel, -maxDragLat, maxDragLat);
+      event.preventDefault();
+    };
+
+    if (hitArea) {
+      hitArea.addEventListener('pointerdown', onPointerDown);
+      hitArea.addEventListener('pointermove', onPointerMove);
+      hitArea.addEventListener('pointerup', stopDrag);
+      hitArea.addEventListener('pointercancel', stopDrag);
+      hitArea.addEventListener('lostpointercapture', stopDrag);
+    }
 
     const draw = () => {
       const w = canvas.offsetWidth, h = canvas.offsetHeight;
@@ -338,6 +374,15 @@ function HologramGlobe({ locKey }) {
       const padding = 28;
       const R  = Math.max(0, Math.min((w / 2) - padding, (drawHeight / 2) - padding) * globeRadiusScale);
       const cx = isDesktopTravelLayout ? R : (w / 2) + globeHorizontalShift;
+
+      if (hitArea) {
+        const hitSize = Math.max(0, R * 2);
+        hitArea.style.display = hitSize ? 'block' : 'none';
+        hitArea.style.width = `${hitSize}px`;
+        hitArea.style.height = `${hitSize}px`;
+        hitArea.style.left = `${canvas.offsetLeft + cx - R}px`;
+        hitArea.style.top = `${canvas.offsetTop + cy - R}px`;
+      }
 
       if (baselineRotLng == null) {
         const rect = canvas.getBoundingClientRect();
@@ -381,8 +426,8 @@ function HologramGlobe({ locKey }) {
         baselineRotLng = -loc.lng - currentLocHorizontalBias + globeCounterClockwiseLngOffset + offset * 0.12;
       }
 
-      const rotLng  = baselineRotLng + ((scrollY - baselineScrollY) * 0.12);
-      const rotLat  = -loc.lat * 0.08;
+      const rotLng  = baselineRotLng + ((scrollY - baselineScrollY) * 0.12) + dragRotLng;
+      const rotLat  = clamp((-loc.lat * 0.08) + dragRotLat, -85, 85);
 
       const d3  = window.d3;
       const geo = geoRef.current;
@@ -477,10 +522,26 @@ function HologramGlobe({ locKey }) {
     };
 
     draw();
-    return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(raf); };
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (hitArea) {
+        hitArea.removeEventListener('pointerdown', onPointerDown);
+        hitArea.removeEventListener('pointermove', onPointerMove);
+        hitArea.removeEventListener('pointerup', stopDrag);
+        hitArea.removeEventListener('pointercancel', stopDrag);
+        hitArea.removeEventListener('lostpointercapture', stopDrag);
+        hitArea.classList.remove('is-dragging');
+      }
+      cancelAnimationFrame(raf);
+    };
   }, [locKey, depsReady, geoReady]);
 
-  return <canvas ref={canvasRef} className="travel2-globe-canvas" style={{ display: 'block' }} />;
+  return (
+    <>
+      <canvas ref={canvasRef} className="travel2-globe-canvas" style={{ display: 'block' }} />
+      <div ref={hitAreaRef} className="travel2-globe-hitarea" aria-hidden="true" />
+    </>
+  );
 }
 
 
