@@ -4,7 +4,8 @@ import React from 'react';
 
 const SITE_ORIGIN = 'https://alexg.mov';
 const SITE_NAME = 'alexg.mov';
-const SITE_IMAGE = `${SITE_ORIGIN}/mockups/meridian%20mockup.png`;
+const SITE_IMAGE = `${SITE_ORIGIN}/mockups/alexg-og-card.png`;
+const SITE_IMAGE_ALT = 'alexg.mov brand card for plugins, LUTs, and video work';
 
 function routeHref(page = 'home', target = null) {
   const path = location.pathname && location.pathname !== '/' ? location.pathname : '/';
@@ -157,6 +158,7 @@ function pageSeo(page) {
     description: 'Premiere plugins and cinematic LUTs for faster edits and cleaner color.',
     canonical: absoluteRoute('home'),
     image: SITE_IMAGE,
+    imageAlt: SITE_IMAGE_ALT,
     graph: baseGraph(),
   };
 
@@ -260,6 +262,7 @@ function pageSeo(page) {
         description: lut.seoDescription || `${lut.name} is a .CUBE LUT for focused cinematic color after a clean base correction.`,
         canonical: absoluteRoute(`lut:${lut.id}`),
         image: imageUrl(lut.mockupSrc),
+        imageAlt: `${lut.name} product mockup`,
         graph: [
           ...baseGraph(),
           lutProductSchema(lut),
@@ -318,10 +321,12 @@ function applyPageSeo(page) {
   upsertMeta('meta[property="og:description"]', { property: 'og:description' }, seo.description);
   upsertMeta('meta[property="og:url"]', { property: 'og:url' }, seo.canonical);
   upsertMeta('meta[property="og:image"]', { property: 'og:image' }, seo.image);
+  upsertMeta('meta[property="og:image:alt"]', { property: 'og:image:alt' }, seo.imageAlt);
   upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card' }, 'summary_large_image');
   upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title' }, seo.title);
   upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description' }, seo.description);
   upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image' }, seo.image);
+  upsertMeta('meta[name="twitter:image:alt"]', { name: 'twitter:image:alt' }, seo.imageAlt);
 
   let script = document.getElementById('seo-jsonld');
   if (!script) {

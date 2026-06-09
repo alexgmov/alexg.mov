@@ -4,7 +4,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 
 ## Runtime Architecture
 
-- `site/main.jsx` boots the React app, first loading shared browser modules such as analytics, product data, SEO helpers, visuals, and chrome.
+- `site/main.jsx` boots the React app, first loading shared browser modules such as analytics, product data, SEO helpers, visuals, and chrome. `site/seo.jsx` owns canonical, Open Graph, Twitter card, and JSON-LD metadata; the default social share image is `mockups/alexg-og-card.png`, while LUT detail pages can override that with product mockups.
 - `site/app.jsx` owns the query-string router. Public pages are represented by `?page=...`, for example `?page=luts`, `?page=lut:cinematic-01`, `?page=sidestream-install`, and `?page=success`.
 - Route components are split into chunks: home, plugins, LUTs, and supporting pages.
 - `site/chrome.jsx` owns global nav/footer chrome. The mobile bottom nav is hidden on product detail routes and the Sidestream install guide so purchase/install actions are not covered by the floating menu.
@@ -249,6 +249,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-06-09: Replaced the default Open Graph/Twitter share preview image with the branded `mockups/alexg-og-card.png` card so home/portfolio/service links no longer default to the MERIDIAN product mockup.
 - 2026-06-09: Complete LUT Bundle previews now show one primary before/after scrubber per released LUT, with the LUT name labeled beneath each bundle preview panel.
 - 2026-06-07: Removed the global header `Shop products` shortcut from `site/chrome.jsx`; shoppers still reach LUTs from the homepage hero CTA and product routes.
 - 2026-05-28: Added pointer-drag rotation to the homepage travel globe with a circular hit area layered over the planet, keeping the oversized canvas non-blocking for surrounding page content.
