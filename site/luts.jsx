@@ -200,6 +200,10 @@ function compareScenesFor(lut) {
   }));
 }
 
+function primaryCompareFor(lut) {
+  return compareScenesFor(lut)[0] || null;
+}
+
 function individualLuts() {
   return LUTS.filter(lut => lut.available && !lut.isBundle);
 }
@@ -363,11 +367,11 @@ function LutDetail({ id, go }) {
   const isBundle = Boolean(l.isBundle);
   const buyLabel = isBundle ? 'Buy Bundle' : 'Buy';
   const bundleMediaScenes = isBundle
-    ? bundleItems.flatMap(item => compareScenesFor(item).map((compare, index) => ({
+    ? bundleItems.map((item, index) => ({
       lut: item,
-      compare,
+      compare: primaryCompareFor(item),
       index,
-    })))
+    })).filter(item => item.compare)
     : compareScenes.map((compare, index) => ({
       lut: l,
       compare,
@@ -388,6 +392,7 @@ function LutDetail({ id, go }) {
       label: `${lut.name} ${compare.label} before and after preview`,
       tone: lut.tone,
       compare,
+      lutName: lut.name,
     })),
   ].filter(Boolean);
   const activeMedia = mediaItems.find(item => item.id === activeMediaId) || mediaItems[0];
@@ -452,13 +457,21 @@ function LutDetail({ id, go }) {
                 <img src={activeMedia.src} alt={activeMedia.alt} />
               </div>
             ) : (
-              <div className="pd-media">
-                <LutPreview tone={activeMedia.tone || l.tone} scale={1.4} interactive compare={activeMedia.compare} />
-                <div className="reel-meta">
-                  <span>BEFORE / AFTER</span>
-                  <span style={{ opacity: 0.6 }}>{activeMedia.compare?.label || l.demoLabel}</span>
+              <>
+                <div className="pd-media">
+                  <LutPreview tone={activeMedia.tone || l.tone} scale={1.4} interactive compare={activeMedia.compare} />
+                  <div className="reel-meta">
+                    <span>BEFORE / AFTER</span>
+                    <span style={{ opacity: 0.6 }}>{activeMedia.compare?.label || l.demoLabel}</span>
+                  </div>
                 </div>
-              </div>
+                {isBundle && activeMedia?.lutName ? (
+                  <div className="bundle-lut-panel-label pd-gallery-lut-label">
+                    <p className="section-title">INCLUDED LUT</p>
+                    <h2>{activeMedia.lutName}</h2>
+                  </div>
+                ) : null}
+              </>
             )}
           </div>
         </div>
@@ -528,12 +541,11 @@ function LutDetail({ id, go }) {
           <div className="bundle-lut-stack">
             {bundleItems.map((item, itemIndex) => {
               const itemCopy = detailCopyFor(item);
-              const itemScenes = compareScenesFor(item);
+              const itemCompare = primaryCompareFor(item);
               return (
                 <article className="bundle-lut-section" key={item.id}>
                   <div className="bundle-lut-copy">
-                    <p className="section-title">{String(itemIndex + 1).padStart(2, '0')} / {item.name}</p>
-                    <h2>{item.name}</h2>
+                    <p className="section-title">{String(itemIndex + 1).padStart(2, '0')} / INCLUDED LUT</p>
                     <p>{item.oneline}</p>
                     <div className="pd-bullets bundle-lut-bullets">
                       <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{itemCopy.whatItDoes}</div></div>
@@ -546,23 +558,21 @@ function LutDetail({ id, go }) {
                         <img src={item.mockupSrc} alt={item.mockupAlt || `${item.name} LUT mock-up`} />
                       </div>
                     ) : null}
-                    <div className="pd-compare-stack bundle-lut-previews">
-                      {itemScenes.map((compare, index) => (
-                        <article className="pd-compare-item" key={compare.id || index}>
-                          <div className="pd-compare-head">
-                            <span>{compare.label}</span>
-                            <strong>{compare.title || `${item.name} scene ${index + 1}`}</strong>
+                    {itemCompare ? (
+                      <article className="pd-compare-item bundle-lut-panel">
+                        <div className="pd-media pd-compare-media">
+                          <LutPreview tone={item.tone} scale={1.15} interactive compare={itemCompare} />
+                          <div className="reel-meta">
+                            <span>BEFORE / AFTER</span>
+                            <span style={{ opacity: 0.6 }}>{itemCompare.label}</span>
                           </div>
-                          <div className="pd-media pd-compare-media">
-                            <LutPreview tone={item.tone} scale={1.15} interactive compare={compare} />
-                            <div className="reel-meta">
-                              <span>BEFORE / AFTER</span>
-                              <span style={{ opacity: 0.6 }}>{compare.label}</span>
-                            </div>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
+                        </div>
+                        <div className="bundle-lut-panel-label">
+                          <p className="section-title">{String(itemIndex + 1).padStart(2, '0')} / {itemCompare.label}</p>
+                          <h2>{item.name}</h2>
+                        </div>
+                      </article>
+                    ) : null}
                   </div>
                 </article>
               );

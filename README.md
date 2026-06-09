@@ -182,7 +182,7 @@ That value must match a key in `PRODUCTS`. Plugin detail pages currently post `p
 - Frontend page `lut:complete-lut-bundle` -> checkout product `complete-lut-bundle` -> Complete LUT Bundle zip.
 - Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> `Sidestream-1.0.2-Mac-ZXP-Installer.dmg` plus the `sidestream-install` backup web steps.
 
-The Complete LUT Bundle detail page is intentionally data-driven: `site/luts.jsx` builds the scroll-through included-LUT sections from every available non-bundle item in `LUTS`. When adding a future LUT, the page will show its section automatically once that LUT is available, but the bundle ZIP, Stripe Price/display price, bundle copy, `llms.txt`, sitemap, and this README still need a deliberate update so checkout and fulfillment match the page.
+The Complete LUT Bundle detail page is intentionally data-driven: `site/luts.jsx` builds the scroll-through included-LUT sections from every available non-bundle item in `LUTS`, with one primary before/after scrubber per released LUT and the LUT name labeled beneath that panel. When adding a future LUT, the page will show its section automatically once that LUT is available, but the bundle ZIP, Stripe Price/display price, bundle copy, `llms.txt`, sitemap, and this README still need a deliberate update so checkout and fulfillment match the page.
 
 When adding a new product:
 
@@ -249,6 +249,8 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-06-09: Complete LUT Bundle previews now show one primary before/after scrubber per released LUT, with the LUT name labeled beneath each bundle preview panel.
+- 2026-06-07: Removed the global header `Shop products` shortcut from `site/chrome.jsx`; shoppers still reach LUTs from the homepage hero CTA and product routes.
 - 2026-05-28: Added pointer-drag rotation to the homepage travel globe with a circular hit area layered over the planet, keeping the oversized canvas non-blocking for surrounding page content.
 - 2026-05-28: Homepage travel now sets San Francisco, USA as the current open-ended location from May 25 onward, removes the Madrid/Croatia future stops, and switches travel-date status checks to `America/Los_Angeles`.
 - 2026-05-21: Moved the homepage OMI proof teaser into the first slot of the featured LUT stack so case-study proof leads the product cards.

@@ -99,17 +99,6 @@ img, svg, video { display: block; max-width: 100%; }
 .nav.nav-overlay .brand-dot { background: #fff; }
 .nav.nav-overlay .nav-links a:hover { color: rgba(255,255,255,0.75); }
 .nav.nav-overlay .nav-links a.active { color: #fff; }
-.nav.nav-overlay .nav-cta {
-  background: transparent;
-  color: #fff;
-  border-color: rgba(255,255,255,0.4);
-  text-shadow: 0 1px 8px rgba(0,0,0,0.55);
-}
-.nav.nav-overlay .nav-cta:hover {
-  background: rgba(255,255,255,0.12);
-  border-color: rgba(255,255,255,0.7);
-  box-shadow: none;
-}
 .nav-inner {
   max-width: var(--max);
   margin: 0 auto;
@@ -134,31 +123,6 @@ img, svg, video { display: block; max-width: 100%; }
 .nav-links a { transition: color .15s ease; }
 .nav-links a:hover { color: var(--ink); }
 .nav-links a.active { color: var(--ink); font-weight: 500; }
-.nav-cta {
-  font-size: 13px;
-  padding: 7px 14px 7px 14px;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-sm);
-  color: var(--bg);
-  background: var(--ink);
-  font-weight: 500;
-  letter-spacing: -0.005em;
-  transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.nav-cta:hover {
-  background: var(--ink-soft);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-}
-[data-theme="dark"] .nav-cta {
-  background: var(--ink);
-  color: var(--bg);
-  border-color: var(--ink);
-}
-[data-theme="dark"] .nav-cta:hover { background: #fff; color: #0a0a0a; }
 
 /* ── Buttons ───────────────────────────────────── */
 .btn {
@@ -1154,12 +1118,23 @@ img, svg, video { display: block; max-width: 100%; }
   gap: 14px;
   align-self: start;
 }
-.bundle-lut-copy h2 {
+.bundle-lut-panel-label {
+  display: grid;
+  gap: 4px;
+}
+.bundle-lut-panel-label .section-title {
+  margin-bottom: 2px;
+}
+.bundle-lut-panel-label h2 {
   font-family: var(--serif);
   font-size: clamp(30px, 4vw, 46px);
   line-height: 1.04;
   font-weight: 500;
+  letter-spacing: 0;
   margin: 0;
+}
+.pd-gallery-lut-label h2 {
+  font-size: clamp(28px, 3.2vw, 38px);
 }
 .bundle-lut-copy p {
   margin: 0;
@@ -3629,27 +3604,6 @@ footer {
     min-width: 0;
     max-width: calc(100% - 96px);
   }
-  .nav-cta {
-    position: absolute;
-    top: 9px;
-    right: 20px;
-    flex: 0 0 auto;
-    min-height: 38px;
-    padding: 0 14px;
-    border-radius: 999px;
-    font-size: 0;
-    margin-left: auto;
-    max-width: 72px;
-    overflow: hidden;
-  }
-  .nav-cta::before {
-    content: "Shop";
-    font-size: 12px;
-    line-height: 1;
-  }
-  .nav-cta span {
-    display: none;
-  }
 
   .mobile-bottom-nav {
     position: fixed;
@@ -4237,7 +4191,7 @@ footer {
     position: static;
     gap: 12px;
   }
-  .bundle-lut-copy h2 {
+  .bundle-lut-panel-label h2 {
     font-size: clamp(34px, 11vw, 46px);
   }
   .bundle-lut-bullets .pd-bullet {

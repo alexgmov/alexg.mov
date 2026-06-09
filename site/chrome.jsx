@@ -10,13 +10,6 @@ const ArrowIcon = ({ size = 14 }) => (
     <path d="M5 12h14M13 6l6 6-6 6" />
   </svg>
 );
-const ShoppingBagIcon = ({ size = 14 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <circle cx="9" cy="20" r="1" />
-    <circle cx="18" cy="20" r="1" />
-    <path d="M3 4h2l2.2 10.4a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 2-1.6L21 8H6" />
-  </svg>
-);
 const DownloadIcon = ({ size = 14 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 3v12M6 9l6 6 6-6M4 21h16" />
@@ -43,10 +36,6 @@ function Nav({ page, go, overlay }) {
     { id: 'services', label: 'Services' },
     { id: 'support', label: 'Support' },
   ];
-  const handleProductsClick = (e) => {
-    e.preventDefault();
-    go('home', { target: 'featured-products' });
-  };
   return (
     <nav className={"nav" + (overlay ? " nav-overlay" : "")}>
       <div className="nav-inner">
@@ -59,10 +48,6 @@ function Nav({ page, go, overlay }) {
               onClick={(e) => { e.preventDefault(); go(l.id); }}>{l.label}</a>
           ))}
         </div>
-        <a className="nav-cta" href={hrefFor('home', 'featured-products')} aria-label="Shop products" onClick={handleProductsClick}>
-          <span className="nav-cta-text">Shop products</span>
-          <span style={{ opacity: 0.65 }}><ShoppingBagIcon /></span>
-        </a>
       </div>
     </nav>
   );
@@ -268,4 +253,4 @@ function Footer({ go }) {
   );
 }
 
-Object.assign(window, { Nav, MobileBottomNav, useStickyCta, MobileProductStickyCta, Footer, PlayIcon, ArrowIcon, ShoppingBagIcon, DownloadIcon, MailIcon, CheckIcon });
+Object.assign(window, { Nav, MobileBottomNav, useStickyCta, MobileProductStickyCta, Footer, PlayIcon, ArrowIcon, DownloadIcon, MailIcon, CheckIcon });
