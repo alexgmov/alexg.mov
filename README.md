@@ -83,10 +83,12 @@ The initial schema lives in `supabase/migrations/20260521095933_create_business_
 - `download_links`: generated fulfillment links, stored as hashes rather than raw signed URLs.
 - `download_events`: signed download-link outcomes such as served, expired, invalid signature, missing product, or Blob fetch failure.
 - `sidestream_telemetry_events`: redacted, batched Sidestream CEP telemetry events posted through `/api/plugin-telemetry`.
+- `sidestream_installs`: latest known app/runtime/support state per hashed Sidestream install and support code.
+- `sidestream_sessions`: session start/end rollups, app/runtime summary, event counts, and latest error/action context.
 
 All new tables have RLS enabled and no public policies. The app writes through the server-side pooled Postgres credential only.
 
-The Sidestream telemetry schema lives in `supabase/migrations/20260521101823_add_sidestream_plugin_telemetry.sql`. Keep it separate from the commerce ledger migration so plugin event volume can be indexed and retained independently from customer, purchase, and license tables.
+The Sidestream telemetry schema starts in `supabase/migrations/20260521101823_add_sidestream_plugin_telemetry.sql`. The richer automatic logging rollup migration lives in `supabase/migrations/20260612120000_add_sidestream_telemetry_rollups.sql` and adds support-code/category/error/action columns plus install/session summary tables. Keep Sidestream telemetry migrations separate from the commerce ledger migration so plugin event volume can be indexed and retained independently from customer, purchase, and license tables.
 
 Apply the migration from the Supabase SQL editor or with the Supabase CLI after linking the project. For the current shared-pooler setup, set the Vercel env var to the Supabase pooler connection string with the real password, for example:
 
@@ -96,7 +98,9 @@ POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-
 
 ## Sidestream Plugin Telemetry
 
-`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension. The plugin sends batches of up to 100 already-redacted events; the server validates size and timestamps, hashes request IP/user-agent context with the server secret, and writes to `sidestream_telemetry_events` through `lib/supabase-db.js`.
+`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension. The plugin sends batches of up to 100 already-redacted events; the server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, writes raw redacted rows to `sidestream_telemetry_events`, and upserts `sidestream_installs` plus `sidestream_sessions` through `lib/supabase-db.js`.
+
+The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for a later dashboard that can query installs, sessions, timelines, failures, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or Supabase credentials.
 
 The route intentionally does not expose Supabase, Stripe, Blob, or Resend secrets to the plugin. If Supabase is not configured, the route still returns success after analytics logging so telemetry never blocks the editor's search/download workflow.
 
@@ -249,6 +253,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-06-12: Extended `/api/plugin-telemetry` for automatic Sidestream logging with richer redacted event envelopes, support codes, batch ids, category/severity/error/action fields, structured consent payloads, and Supabase rollups in `sidestream_installs` plus `sidestream_sessions`.
 - 2026-06-09: Replaced the default Open Graph/Twitter share preview image with the branded `mockups/alexg-og-card.png` card so home/portfolio/service links no longer default to the MERIDIAN product mockup.
 - 2026-06-09: Complete LUT Bundle previews now show one primary before/after scrubber per released LUT, with the LUT name labeled beneath each bundle preview panel.
 - 2026-06-07: Removed the global header `Shop products` shortcut from `site/chrome.jsx`; shoppers still reach LUTs from the homepage hero CTA and product routes.
