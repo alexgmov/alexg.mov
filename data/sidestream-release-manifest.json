@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "product": "sidestream",
+  "channel": "stable",
+  "version": "1.0.2",
+  "minSupportedVersion": "1.0.0",
+  "critical": false,
+  "rolloutPercent": 100,
+  "publishedAt": "2026-06-12T00:00:00.000Z",
+  "releaseNotesUrl": "https://alexg.mov/sidestream/releases/1.0.2",
+  "artifact": {
+    "type": "dmg",
+    "url": "https://downloads.alexg.mov/sidestream/1.0.2/Sidestream-1.0.2-Mac-ZXP-Installer.dmg",
+    "sha256": "1d67200fbc1880a4f5ee699e288342dc1ef73c7574d3a1f661df74a4575fee33",
+    "sizeBytes": 203288478
+  }
+}

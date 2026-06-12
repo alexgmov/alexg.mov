@@ -6,6 +6,7 @@
     "dev": "node server.js",
     "build": "vite build && node scripts/copy-static.mjs",
     "preview": "NODE_ENV=production node server.js",
+    "release:publish-manifest": "node scripts/publish-sidestream-release-manifest.js",
     "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {

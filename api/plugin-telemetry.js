@@ -19,6 +19,7 @@ const VALID_CATEGORIES = new Set([
   'postprocess',
   'import',
   'settings',
+  'update',
   'error',
 ]);
 const VALID_SEVERITIES = new Set(['info', 'warning', 'error']);

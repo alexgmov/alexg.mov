@@ -1,6 +1,6 @@
 # alexg.mov Website
 
-This repository is the alexg.mov marketing site and digital product shop. It is a Vite/React single-page app with Vercel-style API handlers for analytics, Stripe Checkout, webhook fulfillment, and private download delivery.
+This repository is the alexg.mov marketing site and digital product shop. It is a Vite/React single-page app with Vercel-style API handlers for analytics, Stripe Checkout, webhook fulfillment, Sidestream release checks, and private download delivery.
 
 ## Runtime Architecture
 
@@ -14,9 +14,10 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `site/pricing.jsx` owns display-only pricing helpers for rendered prices, compare-at launch pricing, and pricing-variant tracking attributes. Stripe Price IDs in `lib/products.js` remain the source of truth for what checkout actually charges.
 - `site/visuals.jsx` owns reusable visual previews such as `LutPreview`. `site/media.js` owns responsive video helpers plus the constrained in-app browser detector; LUT previews render poster-based before/after layers in TikTok/Instagram-style WebViews so autoplay preview videos cannot jump into native fullscreen.
 - `lib/products.js` is the server-side commerce catalog. This is the only product catalog used for Stripe Checkout and fulfillment.
-- `api/*.js` files are Vercel-compatible CommonJS handlers. Locally, `server.js` maps those same files to `/api/...` routes and attaches small `res.status()`, `res.json()`, and `res.send()` helpers.
+- `api/*.js` and nested `api/**/*.js` files are Vercel-compatible CommonJS handlers. Locally, `server.js` maps those same files to `/api/...` routes and attaches small `res.status()`, `res.json()`, and `res.send()` helpers.
 - `server.js` serves Vite middleware in development and the `dist/` build in production mode.
 - `scripts/copy-static.mjs` copies static assets that Vite does not bundle directly, including `mockups`, `videos`, `robots.txt`, `sitemap.xml`, and `llms.txt`.
+- `data/sidestream-release-manifest.json` is the checked-in Sidestream stable release manifest served by `api/sidestream/releases/latest.js`. Update it only through `scripts/publish-sidestream-release-manifest.js` after the artifact is signed, verified, uploaded, and smoke-tested.
 
 ## Local Commands
 
@@ -24,6 +25,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 npm run dev
 npm run build
 npm run preview
+npm run release:publish-manifest -- --version 1.0.3 --artifact /path/to/Sidestream-1.0.3-Mac-ZXP-Installer.dmg --artifact-url https://downloads.alexg.mov/sidestream/1.0.3/Sidestream-1.0.3-Mac-ZXP-Installer.dmg --signed --verified --uploaded --smoke-tested
 ```
 
 `npm run dev` starts the local Node server and Vite middleware on `PORT` or `3000`. `npm run build` runs `vite build` and then copies static assets into `dist/`.
@@ -49,6 +51,7 @@ Commerce and fulfillment use these variables:
 - `HALOCLYNE_BLOB_URL`: optional private Vercel Blob URL override for HALOCLYNE.
 - `COMPLETE_LUT_BUNDLE_BLOB_URL`: optional private Vercel Blob URL override for the Complete LUT Bundle ZIP.
 - `SIDESTREAM_BLOB_URL`: optional private Vercel Blob URL override for the Sidestream Mac install package DMG.
+- `SIDESTREAM_RELEASE_MANIFEST_PATH`: optional server-side override for the Sidestream release manifest JSON. Defaults to `data/sidestream-release-manifest.json`.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
 - `RESEND_API_KEY`: Resend key used by the webhook fulfillment email and first-visit promo code email.
@@ -69,6 +72,20 @@ Commerce and fulfillment use these variables:
 
 Never expose Stripe secret keys, webhook secrets, Resend keys, Blob tokens, or `DOWNLOAD_SECRET` in frontend files.
 Never expose the Supabase pooler password, Postgres URL, secret/service-role key, or any server database credential in frontend files or the Sidestream CEP extension.
+
+## Sidestream Release Manifest
+
+`api/sidestream/releases/latest.js` serves `GET /api/sidestream/releases/latest?channel=stable&platform=darwin-arm64&version=1.0.2` for the Sidestream CEP panel update checker. The route returns only public release metadata: product, channel, latest version, minimum supported version, critical flag, rollout percent, release notes URL, and the public artifact URL/hash/size. It does not require or accept install identity, support code, email, telemetry payloads, Stripe state, or signed purchase links.
+
+The stable manifest lives at `data/sidestream-release-manifest.json`. Publish a new latest release only after the release package is complete:
+
+1. Build/sign the ZXP and Mac DMG from the FlowState repo.
+2. Verify the signed package and smoke-test the install.
+3. Upload the public release artifact to the downloads host.
+4. Run `npm run release:publish-manifest -- --version <x.y.z> --artifact <local dmg> --artifact-url <https download url> --signed --verified --uploaded --smoke-tested`.
+5. Run `npm run build` before committing the website change.
+
+The publish script calculates `sha256` and `sizeBytes` from the local artifact and refuses to write the manifest unless all four release gates are passed as flags. The endpoint currently supports the `stable` channel for Mac DMG artifacts (`darwin-arm64` and `darwin-x64`). Staged rollout is expressed as `rolloutPercent`; the Sidestream panel makes the actual eligibility decision locally so the endpoint does not need to track users.
 
 ## Supabase Business Ledger
 
@@ -104,7 +121,7 @@ POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-
 
 Telemetry recording prefers the server-only Supabase REST path when `SUPABASE_URL` and `SUPABASE_SECRET_KEY` are configured. If the richer telemetry migration has not been applied yet, the REST writer retries against the legacy `sidestream_telemetry_events` columns so raw redacted events are still recorded; install/session rollups begin once the migration and Supabase schema cache include the new tables/columns. If the REST key is absent, telemetry falls back to the Postgres pooler path.
 
-The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for a later dashboard that can query installs, sessions, timelines, failures, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or Supabase credentials.
+The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for a later dashboard that can query installs, sessions, timelines, failures, update-check outcomes, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or Supabase credentials.
 
 The route intentionally does not expose Supabase, Stripe, Blob, or Resend secrets to the plugin. If Supabase is not configured, the route still returns success after analytics logging so telemetry never blocks the editor's search/download workflow.
 
@@ -257,6 +274,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-06-12: Added the Sidestream stable release manifest endpoint at `/api/sidestream/releases/latest`, a gated manifest publish script, update telemetry category support, and docs for the no-identity update-check protocol.
 - 2026-06-12: Added a server-only Supabase REST telemetry writer using `SUPABASE_URL` plus `SUPABASE_SECRET_KEY`, with Postgres as fallback and a legacy-schema retry so Sidestream events still record before the rollup migration is applied.
 - 2026-06-12: Extended `/api/plugin-telemetry` for automatic Sidestream logging with richer redacted event envelopes, support codes, batch ids, category/severity/error/action fields, structured consent payloads, and Supabase rollups in `sidestream_installs` plus `sidestream_sessions`.
 - 2026-06-09: Replaced the default Open Graph/Twitter share preview image with the branded `mockups/alexg-og-card.png` card so home/portfolio/service links no longer default to the MERIDIAN product mockup.

@@ -19,6 +19,7 @@ const apiRoutes = {
   '/api/download': './api/download',
   '/api/email-capture': './api/email-capture',
   '/api/plugin-telemetry': './api/plugin-telemetry',
+  '/api/sidestream/releases/latest': './api/sidestream/releases/latest',
   '/api/webhook': './api/webhook',
   '/analytics': './api/analytics-dashboard',
   '/analytics/': './api/analytics-dashboard',
