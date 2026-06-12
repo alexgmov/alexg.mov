@@ -109,3 +109,6 @@ alter table public.sidestream_installs enable row level security;
 alter table public.sidestream_sessions enable row level security;
 revoke all on table public.sidestream_installs from anon, authenticated;
 revoke all on table public.sidestream_sessions from anon, authenticated;
+grant select, insert, update, delete on table public.sidestream_telemetry_events to service_role;
+grant select, insert, update, delete on table public.sidestream_installs to service_role;
+grant select, insert, update, delete on table public.sidestream_sessions to service_role;
