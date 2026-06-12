@@ -1,6 +1,5 @@
 const {
   recordPluginTelemetryBatch,
-  tryRecord,
 } = require('../lib/supabase-db');
 const {
   logEvent,
@@ -58,11 +57,11 @@ module.exports = async function handler(req, res) {
     return res.status(202).json({ ok: true, accepted: 0, recorded: 0 });
   }
 
-  const result = await tryRecord('sidestream plugin telemetry', () => recordPluginTelemetryBatch({
+  const result = await recordTelemetrySafely({
     events,
     req,
     endpointVersion: ENDPOINT_VERSION,
-  }));
+  });
 
   await logEvent({
     type: 'sidestream_plugin_telemetry_received',
@@ -72,6 +71,9 @@ module.exports = async function handler(req, res) {
     recorded: result?.recorded || 0,
     skipped: Boolean(result?.skipped),
     errored: Boolean(result?.error),
+    collector: result?.collector || '',
+    legacySchema: Boolean(result?.legacySchema),
+    rollupsSkipped: Boolean(result?.rollupsSkipped),
   });
 
   return res.status(result?.error ? 202 : 200).json({
@@ -81,6 +83,15 @@ module.exports = async function handler(req, res) {
     skipped: Boolean(result?.skipped),
   });
 };
+
+async function recordTelemetrySafely(options) {
+  try {
+    return await recordPluginTelemetryBatch(options);
+  } catch (err) {
+    console.error('[supabase] sidestream plugin telemetry failed:', err.message);
+    return { error: err.message, recorded: 0 };
+  }
+}
 
 function setCorsHeaders(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

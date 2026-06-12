@@ -61,16 +61,18 @@ Commerce and fulfillment use these variables:
 - `ANALYTICS_LOG_DIR`: optional local analytics log directory.
 - `ANALYTICS_SALT`: optional visitor fingerprint salt. Falls back to `DOWNLOAD_SECRET`.
 - `POSTGRES_URL`, `DATABASE_URL`, or `SUPABASE_POSTGRES_URL`: optional Supabase/Postgres pooled connection string used for durable business logging. Prefer Supabase's shared pooler URL on Vercel, with the real password stored only in Vercel/local env vars.
+- `SUPABASE_URL`: optional Supabase project URL used with `SUPABASE_SECRET_KEY` for server-only Sidestream telemetry writes when the Postgres pooler URL is unavailable.
+- `SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY`: optional server-only Supabase REST key for Sidestream telemetry. Never expose this to browser code or the Sidestream CEP extension; it bypasses RLS and belongs only in trusted backend env vars.
 - `POSTGRES_POOL_MAX`: optional server-side Postgres pool size. Defaults to `3`, which is intentionally small for Vercel serverless.
 - `POSTGRES_SSL`: set to `0` only for a local non-SSL Postgres. Supabase pooler connections should keep SSL enabled.
 - `SIDESTREAM_TELEMETRY_ENABLED`: set to `0` to make `/api/plugin-telemetry` accept but drop Sidestream plugin telemetry while keeping the route deployed.
 
 Never expose Stripe secret keys, webhook secrets, Resend keys, Blob tokens, or `DOWNLOAD_SECRET` in frontend files.
-Never expose the Supabase pooler password, Postgres URL, service-role key, or any server database credential in frontend files or the Sidestream CEP extension.
+Never expose the Supabase pooler password, Postgres URL, secret/service-role key, or any server database credential in frontend files or the Sidestream CEP extension.
 
 ## Supabase Business Ledger
 
-The optional Supabase integration uses direct server-side Postgres writes through `lib/supabase-db.js`. It is intentionally server-only: Vercel API routes read the pooled Postgres URL from env vars, while browser code and the Sidestream CEP panel never receive database credentials.
+The optional Supabase integration uses server-side database writes through `lib/supabase-db.js`. Commerce/ledger helpers use direct Postgres when a pooled Postgres URL is configured. Sidestream telemetry prefers server-only Supabase REST with `SUPABASE_URL` plus `SUPABASE_SECRET_KEY`, then falls back to direct Postgres when the REST key is absent. Browser code and the Sidestream CEP panel never receive database credentials.
 
 The initial schema lives in `supabase/migrations/20260521095933_create_business_ledger.sql` and creates private ledger tables for:
 
@@ -90,7 +92,7 @@ All new tables have RLS enabled and no public policies. The app writes through t
 
 The Sidestream telemetry schema starts in `supabase/migrations/20260521101823_add_sidestream_plugin_telemetry.sql`. The richer automatic logging rollup migration lives in `supabase/migrations/20260612120000_add_sidestream_telemetry_rollups.sql` and adds support-code/category/error/action columns plus install/session summary tables. Keep Sidestream telemetry migrations separate from the commerce ledger migration so plugin event volume can be indexed and retained independently from customer, purchase, and license tables.
 
-Apply the migration from the Supabase SQL editor or with the Supabase CLI after linking the project. For the current shared-pooler setup, set the Vercel env var to the Supabase pooler connection string with the real password, for example:
+Apply the migration from the Supabase SQL editor or with the Supabase CLI after linking the project. For direct Postgres writes, set the Vercel env var to the Supabase pooler connection string with the real password, for example:
 
 ```sh
 POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres"
@@ -99,6 +101,8 @@ POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-
 ## Sidestream Plugin Telemetry
 
 `api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension. The plugin sends batches of up to 100 already-redacted events; the server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, writes raw redacted rows to `sidestream_telemetry_events`, and upserts `sidestream_installs` plus `sidestream_sessions` through `lib/supabase-db.js`.
+
+Telemetry recording prefers the server-only Supabase REST path when `SUPABASE_URL` and `SUPABASE_SECRET_KEY` are configured. If the richer telemetry migration has not been applied yet, the REST writer retries against the legacy `sidestream_telemetry_events` columns so raw redacted events are still recorded; install/session rollups begin once the migration and Supabase schema cache include the new tables/columns. If the REST key is absent, telemetry falls back to the Postgres pooler path.
 
 The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for a later dashboard that can query installs, sessions, timelines, failures, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or Supabase credentials.
 
@@ -253,6 +257,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-06-12: Added a server-only Supabase REST telemetry writer using `SUPABASE_URL` plus `SUPABASE_SECRET_KEY`, with Postgres as fallback and a legacy-schema retry so Sidestream events still record before the rollup migration is applied.
 - 2026-06-12: Extended `/api/plugin-telemetry` for automatic Sidestream logging with richer redacted event envelopes, support codes, batch ids, category/severity/error/action fields, structured consent payloads, and Supabase rollups in `sidestream_installs` plus `sidestream_sessions`.
 - 2026-06-09: Replaced the default Open Graph/Twitter share preview image with the branded `mockups/alexg-og-card.png` card so home/portfolio/service links no longer default to the MERIDIAN product mockup.
 - 2026-06-09: Complete LUT Bundle previews now show one primary before/after scrubber per released LUT, with the LUT name labeled beneath each bundle preview panel.
