@@ -105,7 +105,7 @@ The initial schema lives in `supabase/migrations/20260521095933_create_business_
 - `sidestream_installs`: latest known app/runtime/support state per hashed Sidestream install and support code.
 - `sidestream_sessions`: session start/end rollups, app/runtime summary, event counts, and latest error/action context.
 
-All new tables have RLS enabled and no public policies. The app writes through the server-side pooled Postgres credential only.
+All new tables have RLS enabled and no public policies. The app writes through the server-side pooled Postgres credential or the Supabase `service_role` REST key only. The Sidestream rollup migration explicitly grants `service_role` table access for the REST writer while keeping `anon` and `authenticated` revoked.
 
 The Sidestream telemetry schema starts in `supabase/migrations/20260521101823_add_sidestream_plugin_telemetry.sql`. The richer automatic logging rollup migration lives in `supabase/migrations/20260612120000_add_sidestream_telemetry_rollups.sql` and adds support-code/category/error/action columns plus install/session summary tables. Keep Sidestream telemetry migrations separate from the commerce ledger migration so plugin event volume can be indexed and retained independently from customer, purchase, and license tables.
 
@@ -275,6 +275,7 @@ The current location is derived automatically at page load using the current dat
 ## Recent Change Log
 
 - 2026-06-12: Added the Sidestream stable release manifest endpoint at `/api/sidestream/releases/latest`, a gated manifest publish script, update telemetry category support, and docs for the no-identity update-check protocol.
+- 2026-06-12: Granted Supabase `service_role` access to Sidestream telemetry tables so the server-only REST writer can insert raw events and upsert install/session rollups while RLS stays enabled and public roles stay revoked.
 - 2026-06-12: Added a server-only Supabase REST telemetry writer using `SUPABASE_URL` plus `SUPABASE_SECRET_KEY`, with Postgres as fallback and a legacy-schema retry so Sidestream events still record before the rollup migration is applied.
 - 2026-06-12: Extended `/api/plugin-telemetry` for automatic Sidestream logging with richer redacted event envelopes, support codes, batch ids, category/severity/error/action fields, structured consent payloads, and Supabase rollups in `sidestream_installs` plus `sidestream_sessions`.
 - 2026-06-09: Replaced the default Open Graph/Twitter share preview image with the branded `mockups/alexg-og-card.png` card so home/portfolio/service links no longer default to the MERIDIAN product mockup.
