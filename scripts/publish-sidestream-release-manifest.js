@@ -8,6 +8,7 @@ const path = require('path');
 const ROOT_DIR = path.join(__dirname, '..');
 const MANIFEST_PATH = process.env.SIDESTREAM_RELEASE_MANIFEST_PATH ||
   path.join(ROOT_DIR, 'data', 'sidestream-release-manifest.json');
+const DEFAULT_RELEASE_NOTES_URL = 'https://alexg.mov/?page=sidestream-install';
 const REQUIRED_GATES = ['signed', 'verified', 'uploaded', 'smoke-tested'];
 
 main();
@@ -31,8 +32,7 @@ function main() {
   const minSupportedVersion = normalizeVersion(args['min-supported-version'] || '1.0.0');
   const channel = sanitizeLabel(args.channel || 'stable');
   const rolloutPercent = normalizeRolloutPercent(args['rollout-percent'] || 100);
-  const releaseNotesUrl = args['release-notes-url'] ||
-    `https://alexg.mov/sidestream/releases/${version}`;
+  const releaseNotesUrl = args['release-notes-url'] || DEFAULT_RELEASE_NOTES_URL;
   const publishedAt = args['published-at'] || new Date().toISOString();
   const artifactType = sanitizeLabel(args['artifact-type'] || 'dmg');
   const critical = parseBoolean(args.critical);
@@ -152,8 +152,8 @@ function printUsage() {
     '  npm run release:publish-manifest -- \\',
     '    --version 1.0.3 \\',
     '    --artifact /path/to/Sidestream-1.0.3-Mac-ZXP-Installer.dmg \\',
-    '    --artifact-url https://downloads.alexg.mov/sidestream/1.0.3/Sidestream-1.0.3-Mac-ZXP-Installer.dmg \\',
-    '    --release-notes-url https://alexg.mov/sidestream/releases/1.0.3 \\',
+    '    --artifact-url https://kuownxqapvwc1svu.private.blob.vercel-storage.com/sidestream/1.0.3/Sidestream-1.0.3-Mac-ZXP-Installer.dmg?download=1 \\',
+    `    --release-notes-url ${DEFAULT_RELEASE_NOTES_URL} \\`,
     '    --signed --verified --uploaded --smoke-tested',
   ].join('\n'));
 }
