@@ -50,7 +50,6 @@ Commerce and fulfillment use these variables:
 - `ONYX_BLOB_URL`: optional private Vercel Blob URL override for ONYX.
 - `HALOCLYNE_BLOB_URL`: optional private Vercel Blob URL override for HALOCLYNE.
 - `COMPLETE_LUT_BUNDLE_BLOB_URL`: optional private Vercel Blob URL override for the Complete LUT Bundle ZIP.
-- `SIDESTREAM_BLOB_URL`: optional private Vercel Blob URL override for the Sidestream Mac install package DMG.
 - `SIDESTREAM_RELEASE_MANIFEST_PATH`: optional server-side override for the Sidestream release manifest JSON. Defaults to `data/sidestream-release-manifest.json`.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
@@ -205,7 +204,7 @@ That value must match a key in `PRODUCTS`. Plugin detail pages currently post `p
 - Frontend page `lut:onyx` -> checkout product `onyx` -> ONYX zip.
 - Frontend page `lut:haloclyne` -> checkout product `haloclyne` -> HALOCLYNE zip.
 - Frontend page `lut:complete-lut-bundle` -> checkout product `complete-lut-bundle` -> Complete LUT Bundle zip.
-- Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> `Sidestream-1.0.4-Mac-ZXP-Installer.dmg` plus the `sidestream-install` backup web steps.
+- Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> the current Sidestream release manifest artifact plus the `sidestream-install` backup web steps.
 
 The Complete LUT Bundle detail page is intentionally data-driven: `site/luts.jsx` builds the scroll-through included-LUT sections from every available non-bundle item in `LUTS`, with one primary before/after scrubber per released LUT and the LUT name labeled beneath that panel. When adding a future LUT, the page will show its section automatically once that LUT is available, but the bundle ZIP, Stripe Price/display price, bundle copy, `llms.txt`, sitemap, and this README still need a deliberate update so checkout and fulfillment match the page.
 
@@ -274,7 +273,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
-- 2026-06-17: Updated Sidestream checkout/download fulfillment and public install copy to the `1.0.4` Mac ZXP-helper DMG, keeping private Blob delivery behind signed `/api/download` links.
+- 2026-06-17: Updated Sidestream checkout/download fulfillment and public install copy to the `1.0.4` Mac ZXP-helper DMG, deriving fulfillment from the checked-in release manifest while keeping private Blob delivery behind signed `/api/download` links.
 - 2026-06-17: Published Sidestream `1.0.3` release metadata, updated the checkout fulfillment fallback to the `1.0.3` private Blob DMG, and defaulted release-note/update clicks to the live Sidestream install guide.
 - 2026-06-12: Added the Sidestream stable release manifest endpoint at `/api/sidestream/releases/latest`, a gated manifest publish script, update telemetry category support, and docs for the no-identity update-check protocol.
 - 2026-06-12: Granted Supabase `service_role` access to Sidestream telemetry tables so the server-only REST writer can insert raw events and upsert install/session rollups while RLS stays enabled and public roles stay revoked.
