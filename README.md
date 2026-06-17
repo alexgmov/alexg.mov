@@ -248,8 +248,9 @@ Important operational detail: fulfillment errors are logged, but the webhook sti
 4. Invalid signatures return `403`.
 5. Missing products return `404`.
 6. The handler fetches the private Blob URL with `BLOB_READ_WRITE_TOKEN`.
-7. The response streams the file as an attachment using `downloadFilename`.
-8. If `POSTGRES_URL` is configured, the handler records the download outcome in `download_events`.
+7. `HEAD` requests validate the signed link and private Blob reachability, then return file headers without streaming the artifact.
+8. `GET` requests stream the file as an attachment using `downloadFilename`.
+9. If `POSTGRES_URL` is configured, the handler records the download outcome in `download_events`.
 
 Download links are generated server-side only and are currently valid for 48 hours.
 
@@ -273,7 +274,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
-- 2026-06-17: Updated Sidestream checkout/download fulfillment and public install copy to the `1.0.4` Mac ZXP-helper DMG, deriving fulfillment from the checked-in release manifest while keeping private Blob delivery behind signed `/api/download` links.
+- 2026-06-17: Updated Sidestream checkout/download fulfillment and public install copy to the `1.0.4` Mac ZXP-helper DMG, deriving fulfillment from the checked-in release manifest while keeping private Blob delivery behind signed `/api/download` links. `/api/download` now supports authenticated `HEAD` checks without streaming large artifacts.
 - 2026-06-17: Published Sidestream `1.0.3` release metadata, updated the checkout fulfillment fallback to the `1.0.3` private Blob DMG, and defaulted release-note/update clicks to the live Sidestream install guide.
 - 2026-06-12: Added the Sidestream stable release manifest endpoint at `/api/sidestream/releases/latest`, a gated manifest publish script, update telemetry category support, and docs for the no-identity update-check protocol.
 - 2026-06-12: Granted Supabase `service_role` access to Sidestream telemetry tables so the server-only REST writer can insert raw events and upsert install/session rollups while RLS stays enabled and public roles stay revoked.

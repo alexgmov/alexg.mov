@@ -29,6 +29,11 @@ function contentDisposition(filename) {
 
 module.exports = async function handler(req, res) {
   try {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      res.setHeader('Allow', 'GET, HEAD');
+      return res.status(405).end();
+    }
+
     const { p: productId, exp, sig } = Object.fromEntries(
       new URL(req.url, 'http://x').searchParams
     );
@@ -70,7 +75,9 @@ module.exports = async function handler(req, res) {
       return res.status(404).end();
     }
 
+    const isHeadRequest = req.method === 'HEAD';
     const upstream = await fetch(product.blobUrl, {
+      method: isHeadRequest ? 'HEAD' : 'GET',
       headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
     });
 
@@ -95,10 +102,14 @@ module.exports = async function handler(req, res) {
     await logDownload(req, {
       productId,
       exp,
-      status: 'served',
+      status: isHeadRequest ? 'head_served' : 'served',
       httpStatus: 200,
       metadata: { bytes: contentLength ? Number(contentLength) : null, filename },
     });
+
+    if (isHeadRequest) {
+      return res.end();
+    }
 
     if (!upstream.body || typeof res.write !== 'function') {
       const file = Buffer.from(await upstream.arrayBuffer());
