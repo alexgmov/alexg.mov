@@ -25,7 +25,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 npm run dev
 npm run build
 npm run preview
-npm run release:publish-manifest -- --version 1.0.3 --artifact /path/to/Sidestream-1.0.3-Mac-ZXP-Installer.dmg --artifact-url 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/sidestream/1.0.3/Sidestream-1.0.3-Mac-ZXP-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
+npm run release:publish-manifest -- --version 1.0.4 --artifact /path/to/Sidestream-1.0.4-Mac-ZXP-Installer.dmg --artifact-url 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/sidestream/1.0.4/Sidestream-1.0.4-Mac-ZXP-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
 ```
 
 `npm run dev` starts the local Node server and Vite middleware on `PORT` or `3000`. `npm run build` runs `vite build` and then copies static assets into `dist/`.
@@ -75,7 +75,7 @@ Never expose the Supabase pooler password, Postgres URL, secret/service-role key
 
 ## Sidestream Release Manifest
 
-`api/sidestream/releases/latest.js` serves `GET /api/sidestream/releases/latest?channel=stable&platform=darwin-arm64&version=1.0.3` for the Sidestream CEP panel update checker. The route returns release metadata: product, channel, latest version, minimum supported version, critical flag, rollout percent, release notes URL, and artifact URL/hash/size. The current Sidestream artifact URL is a private Vercel Blob URL; the panel opens `releaseNotesUrl` first, which defaults to the public Sidestream install guide at `https://alexg.mov/?page=sidestream-install`. The endpoint does not require or accept install identity, support code, email, telemetry payloads, Stripe state, or signed purchase links.
+`api/sidestream/releases/latest.js` serves `GET /api/sidestream/releases/latest?channel=stable&platform=darwin-arm64&version=1.0.4` for the Sidestream CEP panel update checker. The route returns release metadata: product, channel, latest version, minimum supported version, critical flag, rollout percent, release notes URL, and artifact URL/hash/size. The current Sidestream artifact URL is a private Vercel Blob URL; the panel opens `releaseNotesUrl` first, which defaults to the public Sidestream install guide at `https://alexg.mov/?page=sidestream-install`. The endpoint does not require or accept install identity, support code, email, telemetry payloads, Stripe state, or signed purchase links.
 
 The stable manifest lives at `data/sidestream-release-manifest.json`. Publish a new latest release only after the release package is complete:
 
@@ -205,7 +205,7 @@ That value must match a key in `PRODUCTS`. Plugin detail pages currently post `p
 - Frontend page `lut:onyx` -> checkout product `onyx` -> ONYX zip.
 - Frontend page `lut:haloclyne` -> checkout product `haloclyne` -> HALOCLYNE zip.
 - Frontend page `lut:complete-lut-bundle` -> checkout product `complete-lut-bundle` -> Complete LUT Bundle zip.
-- Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> `Sidestream-1.0.3-Mac-ZXP-Installer.dmg` plus the `sidestream-install` backup web steps.
+- Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> `Sidestream-1.0.4-Mac-ZXP-Installer.dmg` plus the `sidestream-install` backup web steps.
 
 The Complete LUT Bundle detail page is intentionally data-driven: `site/luts.jsx` builds the scroll-through included-LUT sections from every available non-bundle item in `LUTS`, with one primary before/after scrubber per released LUT and the LUT name labeled beneath that panel. When adding a future LUT, the page will show its section automatically once that LUT is available, but the bundle ZIP, Stripe Price/display price, bundle copy, `llms.txt`, sitemap, and this README still need a deliberate update so checkout and fulfillment match the page.
 
@@ -274,6 +274,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-06-17: Updated Sidestream checkout/download fulfillment and public install copy to the `1.0.4` Mac ZXP-helper DMG, keeping private Blob delivery behind signed `/api/download` links.
 - 2026-06-17: Published Sidestream `1.0.3` release metadata, updated the checkout fulfillment fallback to the `1.0.3` private Blob DMG, and defaulted release-note/update clicks to the live Sidestream install guide.
 - 2026-06-12: Added the Sidestream stable release manifest endpoint at `/api/sidestream/releases/latest`, a gated manifest publish script, update telemetry category support, and docs for the no-identity update-check protocol.
 - 2026-06-12: Granted Supabase `service_role` access to Sidestream telemetry tables so the server-only REST writer can insert raw events and upsert install/session rollups while RLS stays enabled and public roles stay revoked.
