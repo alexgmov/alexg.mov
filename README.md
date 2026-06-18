@@ -8,7 +8,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `site/app.jsx` owns the query-string router. Public pages are represented by `?page=...`, for example `?page=luts`, `?page=lut:cinematic-01`, `?page=sidestream-install`, and `?page=success`.
 - Route components are split into chunks: home, plugins, LUTs, and supporting pages.
 - `site/chrome.jsx` owns global nav/footer chrome. The mobile bottom nav is hidden on product detail routes and the Sidestream install guide so purchase/install actions are not covered by the floating menu.
-- `site/home.jsx` owns the homepage hero and featured product rail, with the OMI proof teaser leading the LUT cards. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
+- `site/home.jsx` owns the homepage hero, hero shortcuts to LUTs/portfolio, and featured product rail, with the OMI proof teaser leading the LUT cards. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
 - `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `America/Los_Angeles` timezone.
 - `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, display pricing fields, media paths, and product page metadata. LUT copy also has fallback/indexable mirrors in `site/luts.jsx`, `site/home.jsx`, and `llms.txt`; keep those aligned when changing product descriptions.
 - `site/pricing.jsx` owns display-only pricing helpers for rendered prices, compare-at launch pricing, and pricing-variant tracking attributes. Stripe Price IDs in `lib/products.js` remain the source of truth for what checkout actually charges.
@@ -276,6 +276,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-06-18: Added a second homepage hero shortcut for Portfolio beside the existing Buy LUTs shortcut.
 - 2026-06-18: Made `/api/plugin-telemetry` use strict acknowledgements: duplicate retries count as recorded, but database misconfiguration, partial writes, or collector errors return non-2xx so the Sidestream CEP queue retries instead of silently dropping dashboard facts.
 - 2026-06-18: Updated Sidestream checkout/download fulfillment and public install copy to the `1.0.5` Mac ZXP-helper DMG, deriving fulfillment from the checked-in release manifest while keeping private Blob delivery behind signed `/api/download` links. `/api/download` supports authenticated `HEAD` checks without streaming large artifacts.
 - 2026-06-17: Published Sidestream `1.0.3` release metadata, updated the checkout fulfillment fallback to the `1.0.3` private Blob DMG, and defaulted release-note/update clicks to the live Sidestream install guide.

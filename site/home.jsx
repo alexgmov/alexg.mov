@@ -953,6 +953,13 @@ function Home({ go }) {
                 onActivate={() => go('luts')}
                 iconSrc={heroLutsMockup}
               />
+              <HeroProductShortcut
+                kind="portfolio"
+                name="PORTFOLIO"
+                type="Selected work"
+                href={hrefFor('portfolio')}
+                onActivate={() => go('portfolio')}
+              />
             </div>
           </HeroTitle>
         </div>
