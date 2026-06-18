@@ -766,38 +766,19 @@ function HeroTitle({ children }) {
   );
 }
 
-function HeroProductShortcut({ kind, name, type, href, onActivate, iconSrc }) {
-  const label = `${name} ${type}`;
+function HeroProductShortcut({ kind, name, href, onActivate }) {
   return (
     <a
       className={`hero-product-shortcut hero-product-shortcut-${kind}`}
       href={href}
-      aria-label={`View ${label}`}
+      aria-label={`View ${name}`}
       onClick={(e) => {
         e.preventDefault();
         onActivate();
       }}
     >
-      <span className={`hero-product-glyph hero-product-glyph-${kind}${iconSrc ? ' hero-product-glyph-image' : ''}`} aria-hidden="true">
-        {iconSrc ? (
-          <img className="hero-product-icon-img" src={iconSrc} alt="" />
-        ) : kind === 'lut' ? (
-          <>
-            <span className="hero-lut-band hero-lut-band-a" />
-            <span className="hero-lut-band hero-lut-band-b" />
-            <span className="hero-lut-band hero-lut-band-c" />
-          </>
-        ) : (
-          <>
-            <span className="hero-plugin-panel hero-plugin-panel-a" />
-            <span className="hero-plugin-panel hero-plugin-panel-b" />
-            <span className="hero-plugin-dot" />
-          </>
-        )}
-      </span>
       <span className="hero-product-copy">
         <span className="hero-product-name">{name}</span>
-        <span className="hero-product-type">{type}</span>
       </span>
       <span className="hero-product-arrow" aria-hidden="true"><ArrowIcon size={13} /></span>
     </a>
@@ -937,7 +918,6 @@ function Home({ go }) {
   const featuredLuts = FEATURED_HOME_LUT_IDS
     .map(id => luts.find(l => l.id === id) || fallbackLutsById[id])
     .filter(Boolean);
-  const heroLutsMockup = featuredLuts[0]?.mockupSrc || fallbackMeridian.mockupSrc;
   return (
     <main className="home-page">
       <section className="hero hero-immersive">
@@ -948,15 +928,12 @@ function Home({ go }) {
               <HeroProductShortcut
                 kind="lut"
                 name="BUY LUTS"
-                type="Color presets"
                 href={hrefFor('luts')}
                 onActivate={() => go('luts')}
-                iconSrc={heroLutsMockup}
               />
               <HeroProductShortcut
                 kind="portfolio"
                 name="PORTFOLIO"
-                type="Selected work"
                 href={hrefFor('portfolio')}
                 onActivate={() => go('portfolio')}
               />
