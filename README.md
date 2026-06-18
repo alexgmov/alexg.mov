@@ -25,7 +25,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 npm run dev
 npm run build
 npm run preview
-npm run release:publish-manifest -- --version 1.0.4 --artifact /path/to/Sidestream-1.0.4-Mac-ZXP-Installer.dmg --artifact-url 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/sidestream/1.0.4/Sidestream-1.0.4-Mac-ZXP-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
+npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestream-1.0.5-Mac-ZXP-Installer.dmg --artifact-url 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/sidestream/1.0.5/Sidestream-1.0.5-Mac-ZXP-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
 ```
 
 `npm run dev` starts the local Node server and Vite middleware on `PORT` or `3000`. `npm run build` runs `vite build` and then copies static assets into `dist/`.
@@ -74,7 +74,7 @@ Never expose the Supabase pooler password, Postgres URL, secret/service-role key
 
 ## Sidestream Release Manifest
 
-`api/sidestream/releases/latest.js` serves `GET /api/sidestream/releases/latest?channel=stable&platform=darwin-arm64&version=1.0.4` for the Sidestream CEP panel update checker. The route returns release metadata: product, channel, latest version, minimum supported version, critical flag, rollout percent, release notes URL, and artifact URL/hash/size. The current Sidestream artifact URL is a private Vercel Blob URL; the panel opens `releaseNotesUrl` first, which defaults to the public Sidestream install guide at `https://alexg.mov/?page=sidestream-install`. The endpoint does not require or accept install identity, support code, email, telemetry payloads, Stripe state, or signed purchase links.
+`api/sidestream/releases/latest.js` serves `GET /api/sidestream/releases/latest?channel=stable&platform=darwin-arm64&version=1.0.5` for the Sidestream CEP panel update checker. The route returns release metadata: product, channel, latest version, minimum supported version, critical flag, rollout percent, release notes URL, and artifact URL/hash/size. The current Sidestream artifact URL is a private Vercel Blob URL; the panel opens `releaseNotesUrl` first, which defaults to the public Sidestream install guide at `https://alexg.mov/?page=sidestream-install`. The endpoint does not require or accept install identity, support code, email, telemetry payloads, Stripe state, or signed purchase links.
 
 The stable manifest lives at `data/sidestream-release-manifest.json`. Publish a new latest release only after the release package is complete:
 
@@ -120,9 +120,11 @@ POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-
 
 Telemetry recording prefers the server-only Supabase REST path when `SUPABASE_URL` and `SUPABASE_SECRET_KEY` are configured. If the richer telemetry migration has not been applied yet, the REST writer retries against the legacy `sidestream_telemetry_events` columns so raw redacted events are still recorded; install/session rollups begin once the migration and Supabase schema cache include the new tables/columns. If the REST key is absent, telemetry falls back to the Postgres pooler path.
 
+The route returns `200` only when every accepted event is recorded or already present from an earlier retry. Database misconfiguration, partial writes, or collector errors return non-2xx so the CEP uploader keeps the local queue and retries. `SIDESTREAM_TELEMETRY_ENABLED=0` remains an intentional accept-and-drop kill switch and returns `202` with `disabled: true`.
+
 The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for a later dashboard that can query installs, sessions, timelines, failures, update-check outcomes, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or Supabase credentials.
 
-The route intentionally does not expose Supabase, Stripe, Blob, or Resend secrets to the plugin. If Supabase is not configured, the route still returns success after analytics logging so telemetry never blocks the editor's search/download workflow.
+The route intentionally does not expose Supabase, Stripe, Blob, or Resend secrets to the plugin. If Supabase is not configured, the route fails the telemetry acknowledgement instead of claiming success; the editor's search/download workflow continues because uploads happen through the plugin's bounded background queue.
 
 ## First-Visit Promo Offer
 
@@ -274,7 +276,8 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
-- 2026-06-17: Updated Sidestream checkout/download fulfillment and public install copy to the `1.0.4` Mac ZXP-helper DMG, deriving fulfillment from the checked-in release manifest while keeping private Blob delivery behind signed `/api/download` links. `/api/download` now supports authenticated `HEAD` checks without streaming large artifacts.
+- 2026-06-18: Made `/api/plugin-telemetry` use strict acknowledgements: duplicate retries count as recorded, but database misconfiguration, partial writes, or collector errors return non-2xx so the Sidestream CEP queue retries instead of silently dropping dashboard facts.
+- 2026-06-18: Updated Sidestream checkout/download fulfillment and public install copy to the `1.0.5` Mac ZXP-helper DMG, deriving fulfillment from the checked-in release manifest while keeping private Blob delivery behind signed `/api/download` links. `/api/download` supports authenticated `HEAD` checks without streaming large artifacts.
 - 2026-06-17: Published Sidestream `1.0.3` release metadata, updated the checkout fulfillment fallback to the `1.0.3` private Blob DMG, and defaulted release-note/update clicks to the live Sidestream install guide.
 - 2026-06-12: Added the Sidestream stable release manifest endpoint at `/api/sidestream/releases/latest`, a gated manifest publish script, update telemetry category support, and docs for the no-identity update-check protocol.
 - 2026-06-12: Granted Supabase `service_role` access to Sidestream telemetry tables so the server-only REST writer can insert raw events and upsert install/session rollups while RLS stays enabled and public roles stay revoked.

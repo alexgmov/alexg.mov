@@ -10,7 +10,7 @@ const PLUGINS = window.PLUGINS || [
     name: 'Sidestream',
     oneline: 'Search YouTube, preview, download, convert, and import media without leaving Premiere.',
     price: 0,
-    version: '1.0.4',
+    version: '1.0.5',
     badge: 'LIVE',
     status: 'released',
     variant: 'media-intake',
@@ -22,10 +22,10 @@ const PLUGINS = window.PLUGINS || [
     seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
     what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
-    get: 'Sidestream 1.0.4 Mac install package · signed ZXP inside · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
+    get: 'Sidestream 1.0.5 Mac install package · signed ZXP inside · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
     install: [
       'Free for now: enter your email at checkout and Sidestream sends one Mac install package.',
-      'Open Sidestream-1.0.4-Mac-ZXP-Installer.dmg on your editing Mac.',
+      'Open Sidestream-1.0.5-Mac-ZXP-Installer.dmg on your editing Mac.',
       'If the ZXP Installer target is missing, open Get ZXP Installer inside the package and install it.',
       'Drag Sidestream.zxp onto the ZXP Installer target in the Finder window.',
       'Open Window → Extensions → Sidestream in Premiere.',
@@ -36,7 +36,7 @@ const PLUGINS = window.PLUGINS || [
       'macOS Finder-style install package',
       'YouTube-first media intake workflow',
       'Signed ZXP package included inside the DMG',
-      'Version 1.0.4',
+      'Version 1.0.5',
     ],
     detailGuide: {
       title: 'Sidestream keeps media intake inside Premiere.',
@@ -439,7 +439,7 @@ function SidestreamInstallGuide({ go }) {
           <div className="install-status-panel" aria-label="Install status">
             <div className="install-status-top">
               <span>ZXP package</span>
-              <strong>Sidestream 1.0.4</strong>
+              <strong>Sidestream 1.0.5</strong>
             </div>
             <div className="install-status-list">
               <span><CheckIcon /> One DMG download</span>

@@ -150,9 +150,9 @@ function printUsage() {
   console.log([
     'Usage:',
     '  npm run release:publish-manifest -- \\',
-    '    --version 1.0.4 \\',
-    '    --artifact /path/to/Sidestream-1.0.4-Mac-ZXP-Installer.dmg \\',
-    '    --artifact-url https://kuownxqapvwc1svu.private.blob.vercel-storage.com/sidestream/1.0.4/Sidestream-1.0.4-Mac-ZXP-Installer.dmg?download=1 \\',
+    '    --version 1.0.5 \\',
+    '    --artifact /path/to/Sidestream-1.0.5-Mac-ZXP-Installer.dmg \\',
+    '    --artifact-url https://kuownxqapvwc1svu.private.blob.vercel-storage.com/sidestream/1.0.5/Sidestream-1.0.5-Mac-ZXP-Installer.dmg?download=1 \\',
     `    --release-notes-url ${DEFAULT_RELEASE_NOTES_URL} \\`,
     '    --signed --verified --uploaded --smoke-tested',
   ].join('\n'));

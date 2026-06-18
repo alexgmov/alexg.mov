@@ -9,7 +9,7 @@ const {
 
 const MAX_BODY_BYTES = 512 * 1024;
 const MAX_EVENTS_PER_BATCH = 100;
-const ENDPOINT_VERSION = '2026-06-12.1';
+const ENDPOINT_VERSION = '2026-06-18.1';
 const VALID_CATEGORIES = new Set([
   'user_action',
   'runtime_status',
@@ -63,13 +63,23 @@ module.exports = async function handler(req, res) {
     req,
     endpointVersion: ENDPOINT_VERSION,
   });
+  const recorded = result?.recorded || 0;
+  const strictSuccess = !result?.error &&
+    !result?.skipped &&
+    recorded === events.length;
+  const responseError = result?.error ||
+    (result?.skipped
+      ? 'Telemetry database is not configured.'
+      : 'Telemetry collector did not record every accepted event.');
 
   await logEvent({
     type: 'sidestream_plugin_telemetry_received',
     source: 'plugin_telemetry',
     endpointVersion: ENDPOINT_VERSION,
     accepted: events.length,
-    recorded: result?.recorded || 0,
+    recorded,
+    acknowledged: strictSuccess,
+    partial: recorded !== events.length,
     skipped: Boolean(result?.skipped),
     errored: Boolean(result?.error),
     collector: result?.collector || '',
@@ -77,11 +87,13 @@ module.exports = async function handler(req, res) {
     rollupsSkipped: Boolean(result?.rollupsSkipped),
   });
 
-  return res.status(result?.error ? 202 : 200).json({
-    ok: true,
+  return res.status(strictSuccess ? 200 : 503).json({
+    ok: strictSuccess,
     accepted: events.length,
-    recorded: result?.recorded || 0,
+    recorded,
     skipped: Boolean(result?.skipped),
+    collector: result?.collector || '',
+    error: strictSuccess ? undefined : responseError,
   });
 };
 
