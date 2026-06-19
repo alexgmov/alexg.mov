@@ -276,6 +276,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-06-18: Increased homepage hero shortcut label size and centered the text vertically in the text-only buttons.
 - 2026-06-18: Simplified homepage hero shortcuts to text-only Buy LUTs and Portfolio buttons with arrows.
 - 2026-06-18: Added a second homepage hero shortcut for Portfolio beside the existing Buy LUTs shortcut.
 - 2026-06-18: Made `/api/plugin-telemetry` use strict acknowledgements: duplicate retries count as recorded, but database misconfiguration, partial writes, or collector errors return non-2xx so the Sidestream CEP queue retries instead of silently dropping dashboard facts.

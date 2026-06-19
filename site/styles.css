@@ -2415,6 +2415,7 @@ footer {
   grid-template-columns: minmax(0, 1fr) 16px;
   gap: 10px;
   align-items: center;
+  align-content: center;
   box-shadow: 0 14px 36px rgba(0,0,0,0.24);
   transition: transform .16s ease, border-color .16s ease, background .16s ease, box-shadow .16s ease;
 }
@@ -2434,10 +2435,14 @@ footer {
 }
 .hero-product-copy {
   min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 .hero-product-name {
-  font-size: 14px;
-  line-height: 1.1;
+  display: block;
+  font-size: 15px;
+  line-height: 1;
   font-weight: 600;
   letter-spacing: 0;
   white-space: nowrap;
@@ -3142,7 +3147,7 @@ footer {
   box-shadow: 0 14px 34px rgba(0,0,0,0.26);
 }
 .hero-title-cta .hero-product-name {
-  font-size: 11px;
+  font-size: 14px;
 }
 .hero-title-cta .hero-product-arrow svg {
   width: 10px;
@@ -3866,7 +3871,7 @@ footer {
     gap: 6px;
   }
   .hero-title-cta .hero-product-name {
-    font-size: 9px;
+    font-size: 12px;
   }
   .hero-product-copy {
     min-width: 0;
