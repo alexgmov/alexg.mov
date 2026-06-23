@@ -6,6 +6,8 @@ const {
   tryRecord,
 } = require('../lib/supabase-db');
 
+const SIDESTREAM_PUBLIC_DOWNLOAD_URL = process.env.SIDESTREAM_PUBLIC_DOWNLOAD_URL || 'https://sidestream-xi.vercel.app/api/download';
+
 function sign(productId, exp) {
   return crypto
     .createHmac('sha256', process.env.DOWNLOAD_SECRET)
@@ -37,6 +39,10 @@ module.exports = async function handler(req, res) {
     const { p: productId, exp, sig } = Object.fromEntries(
       new URL(req.url, 'http://x').searchParams
     );
+
+    if (productId === 'sidestream') {
+      return redirectSidestreamDownload(req, res, { exp, status: 'sidestream_public_redirect' });
+    }
 
     if (!productId || !exp || !sig) {
       await logDownload(req, { productId, exp, status: 'missing_params', httpStatus: 400 });
@@ -130,6 +136,20 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.makeLink = makeLink;
+
+async function redirectSidestreamDownload(req, res, { exp, status }) {
+  await logDownload(req, {
+    productId: 'sidestream',
+    exp,
+    status,
+    httpStatus: 302,
+    metadata: { destination: SIDESTREAM_PUBLIC_DOWNLOAD_URL },
+  });
+  res.statusCode = 302;
+  res.setHeader('Location', SIDESTREAM_PUBLIC_DOWNLOAD_URL);
+  res.setHeader('Cache-Control', 'no-store');
+  res.end();
+}
 
 async function logDownload(req, details) {
   await tryRecord('download event', () => recordDownloadEvent({

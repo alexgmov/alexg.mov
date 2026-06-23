@@ -11,6 +11,7 @@ const {
 } = require('../lib/supabase-db');
 
 const CANONICAL_ORIGIN = normalizeOrigin(process.env.SITE_URL || 'https://alexg.mov');
+const SIDESTREAM_PUBLIC_DOWNLOAD_URL = process.env.SIDESTREAM_PUBLIC_DOWNLOAD_URL || 'https://sidestream-xi.vercel.app/api/download';
 
 function readBody(req) {
   if (Buffer.isBuffer(req.body)) return Promise.resolve(req.body);
@@ -145,7 +146,7 @@ async function fulfillCheckoutSession(session, req) {
   if (!email) {
     throw new Error(`Missing customer email for session "${session.id}"`);
   }
-  if (!process.env.DOWNLOAD_SECRET) {
+  if (productId !== 'sidestream' && !process.env.DOWNLOAD_SECRET) {
     throw new Error('DOWNLOAD_SECRET is not configured');
   }
   if (!process.env.RESEND_API_KEY) {
@@ -153,7 +154,9 @@ async function fulfillCheckoutSession(session, req) {
   }
 
   const origin = getPublicOrigin(req);
-  const downloadUrl = makeLink(origin, productId);
+  const downloadUrl = productId === 'sidestream'
+    ? SIDESTREAM_PUBLIC_DOWNLOAD_URL
+    : makeLink(origin, productId);
   const installUrl = productId === 'sidestream'
     ? `${origin}/?page=sidestream-install&download=${encodeURIComponent(downloadUrl)}`
     : '';

@@ -53,6 +53,7 @@ Commerce and fulfillment use these variables:
 - `SIDESTREAM_RELEASE_MANIFEST_PATH`: optional server-side override for the Sidestream release manifest JSON. Defaults to `data/sidestream-release-manifest.json`.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
+- `SIDESTREAM_PUBLIC_DOWNLOAD_URL`: optional public Sidestream installer URL. Defaults to `https://sidestream-xi.vercel.app/api/download` and is used so the free installer does not depend on the shop signed-link/blob-token path.
 - `RESEND_API_KEY`: Resend key used by the webhook fulfillment email and first-visit promo code email.
 - `FIRST_VISIT_OFFER_FROM`: optional sender override for the promo code email. Defaults to `alexg.mov <downloads@alexg.mov>`.
 - `FIRST_VISIT_OFFER_REPLY_TO`: optional reply-to override for the promo code email. Defaults to `alex@alexg.mov`.
@@ -232,10 +233,10 @@ Local product files can live under `plugins/` or `luts/` while they are being up
 4. `fulfillCheckoutSession()` reads `metadata.productId` from the Stripe session.
 5. Fulfillment only runs when `payment_status` is `paid` or `no_payment_required`. The second status supports Stripe no-cost orders from 100% promotion codes.
 6. The product is loaded from `lib/products.js`.
-7. Fulfillment requires a configured product Blob URL, customer email, `DOWNLOAD_SECRET`, and `RESEND_API_KEY`.
-8. `api/download.makeLink()` creates a signed URL valid for 48 hours.
+7. Fulfillment requires a configured product Blob URL, customer email, and `RESEND_API_KEY`; paid product fulfillment also requires `DOWNLOAD_SECRET`.
+8. `api/download.makeLink()` creates a signed URL valid for 48 hours for paid product downloads.
 9. Resend sends the buyer an email from `alexg.mov <downloads@alexg.mov>`.
-10. Sidestream fulfillment emails the single Mac install package download link plus backup web steps. The package contains the signed ZXP, a Finder-visible ZXP Installer target, and an aescripts ZXP/UXP Installer link.
+10. Sidestream fulfillment emails the single native Mac installer DMG download link plus backup web steps. Because Sidestream is currently free, that email uses the public Sidestream installer route instead of the signed shop download route. The DMG contains `Install Sidestream.pkg`; no external installer app is required.
 11. If `POSTGRES_URL` is configured, the webhook records the Stripe event, checkout session, customer, purchase, active license, and hashed download-link row in Supabase.
 
 Important operational detail: fulfillment errors are logged, but the webhook still responds with `{ received: true }`. That means Stripe will not retry a failed Resend send or missing-product configuration after the handler catches the error. Check deployment logs after product launches and webhook tests.
@@ -244,7 +245,7 @@ Important operational detail: fulfillment errors are logged, but the webhook sti
 
 `api/download.js` serves private product files through signed links:
 
-1. The link contains `p`, `exp`, and `sig` query parameters.
+1. Paid product links contain `p`, `exp`, and `sig` query parameters.
 2. `sig` is an HMAC-SHA256 signature over `productId:exp` using `DOWNLOAD_SECRET`.
 3. Expired links return `410`.
 4. Invalid signatures return `403`.
@@ -253,6 +254,8 @@ Important operational detail: fulfillment errors are logged, but the webhook sti
 7. `HEAD` requests validate the signed link and private Blob reachability, then return file headers without streaming the artifact.
 8. `GET` requests stream the file as an attachment using `downloadFilename`.
 9. If `POSTGRES_URL` is configured, the handler records the download outcome in `download_events`.
+
+Sidestream is the exception while it is free: `/api/download?p=sidestream...` redirects to `SIDESTREAM_PUBLIC_DOWNLOAD_URL`, and new Sidestream checkout emails use that same public installer URL directly. This keeps old signed Sidestream email links working even if `DOWNLOAD_SECRET` or private Blob tokens drift.
 
 Download links are generated server-side only and are currently valid for 48 hours.
 
@@ -276,6 +279,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-06-22: Routed free Sidestream installer fulfillment through the known-good public Sidestream download endpoint, with `/api/download?p=sidestream...` redirecting old signed links there so installer access no longer depends on the shop signed-link secret or separate Blob token.
 - 2026-06-18: Increased homepage hero shortcut label size and centered the text vertically in the text-only buttons.
 - 2026-06-18: Simplified homepage hero shortcuts to text-only Buy LUTs and Portfolio buttons with arrows.
 - 2026-06-18: Added a second homepage hero shortcut for Portfolio beside the existing Buy LUTs shortcut.
