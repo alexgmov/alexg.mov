@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "product": "sidestream",
   "channel": "stable",
-  "version": "1.0.5",
+  "version": "1.0.8",
   "minSupportedVersion": "1.0.0",
   "critical": false,
   "rolloutPercent": 100,
-  "publishedAt": "2026-06-22T19:55:18.710Z",
+  "publishedAt": "2026-06-30T07:32:58.313Z",
   "releaseNotesUrl": "https://alexg.mov/?page=sidestream-install",
   "artifact": {
     "type": "dmg",
-    "url": "https://kuownxqapvwc1svu.private.blob.vercel-storage.com/sidestream/latest/Sidestream-Mac-ZXP-Installer.dmg?download=1",
-    "sha256": "29e9b8a324368b932459ba1ce36b1c799087734223706fb65cabd48b6aa95b37",
-    "sizeBytes": 283255619
+    "url": "https://9kfjhekmxi6iiwni.private.blob.vercel-storage.com/sidestream/1.0.8/Sidestream-1.0.8-Mac-Installer.dmg?download=1",
+    "sha256": "8cbe189f1b6a77acedc9f66fb6cc8f21edca33f74ba69005d3216500d337efd5",
+    "sizeBytes": 207501630
   }
 }
