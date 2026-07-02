@@ -20,6 +20,7 @@ const VALID_CATEGORIES = new Set([
   'import',
   'settings',
   'update',
+  'install',
   'error',
 ]);
 const VALID_SEVERITIES = new Set(['info', 'warning', 'error']);

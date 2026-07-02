@@ -54,12 +54,6 @@ module.exports = async function handler(req, res) {
       await logDownload(req, { productId, exp, status: 'missing_download_secret', httpStatus: 500 });
       return res.status(500).send('Download is not configured.');
     }
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.error('BLOB_READ_WRITE_TOKEN is not configured');
-      await logDownload(req, { productId, exp, status: 'missing_blob_token', httpStatus: 500 });
-      return res.status(500).send('Download storage is not configured.');
-    }
-
     if (Date.now() > parseInt(exp, 10)) {
       await logDownload(req, { productId, exp, status: 'expired', httpStatus: 410 });
       return res.status(410).send('This download link has expired.');
@@ -81,10 +75,19 @@ module.exports = async function handler(req, res) {
       return res.status(404).end();
     }
 
+    const blobTokenEnv = product.blobTokenEnv || 'BLOB_READ_WRITE_TOKEN';
+    const blobToken = process.env[blobTokenEnv];
+
+    if (!blobToken) {
+      console.error(`${blobTokenEnv} is not configured`);
+      await logDownload(req, { productId, exp, status: 'missing_blob_token', httpStatus: 500 });
+      return res.status(500).send('Download storage is not configured.');
+    }
+
     const isHeadRequest = req.method === 'HEAD';
     const upstream = await fetch(product.blobUrl, {
       method: isHeadRequest ? 'HEAD' : 'GET',
-      headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+      headers: { Authorization: `Bearer ${blobToken}` },
     });
 
     if (!upstream.ok) {

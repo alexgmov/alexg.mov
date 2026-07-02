@@ -787,14 +787,14 @@ function HeroProductShortcut({ kind, name, href, onActivate }) {
 
 const OMI_CASE_STUDY = {
   client: 'OMI',
-  impactValue: '7 million',
-  impactUnit: 'VIEWS',
+  impactValue: '10M',
+  impactUnit: 'ORGANIC VIEWS',
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2026',
   teaserLabelParts: ['OMI LAUNCH FILM', 'FULL STACK VIDEO PRODUCTION', '2026'],
-  teaserTitle: 'Shipped a launch film with 7 million views.',
+  teaserTitle: 'Shipped a launch film with 10M organic views.',
   teaserSummary: 'Concept, production, edit, and UI moments tied to one metric: reach.',
   videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
-  heroTitle: "Directed OMI's launch film and drove 7 million views in four days.",
+  heroTitle: "Directed OMI's launch film and drove 10M organic views.",
   summary: 'OMI needed a launch film built for reach. I handled concept, script, production, edit, and onscreen product moments.',
   detailSections: [
     {
@@ -807,7 +807,7 @@ const OMI_CASE_STUDY = {
     },
     {
       title: 'Post + outcome',
-      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 7 million views across X and Instagram in four days.',
+      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 10M organic views across X and Instagram.',
     },
   ],
 };

@@ -212,8 +212,8 @@ function pageSeo(page) {
   if (pageKey === 'sidestream-install') {
     return {
       ...defaults,
-      title: 'Install Sidestream with the ZXP/UXP Installer | alexg.mov',
-      description: 'Guided Sidestream install steps for opening the Mac install package, dragging the signed ZXP onto the ZXP Installer target, and opening the panel in Premiere Pro.',
+      title: 'Install Sidestream with the Mac Installer DMG | alexg.mov',
+      description: 'Guided Sidestream install steps for opening the native Mac installer DMG, running Install Sidestream.pkg, and opening the panel in Premiere Pro.',
       canonical: absoluteRoute('sidestream-install'),
       graph: [
         ...baseGraph(),

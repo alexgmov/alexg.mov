@@ -54,7 +54,7 @@ const PORTFOLIO_VIDEOS = [
     category: 'launchbrand',
     kind: 'Product launch film',
     client: 'OMI',
-    blurb: 'Launch film with 7 million views.',
+    blurb: 'Launch film with 10M organic views.',
     source: 'alexg.mov',
     sourceUrl: 'videos/portfolio/web/omi-launch-film.mp4',
     src: 'videos/portfolio/web/omi-launch-film.mp4',
@@ -292,11 +292,10 @@ const PORTFOLIO_SECTIONS = PORTFOLIO_CATEGORIES.map((category) => ({
 
 const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
   client: 'OMI',
-  impactValue: '7 million',
-  impactUnit: 'VIEWS',
-  impactWindow: 'in 4 days',
+  impactValue: '10M',
+  impactUnit: 'ORGANIC VIEWS',
   label: 'OMI LAUNCH FILM · X + INSTAGRAM · 2025',
-  heroTitle: "Directed OMI's launch film and drove 7 million views in four days.",
+  heroTitle: "Directed OMI's launch film and drove 10M organic views.",
   summary: 'OMI needed a launch film built for reach. I handled concept, script, production, edit, and onscreen product moments.',
   videoSrc: 'videos/portfolio/web/omi-launch-film.mp4',
   services: ['Brand Film', 'Video Editing', 'Motion Graphics'],
@@ -311,7 +310,7 @@ const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
     },
     {
       title: 'Post + outcome',
-      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 7 million views across X and Instagram in four days.',
+      body: 'I cut the spot, shaped the voice and UI moments, and the launch reached 10M organic views across X and Instagram.',
     },
   ],
 };
@@ -884,7 +883,7 @@ function Services({ go }) {
 }
 
 const FAQS = window.FAQS || [
-  { q: 'Do your plugins work on Windows?', a: 'Sidestream is built as a signed ZXP, but the polished download package is Mac-first right now. Email support if you need the raw Windows ZXP.' },
+  { q: 'Do your plugins work on Windows?', a: 'Sidestream is Mac-first right now through the signed native installer DMG. Email support if you need a Windows fallback.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
   { q: 'Do you offer refunds?', a: 'No. These are digital downloads, so all sales are final. If something is broken on my end, email me and I will fix or replace it.' },
   { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Include your OS, Premiere version, and a screen recording if possible.' },

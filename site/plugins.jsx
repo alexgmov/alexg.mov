@@ -22,20 +22,20 @@ const PLUGINS = window.PLUGINS || [
     seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
     what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
-    get: 'Sidestream 1.0.5 Mac install package · signed ZXP inside · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
+    get: 'Sidestream 1.0.5 Mac installer DMG · signed and notarized package · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
     install: [
       'Free for now: enter your email at checkout and Sidestream sends one Mac install package.',
-      'Open Sidestream-1.0.5-Mac-ZXP-Installer.dmg on your editing Mac.',
-      'If the ZXP Installer target is missing, open Get ZXP Installer inside the package and install it.',
-      'Drag Sidestream.zxp onto the ZXP Installer target in the Finder window.',
+      'Open Sidestream-1.0.5-Mac-Installer.dmg on your editing Mac.',
+      'Double-click Install Sidestream.pkg inside the DMG.',
+      'Follow the macOS installer prompts and approve the normal admin prompt if asked.',
       'Open Window → Extensions → Sidestream in Premiere.',
       'Search YouTube, preview a result, download video or audio, then import the finished file.',
     ],
     specs: [
       'Adobe Premiere Pro 2020 (14.0) or later',
-      'macOS Finder-style install package',
+      'Signed and notarized native Mac installer DMG',
       'YouTube-first media intake workflow',
-      'Signed ZXP package included inside the DMG',
+      'No external installer required',
       'Version 1.0.5',
     ],
     detailGuide: {
@@ -140,16 +140,13 @@ const PLUGIN_DETAIL_FAQS = window.PLUGIN_DETAIL_FAQS || [
   },
   {
     q: 'What software do I need?',
-    a: 'Released plugins ship as ZXP extension packages for Premiere Pro. Check each plugin page for exact version support.',
+    a: 'Released plugins ship as installers for Premiere Pro. Check each plugin page for exact version support.',
   },
   {
     q: 'How do I receive a plugin after checkout?',
     a: 'The download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install it later on your editing computer.',
   },
 ];
-
-const SIDESTREAM_ZXP_INSTALLER_URL = 'https://aescripts.com/learn/zxp-installer/';
-const SIDESTREAM_ZXP_INSTALLER_FAQ_URL = 'https://aescripts.com/knowledgebase/index/view/faq/zxp-installer-faq/';
 
 function isFreePlugin(plugin) {
   return plugin && plugin.status === 'released' && plugin.price === 0;
@@ -323,7 +320,7 @@ function PluginsList({ go }) {
             <div className="how-item">
               <div className="how-num">02 / INSTALL FAST</div>
               <h4 className="how-h">Install the package</h4>
-              <p className="how-p">Download the Mac install package on your editing computer, drag the ZXP onto the installer target, and open the panel inside Premiere.</p>
+              <p className="how-p">Download the Mac installer DMG on your editing computer, run the included package, and open the panel inside Premiere.</p>
             </div>
             <div className="how-item">
               <div className="how-num">03 / EDIT FASTER</div>
@@ -339,7 +336,6 @@ function PluginsList({ go }) {
 
 function SidestreamInstallGuide({ go }) {
   const hrefFor = window.routeHref || ((id) => '#');
-  const [installerState, setInstallerState] = React.useState('need');
   const downloadUrl = React.useMemo(() => {
     try {
       return new URLSearchParams(location.search).get('download') || '';
@@ -351,7 +347,7 @@ function SidestreamInstallGuide({ go }) {
   const steps = [
     {
       eyebrow: '01 / GET THE PACKAGE',
-      title: 'Download the Mac install package',
+      title: 'Download the Mac installer DMG',
       body: 'Use the private download button in your email. Open the DMG on your editing Mac; do not unzip it or hunt for a separate guide.',
       action: downloadUrl ? (
         <a className="btn btn-primary" href={downloadUrl}>
@@ -372,36 +368,19 @@ function SidestreamInstallGuide({ go }) {
       ),
     },
     {
-      eyebrow: '02 / INSTALLER CHECK',
-      title: 'Check the ZXP Installer target',
-      body: 'The DMG points at the normal ZXP Installer app in Applications. If that target is missing, use the installer link inside the package, install it, then come back.',
+      eyebrow: '02 / OPEN THE DMG',
+      title: 'Open Sidestream-1.0.5-Mac-Installer.dmg',
+      body: 'The DMG contains the native macOS package. You do not need a separate install app.',
       action: (
-        <div className="install-segment" role="group" aria-label="ZXP installer status">
-          <button
-            type="button"
-            className={installerState === 'have' ? 'active' : ''}
-            onClick={() => setInstallerState('have')}
-          >
-            I have it
-          </button>
-          <a href={SIDESTREAM_ZXP_INSTALLER_URL} target="_blank" rel="noreferrer">
-            Get installer
-          </a>
-        </div>
+        <span className="install-state-pill is-ready">No extra installer</span>
       ),
     },
     {
       eyebrow: '03 / RUN THE INSTALL',
-      title: 'Drag the ZXP onto the target',
-      body: 'Quit Premiere Pro, then drag Sidestream.zxp onto Drop Sidestream here - ZXP Installer.app inside the DMG window.',
+      title: 'Run Install Sidestream.pkg',
+      body: 'Quit Premiere Pro, double-click Install Sidestream.pkg inside the DMG, and approve the normal macOS installer prompts.',
       action: (
-        <button
-          type="button"
-          className={`install-state-pill ${installerState === 'have' ? 'is-ready' : ''}`}
-          onClick={() => setInstallerState('have')}
-        >
-          {installerState === 'have' ? 'Installer ready' : 'Mark installer ready'}
-        </button>
+        <span className="install-state-pill is-ready">Package installer</span>
       ),
     },
     {
@@ -432,19 +411,19 @@ function SidestreamInstallGuide({ go }) {
             <p className="section-title">SIDESTREAM INSTALL</p>
             <h1 id="sidestream-install-title">Install Sidestream step by step.</h1>
             <p>
-              This page backs up the Mac install package: open the DMG, drag the signed ZXP onto
-              the ZXP Installer target, then open Sidestream inside Premiere.
+              This page backs up the Mac installer package: open the DMG, run
+              Install Sidestream.pkg, then open Sidestream inside Premiere.
             </p>
           </div>
           <div className="install-status-panel" aria-label="Install status">
             <div className="install-status-top">
-              <span>ZXP package</span>
+              <span>Native Mac installer</span>
               <strong>Sidestream 1.0.5</strong>
             </div>
             <div className="install-status-list">
               <span><CheckIcon /> One DMG download</span>
-              <span><CheckIcon /> Signed ZXP inside</span>
-              <span><CheckIcon /> Drag-and-drop installer handoff</span>
+              <span><CheckIcon /> Signed and notarized package</span>
+              <span><CheckIcon /> No external installer app</span>
             </div>
           </div>
         </section>
@@ -470,22 +449,19 @@ function SidestreamInstallGuide({ go }) {
           </div>
           <div className="install-faq-list">
             <details open>
-              <summary>Use the ZXP/UXP Installer, not the Manager App.</summary>
-              <p>Sidestream comes from alexg.mov, so you do not need an aescripts account or the aescripts + aeplugins Manager App.</p>
+              <summary>Quit Premiere before installing.</summary>
+              <p>The package replaces the installed Sidestream extension. Quit Premiere first, run the installer, then reopen Premiere.</p>
             </details>
             <details>
               <summary>If Premiere does not show Sidestream.</summary>
-              <p>Reopen Premiere, check both Extensions menus, then reinstall with the installer set to current-user install if the option appears.</p>
+              <p>Reopen Premiere, check both Extensions menus, then run Install Sidestream.pkg again and approve the admin prompt if macOS asks.</p>
             </details>
             <details>
-              <summary>If drag and drop does not work.</summary>
-              <p>Open the ZXP/UXP Installer, choose File &gt; Open, and select Sidestream.zxp from the mounted DMG.</p>
+              <summary>If the package will not open.</summary>
+              <p>Make sure the DMG finished downloading, open it from Finder, and send support a screenshot of the macOS installer error.</p>
             </details>
           </div>
           <div className="install-foot-actions">
-            <a className="btn btn-secondary" href={SIDESTREAM_ZXP_INSTALLER_FAQ_URL} target="_blank" rel="noreferrer">
-              Installer FAQ
-            </a>
             <a className="btn btn-primary" href="mailto:alex@alexg.mov?subject=Sidestream%20install%20help">
               Email Support
             </a>
@@ -609,7 +585,7 @@ function PluginDetail({ id, go }) {
                 <span className="cta-copy-mobile">{buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}</span>
               </button>
             : <button className="btn btn-secondary btn-lg pd-buy">Join Launch List</button>}
-          <div className="pd-reassure"><CheckIcon /> {isFreePlugin(p) ? 'Free Mac install package sent to checkout email · ZXP Installer link included' : (p.status === 'released' ? 'Download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues')}</div>
+          <div className="pd-reassure"><CheckIcon /> {isFreePlugin(p) ? 'Free Mac installer DMG sent to checkout email · no external installer required' : (p.status === 'released' ? 'Download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues')}</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{p.what}</div></div>

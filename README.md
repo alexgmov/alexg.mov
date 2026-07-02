@@ -25,7 +25,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 npm run dev
 npm run build
 npm run preview
-npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestream-1.0.5-Mac-ZXP-Installer.dmg --artifact-url 'https://kuownxqapvwc1svu.private.blob.vercel-storage.com/sidestream/1.0.5/Sidestream-1.0.5-Mac-ZXP-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
+npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestream-1.0.5-Mac-Installer.dmg --artifact-url 'https://9kfjhekmxi6iiwni.private.blob.vercel-storage.com/sidestream/1.0.5/Sidestream-1.0.5-Mac-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
 ```
 
 `npm run dev` starts the local Node server and Vite middleware on `PORT` or `3000`. `npm run build` runs `vite build` and then copies static assets into `dist/`.
@@ -53,6 +53,7 @@ Commerce and fulfillment use these variables:
 - `SIDESTREAM_RELEASE_MANIFEST_PATH`: optional server-side override for the Sidestream release manifest JSON. Defaults to `data/sidestream-release-manifest.json`.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
+- `SIDESTREAM_BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` for Sidestream when its release DMG lives in a separate Blob store from the LUT products.
 - `SIDESTREAM_PUBLIC_DOWNLOAD_URL`: optional public Sidestream installer URL. Defaults to `https://sidestream-xi.vercel.app/api/download` and is used so the free installer does not depend on the shop signed-link/blob-token path.
 - `RESEND_API_KEY`: Resend key used by the webhook fulfillment email and first-visit promo code email.
 - `FIRST_VISIT_OFFER_FROM`: optional sender override for the promo code email. Defaults to `alexg.mov <downloads@alexg.mov>`.
@@ -79,7 +80,7 @@ Never expose the Supabase pooler password, Postgres URL, secret/service-role key
 
 The stable manifest lives at `data/sidestream-release-manifest.json`. Publish a new latest release only after the release package is complete:
 
-1. Build/sign the ZXP and Mac DMG from the FlowState repo.
+1. Build/sign/notarize the native Mac installer DMG from the FlowState repo.
 2. Verify the signed package and smoke-test the install.
 3. Upload the release artifact to Vercel Blob. The current store is private-only, so use the returned private Blob URL as `--artifact-url` unless a public downloads host has been restored.
 4. Run `npm run release:publish-manifest -- --version <x.y.z> --artifact <local dmg> --artifact-url <https blob url> --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested`.
@@ -117,13 +118,13 @@ POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-
 
 ## Sidestream Plugin Telemetry
 
-`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension. The plugin sends batches of up to 100 already-redacted events; the server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, writes raw redacted rows to `sidestream_telemetry_events`, and upserts `sidestream_installs` plus `sidestream_sessions` through `lib/supabase-db.js`.
+`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension and the native Mac installer postinstall script. The plugin sends batches of up to 100 already-redacted events; the installer sends a single best-effort `installer_install_completed` event with a pseudonymous `installer_receipt_id_hash`. The server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, writes raw redacted rows to `sidestream_telemetry_events`, and upserts `sidestream_installs` plus `sidestream_sessions` through `lib/supabase-db.js` when events carry normal panel install/session ids.
 
 Telemetry recording prefers the server-only Supabase REST path when `SUPABASE_URL` and `SUPABASE_SECRET_KEY` are configured. If the richer telemetry migration has not been applied yet, the REST writer retries against the legacy `sidestream_telemetry_events` columns so raw redacted events are still recorded; install/session rollups begin once the migration and Supabase schema cache include the new tables/columns. If the REST key is absent, telemetry falls back to the Postgres pooler path.
 
 The route returns `200` only when every accepted event is recorded or already present from an earlier retry. Database misconfiguration, partial writes, or collector errors return non-2xx so the CEP uploader keeps the local queue and retries. `SIDESTREAM_TELEMETRY_ENABLED=0` remains an intentional accept-and-drop kill switch and returns `202` with `disabled: true`.
 
-The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for a later dashboard that can query installs, sessions, timelines, failures, update-check outcomes, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or Supabase credentials.
+The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for dashboards that can query installs, native installer receipts, sessions, timelines, failures, update-check outcomes, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or Supabase credentials.
 
 The route intentionally does not expose Supabase, Stripe, Blob, or Resend secrets to the plugin. If Supabase is not configured, the route fails the telemetry acknowledgement instead of claiming success; the editor's search/download workflow continues because uploads happen through the plugin's bounded background queue.
 
@@ -250,7 +251,7 @@ Important operational detail: fulfillment errors are logged, but the webhook sti
 3. Expired links return `410`.
 4. Invalid signatures return `403`.
 5. Missing products return `404`.
-6. The handler fetches the private Blob URL with `BLOB_READ_WRITE_TOKEN`.
+6. The handler fetches the private Blob URL with `BLOB_READ_WRITE_TOKEN`, or with a product-specific token env such as `SIDESTREAM_BLOB_READ_WRITE_TOKEN` when configured in `lib/products.js`.
 7. `HEAD` requests validate the signed link and private Blob reachability, then return file headers without streaming the artifact.
 8. `GET` requests stream the file as an attachment using `downloadFilename`.
 9. If `POSTGRES_URL` is configured, the handler records the download outcome in `download_events`.
@@ -279,12 +280,14 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-06-22: Allowed Sidestream telemetry event category `install` so native Mac installer receipt events keep their category when posted through `/api/plugin-telemetry`.
 - 2026-06-22: Routed free Sidestream installer fulfillment through the known-good public Sidestream download endpoint, with `/api/download?p=sidestream...` redirecting old signed links there so installer access no longer depends on the shop signed-link secret or separate Blob token.
+- 2026-06-22: Updated OMI proof copy to say `10M organic views` across the homepage proof teaser, portfolio tile, and service case-study fallback copy.
 - 2026-06-18: Increased homepage hero shortcut label size and centered the text vertically in the text-only buttons.
 - 2026-06-18: Simplified homepage hero shortcuts to text-only Buy LUTs and Portfolio buttons with arrows.
 - 2026-06-18: Added a second homepage hero shortcut for Portfolio beside the existing Buy LUTs shortcut.
 - 2026-06-18: Made `/api/plugin-telemetry` use strict acknowledgements: duplicate retries count as recorded, but database misconfiguration, partial writes, or collector errors return non-2xx so the Sidestream CEP queue retries instead of silently dropping dashboard facts.
-- 2026-06-18: Updated Sidestream checkout/download fulfillment and public install copy to the `1.0.5` Mac ZXP-helper DMG, deriving fulfillment from the checked-in release manifest while keeping private Blob delivery behind signed `/api/download` links. `/api/download` supports authenticated `HEAD` checks without streaming large artifacts.
+- 2026-06-22: Updated Sidestream checkout/download fulfillment, release manifest, and public install copy to the `1.0.5` native Mac installer DMG, removing the retired ZXP-helper package from the customer path while keeping private Blob delivery behind signed `/api/download` links.
 - 2026-06-17: Published Sidestream `1.0.3` release metadata, updated the checkout fulfillment fallback to the `1.0.3` private Blob DMG, and defaulted release-note/update clicks to the live Sidestream install guide.
 - 2026-06-12: Added the Sidestream stable release manifest endpoint at `/api/sidestream/releases/latest`, a gated manifest publish script, update telemetry category support, and docs for the no-identity update-check protocol.
 - 2026-06-12: Granted Supabase `service_role` access to Sidestream telemetry tables so the server-only REST writer can insert raw events and upsert install/session rollups while RLS stays enabled and public roles stay revoked.

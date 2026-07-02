@@ -194,12 +194,12 @@ function buildEmail(productName, downloadUrl, options = {}) {
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#111;max-width:560px;margin:0 auto;padding:48px 24px">
   <p style="font-family:monospace;font-size:11px;color:#888;letter-spacing:.06em;margin:0 0 40px">ALEXG.MOV · DOWNLOAD READY</p>
   <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:34px;font-weight:500;letter-spacing:-.02em;margin:0 0 16px">${escapeHtml(productName)}</h1>
-  <p style="font-size:15px;color:#555;line-height:1.65;margin:0 0 28px">Your purchase is confirmed. Download the Mac install package, open the DMG, then drag Sidestream.zxp onto the ZXP Installer target. If you do not have the ZXP Installer, use the installer link inside the package, install it, then come back.<br>This download link expires in 48 hours.</p>
+  <p style="font-size:15px;color:#555;line-height:1.65;margin:0 0 28px">Your purchase is confirmed. Download the Mac installer DMG, open it, then double-click Install Sidestream.pkg and follow the macOS installer prompts.<br>This download link expires in 48 hours.</p>
   <div style="display:flex;flex-wrap:wrap;gap:12px;margin:0 0 36px">
     <a href="${escapeAttribute(downloadUrl)}" style="display:inline-block;background:#111;color:#fff;padding:14px 22px;font-family:monospace;font-size:13px;letter-spacing:.04em;text-decoration:none;border-radius:2px">Download Mac Install Package</a>
     <a href="${escapeAttribute(options.installUrl || '')}" style="display:inline-block;background:#fff;color:#111;padding:14px 22px;font-family:monospace;font-size:13px;letter-spacing:.04em;text-decoration:none;border-radius:2px;border:1px solid #ddd">Open Backup Steps</a>
   </div>
-  <p style="font-size:13px;color:#777;line-height:1.6;margin:0">No separate PDF or zip needed. The DMG contains the signed ZXP, the installer target, and the ZXP Installer link.</p>
+  <p style="font-size:13px;color:#777;line-height:1.6;margin:0">No separate PDF, zip, or external installer app needed. The DMG contains the signed and notarized Sidestream installer package.</p>
   <hr style="border:none;border-top:1px solid #eee;margin:48px 0 24px">
   <p style="font-size:13px;color:#888;line-height:1.6;margin:0">Hit an install bug? Email <a href="mailto:alex@alexg.mov" style="color:#111;text-decoration:none;font-family:monospace">alex@alexg.mov</a> — reply within 24 hours.</p>
 </body>

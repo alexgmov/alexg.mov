@@ -18,20 +18,20 @@ const PLUGINS = [
     seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
     what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
-    get: 'Sidestream 1.0.5 Mac install package · signed ZXP inside · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
+    get: 'Sidestream 1.0.5 Mac installer DMG · signed and notarized package · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
     install: [
       'Free for now: enter your email at checkout and Sidestream sends one Mac install package.',
-      'Open Sidestream-1.0.5-Mac-ZXP-Installer.dmg on your editing Mac.',
-      'If the ZXP Installer target is missing, open Get ZXP Installer inside the package and install it.',
-      'Drag Sidestream.zxp onto the ZXP Installer target in the Finder window.',
+      'Open Sidestream-1.0.5-Mac-Installer.dmg on your editing Mac.',
+      'Double-click Install Sidestream.pkg inside the DMG.',
+      'Follow the macOS installer prompts and approve the normal admin prompt if asked.',
       'Open Window → Extensions → Sidestream in Premiere.',
       'Search YouTube, preview a result, download video or audio, then import the finished file.',
     ],
     specs: [
       'Adobe Premiere Pro 2020 (14.0) or later',
-      'macOS Finder-style install package',
+      'Signed and notarized native Mac installer DMG',
       'YouTube-first media intake workflow',
-      'Signed ZXP package included inside the DMG',
+      'No external installer required',
       'Version 1.0.5',
     ],
     detailGuide: {
@@ -315,7 +315,7 @@ const LUT_DETAIL_FAQS = [
 ];
 
 const FAQS = [
-  { q: 'Do your plugins work on Windows?', a: 'Sidestream is built as a signed ZXP, but the polished download package is Mac-first right now. Email support if you need the raw Windows ZXP.' },
+  { q: 'Do your plugins work on Windows?', a: 'Sidestream is Mac-first right now through the signed native installer DMG. Email support if you need a Windows fallback.' },
   { q: 'Can I use the LUTs in client work?', a: 'Yes. Personal and commercial use are both allowed. Don\'t redistribute the files themselves or resell the pack.' },
   { q: 'Do you offer refunds?', a: 'No. These are digital downloads, so all sales are final. If something is broken on my end, email me and I will fix or replace it.' },
   { q: 'How fast do you respond to support?', a: 'Within 24 hours on weekdays. Include your OS, Premiere version, and a screen recording if possible.' },
