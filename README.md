@@ -18,7 +18,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `server.js` serves Vite middleware in development and the `dist/` build in production mode.
 - `scripts/copy-static.mjs` copies static assets that Vite does not bundle directly, including `mockups`, `videos`, `robots.txt`, `sitemap.xml`, and `llms.txt`.
 - `data/sidestream-release-manifest.json` is the checked-in Sidestream stable release manifest served by `api/sidestream/releases/latest.js`. Update it only through `scripts/publish-sidestream-release-manifest.js` after the artifact is signed, verified, uploaded, and smoke-tested.
-- `docs/sidestream-neon-telemetry-architecture.md` documents the target Sidestream telemetry egress architecture: Vercel Blob is the immutable accepted-batch archive, Neon is the queryable recent/rollup store, and the FlowState dashboard should consume guarded website APIs instead of direct storage credentials.
+- `docs/sidestream-neon-telemetry-architecture.md` documents the Sidestream telemetry egress architecture: Vercel Blob is the immutable accepted-batch archive, Neon is the primary server-side Postgres database for imports/rollups/guarded reads, and the FlowState dashboard should consume guarded website APIs instead of direct storage credentials.
 
 ## Local Commands
 
@@ -56,8 +56,8 @@ Commerce and fulfillment use these variables:
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
 - `SIDESTREAM_BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` for Sidestream when its release DMG lives in a separate Blob store from the LUT products.
 - `SIDESTREAM_PUBLIC_DOWNLOAD_URL`: optional public Sidestream installer URL. Defaults to `https://sidestream-xi.vercel.app/api/download` and is used so the free installer does not depend on the shop signed-link/blob-token path.
-- `SIDESTREAM_TELEMETRY_BLOB_READ_WRITE_TOKEN`: planned server-only Vercel Blob token for the immutable Sidestream telemetry raw-batch archive. Keep it separate from product download Blob tokens when possible.
-- `SIDESTREAM_NEON_DATABASE_URL` or `NEON_DATABASE_URL`: planned server-only Neon connection string for Sidestream telemetry import, recent-event, and rollup queries. Never expose it to browser code, the Sidestream CEP extension, or the FlowState dashboard.
+- `SIDESTREAM_TELEMETRY_BLOB_READ_WRITE_TOKEN`: server-only Vercel Blob token for the immutable Sidestream telemetry raw-batch archive. Keep it separate from product download Blob tokens when possible.
+- `SIDESTREAM_NEON_DATABASE_URL` or `NEON_DATABASE_URL`: primary server-only Neon connection string for Sidestream telemetry import, recent-event, rollup, and guarded dashboard queries. Sidestream telemetry database resolution must prefer `SIDESTREAM_NEON_DATABASE_URL`, then `NEON_DATABASE_URL`, then `DATABASE_URL`/`POSTGRES_URL` only when that URL is a Neon connection. Never expose it to browser code, the Sidestream CEP extension, or the FlowState dashboard.
 - `RESEND_API_KEY`: Resend key used by the webhook fulfillment email and first-visit promo code email.
 - `FIRST_VISIT_OFFER_FROM`: optional sender override for the promo code email. Defaults to `alexg.mov <downloads@alexg.mov>`.
 - `FIRST_VISIT_OFFER_REPLY_TO`: optional reply-to override for the promo code email. Defaults to `alex@alexg.mov`.
@@ -67,15 +67,15 @@ Commerce and fulfillment use these variables:
 - `EMAIL_POSTAL_ADDRESS` or `BUSINESS_POSTAL_ADDRESS`: footer address to include for commercial email compliance.
 - `ANALYTICS_LOG_DIR`: optional local analytics log directory.
 - `ANALYTICS_SALT`: optional visitor fingerprint salt. Falls back to `DOWNLOAD_SECRET`.
-- `POSTGRES_URL`, `DATABASE_URL`, or `SUPABASE_POSTGRES_URL`: optional Supabase/Postgres pooled connection string used for durable business logging. Prefer Supabase's shared pooler URL on Vercel, with the real password stored only in Vercel/local env vars.
-- `SUPABASE_URL`: optional Supabase project URL used with `SUPABASE_SECRET_KEY` for server-only Sidestream telemetry writes when the Postgres pooler URL is unavailable.
-- `SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY`: optional server-only Supabase REST key for Sidestream telemetry. Never expose this to browser code or the Sidestream CEP extension; it bypasses RLS and belongs only in trusted backend env vars.
+- `POSTGRES_URL`, `DATABASE_URL`, or `SUPABASE_POSTGRES_URL`: optional Postgres connection strings used for durable business logging. `DATABASE_URL`/`POSTGRES_URL` may be used by Sidestream telemetry only when they point at Neon; `SUPABASE_POSTGRES_URL` is legacy for Supabase/business-ledger paths and is not part of the Neon telemetry precedence.
+- `SUPABASE_URL`: legacy Supabase project URL. Vercel Production may still define it, but Sidestream telemetry must not choose Supabase REST merely because it exists; use it only behind an explicit legacy Supabase fallback gate.
+- `SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY`: legacy server-only Supabase REST key. Never expose this to browser code or the Sidestream CEP extension; it bypasses RLS and belongs only in trusted backend env vars. For Sidestream telemetry it is legacy, not the default database path.
 - `POSTGRES_POOL_MAX`: optional server-side Postgres pool size. Defaults to `3`, which is intentionally small for Vercel serverless.
 - `POSTGRES_SSL`: set to `0` only for a local non-SSL Postgres. Supabase pooler connections should keep SSL enabled.
 - `SIDESTREAM_TELEMETRY_ENABLED`: set to `0` to make `/api/plugin-telemetry` accept but drop Sidestream plugin telemetry while keeping the route deployed.
 
 Never expose Stripe secret keys, webhook secrets, Resend keys, Blob tokens, or `DOWNLOAD_SECRET` in frontend files.
-Never expose the Supabase pooler password, Postgres URL, Neon URL, secret/service-role key, or any server database credential in frontend files, the Sidestream CEP extension, or FlowState dashboard code.
+Never expose the Supabase pooler password, Postgres URL, Neon URL, legacy Supabase secret/service-role key, or any server database credential in frontend files, the Sidestream CEP extension, or FlowState dashboard code.
 
 ## Sidestream Release Manifest
 
@@ -93,7 +93,7 @@ The publish script calculates `sha256` and `sizeBytes` from the local artifact a
 
 ## Supabase Business Ledger
 
-The optional Supabase integration uses server-side database writes through `lib/supabase-db.js`. Commerce/ledger helpers use direct Postgres when a pooled Postgres URL is configured. Sidestream telemetry prefers server-only Supabase REST with `SUPABASE_URL` plus `SUPABASE_SECRET_KEY`, then falls back to direct Postgres when the REST key is absent. Browser code and the Sidestream CEP panel never receive database credentials.
+The optional Supabase integration uses server-side database writes through `lib/supabase-db.js` for commerce/business-ledger history. Sidestream telemetry has moved to Neon as the primary server-side Postgres database for imports, rollups, and guarded dashboard reads. Browser code, the Sidestream CEP panel, and the FlowState dashboard never receive database credentials.
 
 The initial schema lives in `supabase/migrations/20260521095933_create_business_ledger.sql` and creates private ledger tables for:
 
@@ -105,15 +105,15 @@ The initial schema lives in `supabase/migrations/20260521095933_create_business_
 - `licenses`: active product/license entitlement rows tied to purchases and Checkout Sessions.
 - `download_links`: generated fulfillment links, stored as hashes rather than raw signed URLs.
 - `download_events`: signed download-link outcomes such as served, expired, invalid signature, missing product, or Blob fetch failure.
-- `sidestream_telemetry_events`: redacted, batched Sidestream CEP telemetry events posted through `/api/plugin-telemetry`.
-- `sidestream_installs`: latest known app/runtime/support state per hashed Sidestream install and support code.
-- `sidestream_sessions`: session start/end rollups, app/runtime summary, event counts, and latest error/action context.
+- `sidestream_telemetry_events`: legacy Supabase table for redacted, batched Sidestream CEP telemetry events posted through `/api/plugin-telemetry`.
+- `sidestream_installs`: legacy Supabase install summary table; Neon owns primary telemetry imports and rollups going forward.
+- `sidestream_sessions`: legacy Supabase session summary table; Neon owns primary telemetry imports and rollups going forward.
 
-All new tables have RLS enabled and no public policies. The app writes through the server-side pooled Postgres credential or the Supabase `service_role` REST key only. The Sidestream rollup migration explicitly grants `service_role` table access for the REST writer while keeping `anon` and `authenticated` revoked.
+All new Supabase tables have RLS enabled and no public policies. Business-ledger writes use the server-side pooled Postgres credential or the Supabase `service_role` REST key only. Historical Sidestream Supabase rollup migrations explicitly grant `service_role` table access for the legacy REST writer while keeping `anon` and `authenticated` revoked.
 
-The Sidestream telemetry schema starts in `supabase/migrations/20260521101823_add_sidestream_plugin_telemetry.sql`. The richer automatic logging rollup migration lives in `supabase/migrations/20260612120000_add_sidestream_telemetry_rollups.sql` and adds support-code/category/error/action columns plus install/session summary tables. Keep Sidestream telemetry migrations separate from the commerce ledger migration so plugin event volume can be indexed and retained independently from customer, purchase, and license tables.
+The historical Sidestream Supabase telemetry schema starts in `supabase/migrations/20260521101823_add_sidestream_plugin_telemetry.sql`. The richer automatic logging rollup migration lives in `supabase/migrations/20260612120000_add_sidestream_telemetry_rollups.sql` and adds support-code/category/error/action columns plus install/session summary tables. Keep legacy Sidestream telemetry migrations separate from the commerce ledger migration so plugin event volume can be indexed and retained independently from customer, purchase, and license tables.
 
-Apply the migration from the Supabase SQL editor or with the Supabase CLI after linking the project. For direct Postgres writes, set the Vercel env var to the Supabase pooler connection string with the real password, for example:
+Apply Supabase business-ledger or legacy telemetry migrations from the Supabase SQL editor or with the Supabase CLI after linking the project. For direct Supabase business-ledger writes, set the Vercel env var to the Supabase pooler connection string with the real password, for example:
 
 ```sh
 POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres"
@@ -121,17 +121,17 @@ POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-
 
 ## Sidestream Plugin Telemetry
 
-`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension and the native Mac installer postinstall script. The plugin sends batches of up to 100 already-redacted events; the installer sends a single best-effort `installer_install_completed` event with a pseudonymous `installer_receipt_id_hash`. The server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, writes raw redacted rows to `sidestream_telemetry_events`, and upserts `sidestream_installs` plus `sidestream_sessions` through `lib/supabase-db.js` when events carry normal panel install/session ids.
+`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension and the native Mac installer postinstall script. The plugin sends batches of up to 100 already-redacted events; the installer sends a single best-effort `installer_install_completed` event with a pseudonymous `installer_receipt_id_hash`. The server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, preserves the raw accepted batch in Vercel Blob, and imports accepted telemetry into Neon recent/rollup tables for guarded dashboard reads.
 
-Telemetry recording prefers the server-only Supabase REST path when `SUPABASE_URL` and `SUPABASE_SECRET_KEY` are configured. If the richer telemetry migration has not been applied yet, the REST writer retries against the legacy `sidestream_telemetry_events` columns so raw redacted events are still recorded; install/session rollups begin once the migration and Supabase schema cache include the new tables/columns. If the REST key is absent, telemetry falls back to the Postgres pooler path.
+Telemetry storage is Neon primary. Connection precedence is `SIDESTREAM_NEON_DATABASE_URL`, then `NEON_DATABASE_URL`, then `DATABASE_URL`/`POSTGRES_URL` only if that URL is the Neon connection. Vercel Production may still contain `SUPABASE_URL` and `SUPABASE_SECRET_KEY`, but Sidestream telemetry must not prefer Supabase REST merely because those variables exist. Supabase REST may remain only as an explicitly gated legacy Supabase fallback.
 
-The route returns `200` only when every accepted event is recorded or already present from an earlier retry. Database misconfiguration, partial writes, or collector errors return non-2xx so the CEP uploader keeps the local queue and retries. `SIDESTREAM_TELEMETRY_ENABLED=0` remains an intentional accept-and-drop kill switch and returns `202` with `disabled: true`.
+The route returns `200` only when the accepted batch is archived or idempotently treated as already archived from an earlier retry. Blob archive misconfiguration, partial archive writes, or collector errors return non-2xx so the CEP uploader keeps the local queue and retries. `SIDESTREAM_TELEMETRY_ENABLED=0` remains an intentional accept-and-drop kill switch and returns `202` with `disabled: true`.
 
-The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for dashboards that can query installs, native installer receipts, sessions, timelines, failures, update-check outcomes, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or Supabase credentials.
+The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for dashboards that can query installs, native installer receipts, sessions, timelines, failures, update-check outcomes, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or database credentials.
 
-The route intentionally does not expose Supabase, Stripe, Blob, or Resend secrets to the plugin. If Supabase is not configured, the route fails the telemetry acknowledgement instead of claiming success; the editor's search/download workflow continues because uploads happen through the plugin's bounded background queue.
+The route intentionally does not expose Neon, legacy Supabase, Stripe, Blob, or Resend secrets to the plugin. Blob archive write failure remains ACK-critical; Neon import failures should be surfaced to server-side import status without giving the plugin or dashboard database credentials. The editor's search/download workflow continues because uploads happen through the plugin's bounded background queue.
 
-The target Neon + Vercel Blob egress contract lives in `docs/sidestream-neon-telemetry-architecture.md`. Follow-up implementation should preserve every accepted `/api/plugin-telemetry` data point, make Vercel Blob the ACK-critical immutable raw batch archive, import Blob archives into Neon on a scheduled or manual cadence, and expose only guarded summary/recent reads for the FlowState analytics dashboard. The current code path still uses the Supabase/Postgres writer until that contract is implemented; do not describe the migration as live until the collector, importer, and guarded reads are shipped.
+The Neon + Vercel Blob egress contract lives in `docs/sidestream-neon-telemetry-architecture.md`. Follow-up implementation should preserve every accepted `/api/plugin-telemetry` data point, keep Vercel Blob as the ACK-critical immutable raw batch archive, import Blob archives into Neon on a scheduled or manual cadence, and expose only guarded summary/recent reads for the FlowState analytics dashboard.
 
 ## First-Visit Promo Offer
 
@@ -285,7 +285,8 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
-- 2026-07-02: Documented the target Sidestream Neon + Vercel Blob telemetry architecture, including preserved `/api/plugin-telemetry` data points, server-only secrets, retention windows, import cadence, manual refresh expectations, failure behavior, and the FlowState dashboard API handoff.
+- 2026-07-02: Corrected the Sidestream telemetry contract to treat Neon as the primary server-side Postgres database, require `SIDESTREAM_NEON_DATABASE_URL`/`NEON_DATABASE_URL` precedence, and mark Supabase REST as an explicitly gated legacy fallback.
+- 2026-07-02: Documented the Sidestream Neon + Vercel Blob telemetry architecture, including preserved `/api/plugin-telemetry` data points, server-only secrets, retention windows, import cadence, manual refresh expectations, failure behavior, and the FlowState dashboard API handoff.
 - 2026-07-02: Dropped all LUT checkout prices by 75%: individual LUTs now display and charge `$4.50`, the Complete LUT Bundle displays and charges `$9.75`, Stripe Products default to the new live one-time Prices, the previous `$18`/`$39` Stripe Prices are archived, and the bundle fallback Price ID now matches the sale price.
 - 2026-06-22: Allowed Sidestream telemetry event category `install` so native Mac installer receipt events keep their category when posted through `/api/plugin-telemetry`.
 - 2026-06-22: Routed free Sidestream installer fulfillment through the known-good public Sidestream download endpoint, with `/api/download?p=sidestream...` redirecting old signed links there so installer access no longer depends on the shop signed-link secret or separate Blob token.

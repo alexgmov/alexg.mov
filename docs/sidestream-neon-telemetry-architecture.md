@@ -1,15 +1,27 @@
 # Sidestream Neon Telemetry Architecture
 
-This is the collector-side contract for moving Sidestream telemetry storage from always-querying the primary database path to a Blob-first archive plus Neon import model. It is intentionally optimized for one human operator checking telemetry a few times per day. It is not a real-time, multi-user analytics system, and future dashboard work should not add high-frequency polling, websocket streams, or broad ad hoc raw-event reads.
+This is the collector-side contract for Sidestream telemetry after the database migration to Neon as the primary server-side Postgres database. The storage model is Blob-first for immutable accepted batches, then Neon for imports, rollups, and guarded dashboard reads. It is intentionally optimized for one human operator checking telemetry a few times per day. It is not a real-time, multi-user analytics system, and future dashboard work should not add high-frequency polling, websocket streams, or broad ad hoc raw-event reads.
 
 ## Goals
 
 - Preserve every accepted data point currently accepted by `POST /api/plugin-telemetry`.
-- Keep all Blob, Neon, Supabase, Postgres, Stripe, Resend, and download secrets server-side only.
+- Keep all Blob, Neon, legacy Supabase, Postgres, Stripe, Resend, and download secrets server-side only.
 - Use Vercel Blob as the immutable raw telemetry batch archive and backfill source.
-- Use Neon as the queryable recent-event and rollup store for dashboards and support lookup.
+- Use Neon as the primary server-side Postgres database for telemetry imports, recent-event queries, rollups, dashboards, and support lookup.
 - Reduce egress and compute by importing on a schedule or explicit manual refresh instead of querying raw operational tables for every dashboard view.
 - Keep FlowState changes out of this repo; this repo only exposes collector, import, and guarded read contracts for the FlowState analytics dashboard to consume later.
+
+## Database Connection Precedence
+
+Sidestream telemetry must resolve its server-side Postgres connection in this order:
+
+1. `SIDESTREAM_NEON_DATABASE_URL`
+2. `NEON_DATABASE_URL`
+3. `DATABASE_URL` or `POSTGRES_URL`, but only when the selected URL is the Neon connection
+
+`SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_POSTGRES_URL` may still exist in Vercel Production for historical reasons. Their presence must not cause Sidestream telemetry to prefer Supabase REST or a Supabase pooler over Neon. Supabase REST is a legacy Supabase path and may be used only behind an explicit legacy fallback gate, not as the default collector, importer, rollup, or dashboard-read path.
+
+FlowState/dashboard clients must call guarded website APIs. They must never receive `SIDESTREAM_NEON_DATABASE_URL`, `NEON_DATABASE_URL`, Blob tokens, legacy Supabase keys, raw Blob URLs, or any other server database credential.
 
 ## Current Collector Contract To Preserve
 
@@ -74,7 +86,7 @@ The collector must continue rejecting or normalizing raw URLs, local paths, file
 5. A scheduled or manual importer reads unimported Blob archives, upserts recent raw event rows into Neon by `telemetry_event_id`, and updates compact rollups.
 6. Dashboard APIs read only from guarded Neon summary/recent tables, never directly from Blob and never from server secret env vars.
 
-The Blob archive is the source of truth. Neon is disposable/queryable state that can be rebuilt from Blob if rollup logic changes or a Neon branch is replaced.
+The Blob archive is the immutable raw source of truth. Neon is the primary queryable database state for imports, rollups, and guarded reads, and it can be rebuilt from Blob if rollup logic changes or a Neon branch is replaced.
 
 ## Blob Archive Contract
 
@@ -95,13 +107,13 @@ The archived object should contain:
 - `events`: the sanitized accepted event objects with every data point listed above.
 - `collector`: implementation metadata such as archive writer version.
 
-Do not store raw request headers, raw IP addresses, raw user agents, Blob tokens, Neon URLs, Supabase service keys, Stripe keys, download secrets, cookies, or unredacted payloads in the archive.
+Do not store raw request headers, raw IP addresses, raw user agents, Blob tokens, Neon URLs, legacy Supabase service keys, Stripe keys, download secrets, cookies, or unredacted payloads in the archive.
 
 Blob write failure is ACK-critical: return non-2xx so the CEP queue keeps its local batch and retries. Neon import failure is not ACK-critical once the Blob archive exists.
 
 ## Neon Store Contract
 
-Neon should hold queryable recent raw rows plus compact rollups. It should not be treated as permanent raw storage.
+Neon is the primary server-side Postgres database for queryable recent raw rows plus compact rollups. It should not be treated as permanent raw storage because Vercel Blob remains the immutable archive and backfill source.
 
 Minimum tables or equivalent projections:
 
@@ -176,7 +188,7 @@ Dashboard behavior:
 Do not edit the FlowState repo from this website repo. The follow-up contract for FlowState is API-level:
 
 - FlowState analytics should call guarded website endpoints backed by Neon summaries/recent tables.
-- It should not receive Neon credentials, Blob tokens, Supabase keys, or raw Blob URLs.
+- It should not receive Neon credentials, Blob tokens, legacy Supabase keys, or raw Blob URLs.
 - It should not query Vercel Blob directly.
 - It should show `lastImportedAt`, `sourceLagSeconds`, and the active retention windows so stale data is obvious.
 - It should treat manual refresh as an explicit operator action and display importer output counts/errors.
@@ -196,7 +208,8 @@ Those names are a contract direction, not proof the endpoints exist yet.
 ## Implementation Notes For Follow-Up Steps
 
 - Prefer a separate telemetry Blob token/env var from product download tokens if Vercel supports the store split cleanly.
-- Prefer a Neon pooled connection string or serverless driver only in API/importer code, never browser bundles.
-- Keep the old Supabase/Postgres writer available only until Blob archive and Neon import are proven. Once Blob-first ACK is live, database write failure should not block CEP acknowledgement unless the archive write also failed.
+- Use `SIDESTREAM_NEON_DATABASE_URL`, then `NEON_DATABASE_URL`, then `DATABASE_URL`/`POSTGRES_URL` only if it is the Neon connection. Keep the Neon pooled connection string or serverless driver only in API/importer code, never browser bundles.
+- Treat Supabase REST as an explicitly gated legacy Supabase fallback only. Vercel Production may still contain `SUPABASE_URL` and `SUPABASE_SECRET_KEY`, but their presence must not override the Neon-primary telemetry path.
+- Once Blob-first ACK is live, database write failure should not block CEP acknowledgement unless the archive write also failed.
 - `npm run build` must stay green after documentation or route changes.
 - Any new README note should route future workers here instead of duplicating this full contract in the README.
