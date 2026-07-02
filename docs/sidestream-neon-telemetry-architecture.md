@@ -21,7 +21,7 @@ Sidestream telemetry must resolve its server-side Postgres connection in this or
 
 `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_POSTGRES_URL` may still exist in Vercel Production for historical reasons. Their presence must not cause Sidestream telemetry to prefer Supabase REST or a Supabase pooler over Neon. Supabase REST is a legacy Supabase path and may be used only behind an explicit legacy fallback gate, not as the default collector, importer, rollup, or dashboard-read path.
 
-Implementations must not infer that legacy Supabase is enabled from the presence of `SUPABASE_URL` or `SUPABASE_SECRET_KEY`. Any legacy Supabase fallback must be deliberately gated separately, documented as legacy, and lower priority than every Neon connection option above.
+Implementations must not infer that legacy Supabase is enabled from the presence of `SUPABASE_URL` or `SUPABASE_SECRET_KEY`. Any legacy Supabase fallback must be deliberately gated with `SIDESTREAM_ALLOW_LEGACY_SUPABASE_TELEMETRY=1`, documented as legacy, and lower priority than every Neon connection option above.
 
 FlowState/dashboard clients must call guarded website APIs. They must never receive `SIDESTREAM_NEON_DATABASE_URL`, `NEON_DATABASE_URL`, Blob tokens, legacy Supabase keys, raw Blob URLs, or any other server database credential.
 
@@ -211,7 +211,7 @@ Those names are a contract direction, not proof the endpoints exist yet.
 
 - Prefer a separate telemetry Blob token/env var from product download tokens if Vercel supports the store split cleanly.
 - Use `SIDESTREAM_NEON_DATABASE_URL`, then `NEON_DATABASE_URL`, then `DATABASE_URL`/`POSTGRES_URL` only if it is the Neon connection. Keep the Neon pooled connection string or serverless driver only in API/importer code, never browser bundles.
-- Treat Supabase REST as an explicitly gated legacy Supabase fallback only. Vercel Production may still contain `SUPABASE_URL` and `SUPABASE_SECRET_KEY`, but their presence must not override the Neon-primary telemetry path.
+- Treat Supabase REST as an explicitly gated legacy Supabase fallback only. Vercel Production may still contain `SUPABASE_URL` and `SUPABASE_SECRET_KEY`, but their presence must not override the Neon-primary telemetry path. The only allowed legacy gate is `SIDESTREAM_ALLOW_LEGACY_SUPABASE_TELEMETRY=1`, and it remains lower priority than every Neon/Postgres telemetry connection.
 - Once Blob-first ACK is live, database write failure should not block CEP acknowledgement unless the archive write also failed.
 - `npm run build` must stay green after documentation or route changes.
 - Any new README note should route future workers here instead of duplicating this full contract in the README.
