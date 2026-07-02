@@ -280,7 +280,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
-- 2026-07-02: Dropped all LUT checkout prices by 75%: individual LUTs now display and charge `$4.50`, the Complete LUT Bundle displays and charges `$9.75`, Stripe Products default to the new live one-time Prices, and the bundle fallback Price ID now matches the sale price.
+- 2026-07-02: Dropped all LUT checkout prices by 75%: individual LUTs now display and charge `$4.50`, the Complete LUT Bundle displays and charges `$9.75`, Stripe Products default to the new live one-time Prices, the previous `$18`/`$39` Stripe Prices are archived, and the bundle fallback Price ID now matches the sale price.
 - 2026-06-22: Allowed Sidestream telemetry event category `install` so native Mac installer receipt events keep their category when posted through `/api/plugin-telemetry`.
 - 2026-06-22: Routed free Sidestream installer fulfillment through the known-good public Sidestream download endpoint, with `/api/download?p=sidestream...` redirecting old signed links there so installer access no longer depends on the shop signed-link secret or separate Blob token.
 - 2026-06-22: Updated OMI proof copy to say `10M organic views` across the homepage proof teaser, portfolio tile, and service case-study fallback copy.
