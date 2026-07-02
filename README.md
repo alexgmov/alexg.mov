@@ -18,6 +18,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `server.js` serves Vite middleware in development and the `dist/` build in production mode.
 - `scripts/copy-static.mjs` copies static assets that Vite does not bundle directly, including `mockups`, `videos`, `robots.txt`, `sitemap.xml`, and `llms.txt`.
 - `data/sidestream-release-manifest.json` is the checked-in Sidestream stable release manifest served by `api/sidestream/releases/latest.js`. Update it only through `scripts/publish-sidestream-release-manifest.js` after the artifact is signed, verified, uploaded, and smoke-tested.
+- `docs/sidestream-neon-telemetry-architecture.md` documents the target Sidestream telemetry egress architecture: Vercel Blob is the immutable accepted-batch archive, Neon is the queryable recent/rollup store, and the FlowState dashboard should consume guarded website APIs instead of direct storage credentials.
 
 ## Local Commands
 
@@ -55,6 +56,8 @@ Commerce and fulfillment use these variables:
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
 - `SIDESTREAM_BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` for Sidestream when its release DMG lives in a separate Blob store from the LUT products.
 - `SIDESTREAM_PUBLIC_DOWNLOAD_URL`: optional public Sidestream installer URL. Defaults to `https://sidestream-xi.vercel.app/api/download` and is used so the free installer does not depend on the shop signed-link/blob-token path.
+- `SIDESTREAM_TELEMETRY_BLOB_READ_WRITE_TOKEN`: planned server-only Vercel Blob token for the immutable Sidestream telemetry raw-batch archive. Keep it separate from product download Blob tokens when possible.
+- `SIDESTREAM_NEON_DATABASE_URL` or `NEON_DATABASE_URL`: planned server-only Neon connection string for Sidestream telemetry import, recent-event, and rollup queries. Never expose it to browser code, the Sidestream CEP extension, or the FlowState dashboard.
 - `RESEND_API_KEY`: Resend key used by the webhook fulfillment email and first-visit promo code email.
 - `FIRST_VISIT_OFFER_FROM`: optional sender override for the promo code email. Defaults to `alexg.mov <downloads@alexg.mov>`.
 - `FIRST_VISIT_OFFER_REPLY_TO`: optional reply-to override for the promo code email. Defaults to `alex@alexg.mov`.
@@ -72,7 +75,7 @@ Commerce and fulfillment use these variables:
 - `SIDESTREAM_TELEMETRY_ENABLED`: set to `0` to make `/api/plugin-telemetry` accept but drop Sidestream plugin telemetry while keeping the route deployed.
 
 Never expose Stripe secret keys, webhook secrets, Resend keys, Blob tokens, or `DOWNLOAD_SECRET` in frontend files.
-Never expose the Supabase pooler password, Postgres URL, secret/service-role key, or any server database credential in frontend files or the Sidestream CEP extension.
+Never expose the Supabase pooler password, Postgres URL, Neon URL, secret/service-role key, or any server database credential in frontend files, the Sidestream CEP extension, or FlowState dashboard code.
 
 ## Sidestream Release Manifest
 
@@ -127,6 +130,8 @@ The route returns `200` only when every accepted event is recorded or already pr
 The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for dashboards that can query installs, native installer receipts, sessions, timelines, failures, update-check outcomes, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or Supabase credentials.
 
 The route intentionally does not expose Supabase, Stripe, Blob, or Resend secrets to the plugin. If Supabase is not configured, the route fails the telemetry acknowledgement instead of claiming success; the editor's search/download workflow continues because uploads happen through the plugin's bounded background queue.
+
+The target Neon + Vercel Blob egress contract lives in `docs/sidestream-neon-telemetry-architecture.md`. Follow-up implementation should preserve every accepted `/api/plugin-telemetry` data point, make Vercel Blob the ACK-critical immutable raw batch archive, import Blob archives into Neon on a scheduled or manual cadence, and expose only guarded summary/recent reads for the FlowState analytics dashboard. The current code path still uses the Supabase/Postgres writer until that contract is implemented; do not describe the migration as live until the collector, importer, and guarded reads are shipped.
 
 ## First-Visit Promo Offer
 
@@ -280,6 +285,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-07-02: Documented the target Sidestream Neon + Vercel Blob telemetry architecture, including preserved `/api/plugin-telemetry` data points, server-only secrets, retention windows, import cadence, manual refresh expectations, failure behavior, and the FlowState dashboard API handoff.
 - 2026-07-02: Dropped all LUT checkout prices by 75%: individual LUTs now display and charge `$4.50`, the Complete LUT Bundle displays and charges `$9.75`, Stripe Products default to the new live one-time Prices, the previous `$18`/`$39` Stripe Prices are archived, and the bundle fallback Price ID now matches the sale price.
 - 2026-06-22: Allowed Sidestream telemetry event category `install` so native Mac installer receipt events keep their category when posted through `/api/plugin-telemetry`.
 - 2026-06-22: Routed free Sidestream installer fulfillment through the known-good public Sidestream download endpoint, with `/api/download?p=sidestream...` redirecting old signed links there so installer access no longer depends on the shop signed-link secret or separate Blob token.
