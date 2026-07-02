@@ -44,7 +44,7 @@ Commerce and fulfillment use these variables:
 - `STRIPE_PRICE_SOLENE`: Stripe Price ID for the MERIDIAN/Solene checkout product.
 - `STRIPE_PRICE_ONYX`: Stripe Price ID for the ONYX checkout product.
 - `STRIPE_PRICE_HALOCLYNE`: Stripe Price ID for the HALOCLYNE checkout product.
-- `STRIPE_PRICE_COMPLETE_LUT_BUNDLE`: optional Stripe Price ID override for the Complete LUT Bundle checkout product. Leave unset to use the checked-in $39 one-time Price.
+- `STRIPE_PRICE_COMPLETE_LUT_BUNDLE`: optional Stripe Price ID override for the Complete LUT Bundle checkout product. Leave unset to use the checked-in $9.75 one-time Price.
 - `STRIPE_PRICE_SIDESTREAM`: optional Stripe Price ID override for the Sidestream plugin checkout product. Leave unset to use the checked-in temporary $0 Sidestream Price while the product is free.
 - `MERIDIAN_BLOB_URL`: optional private Vercel Blob URL override for MERIDIAN.
 - `ONYX_BLOB_URL`: optional private Vercel Blob URL override for ONYX.
@@ -165,11 +165,11 @@ Public product entries can include optional display-only pricing fields:
 
 - `price`: frontend display price. Stripe still charges the server-side Stripe Price ID.
 - `compareAtPrice`: regular/launch anchor rendered as a crossed-out price only when it is higher than `price`.
-- `priceLabel`: small supporting label such as `Launch price`.
+- `priceLabel`: small supporting label such as `75% off`.
 - `priceNote`: product-detail reassurance copy beside the price.
 - `pricingVariant`: optional stable analytics label. If omitted, `site/pricing.jsx` derives labels such as `launch-29-18`.
 
-The current individual LUT pricing pattern is `$29` compare-at and `$18` launch price. The Complete LUT Bundle uses the sum of the three individual compare-at prices as its `$87` anchor and a `$39` bundle launch price, which discounts below buying all three launch-price LUTs separately. Do not invent fake high anchors such as `$99` unless that was a real bona fide price or a defensible planned regular price. Sidestream remains visually free while its checked-in Stripe fallback is a temporary $0 Price; do not display `$18` for it until `STRIPE_PRICE_SIDESTREAM` points at a real paid Price.
+The current LUT sale pricing pattern is 75% off the previous checkout price: individual LUTs show `$18` compare-at and `$4.50` current price with `pricingVariant: 'sale-75-off-individual-lut'`; the Complete LUT Bundle shows `$39` compare-at and `$9.75` current price with `pricingVariant: 'sale-75-off-complete-bundle'`. Stripe checkout must point at matching one-time Prices: `STRIPE_PRICE_SOLENE`, `STRIPE_PRICE_ONYX`, `STRIPE_PRICE_HALOCLYNE`, and `STRIPE_PRICE_COMPLETE_LUT_BUNDLE`. Do not invent fake high anchors such as `$99` unless that was a real bona fide price or a defensible planned regular price. Sidestream remains visually free while its checked-in Stripe fallback is a temporary $0 Price; do not display `$18` for it until `STRIPE_PRICE_SIDESTREAM` points at a real paid Price.
 
 ## Checkout Success Page
 
@@ -280,6 +280,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-07-02: Dropped all LUT checkout prices by 75%: individual LUTs now display and charge `$4.50`, the Complete LUT Bundle displays and charges `$9.75`, Stripe Products default to the new live one-time Prices, and the bundle fallback Price ID now matches the sale price.
 - 2026-06-22: Allowed Sidestream telemetry event category `install` so native Mac installer receipt events keep their category when posted through `/api/plugin-telemetry`.
 - 2026-06-22: Routed free Sidestream installer fulfillment through the known-good public Sidestream download endpoint, with `/api/download?p=sidestream...` redirecting old signed links there so installer access no longer depends on the shop signed-link secret or separate Blob token.
 - 2026-06-22: Updated OMI proof copy to say `10M organic views` across the homepage proof teaser, portfolio tile, and service case-study fallback copy.
