@@ -21,6 +21,8 @@ Sidestream telemetry must resolve its server-side Postgres connection in this or
 
 `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_POSTGRES_URL` may still exist in Vercel Production for historical reasons. Their presence must not cause Sidestream telemetry to prefer Supabase REST or a Supabase pooler over Neon. Supabase REST is a legacy Supabase path and may be used only behind an explicit legacy fallback gate, not as the default collector, importer, rollup, or dashboard-read path.
 
+Implementations must not infer that legacy Supabase is enabled from the presence of `SUPABASE_URL` or `SUPABASE_SECRET_KEY`. Any legacy Supabase fallback must be deliberately gated separately, documented as legacy, and lower priority than every Neon connection option above.
+
 FlowState/dashboard clients must call guarded website APIs. They must never receive `SIDESTREAM_NEON_DATABASE_URL`, `NEON_DATABASE_URL`, Blob tokens, legacy Supabase keys, raw Blob URLs, or any other server database credential.
 
 ## Current Collector Contract To Preserve
