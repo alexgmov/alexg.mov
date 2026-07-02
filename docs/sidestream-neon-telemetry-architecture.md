@@ -25,6 +25,27 @@ Implementations must not infer that legacy Supabase is enabled from the presence
 
 FlowState/dashboard clients must call guarded website APIs. They must never receive `SIDESTREAM_NEON_DATABASE_URL`, `NEON_DATABASE_URL`, Blob tokens, legacy Supabase keys, raw Blob URLs, or any other server database credential.
 
+## Operator Egress Due-Diligence Check
+
+Run the lightweight check before production telemetry changes, dashboard work, or env cleanup:
+
+```sh
+node scripts/check-sidestream-telemetry-egress.mjs
+```
+
+The script reads only environment variable names/values available to its Node process, redacts any configured values, and does not open Neon, legacy Supabase, Blob, Stripe, or Resend connections. Run it from the same production-like environment you want to verify.
+
+Possible verdicts:
+
+| Verdict | Meaning | Practical next step |
+| --- | --- | --- |
+| `Neon configured` | A Sidestream-specific Neon env var or a Neon-hosted `DATABASE_URL`/`POSTGRES_URL` is visible. | Keep the Neon URL server-only and continue using guarded website APIs for dashboard reads. |
+| `legacy Supabase present but inert` | Neon is configured and legacy Supabase REST env vars are visible, but the explicit fallback flag is not enabled. | Keep those vars only if another server path still needs them; otherwise remove them from Production after confirming business-ledger/history paths are unaffected. |
+| `missing Neon URL` | No accepted Neon telemetry database env var is visible to this process. Legacy Supabase REST vars still do not become telemetry routing unless the explicit flag is set. | Set `SIDESTREAM_NEON_DATABASE_URL` or `NEON_DATABASE_URL` before relying on production telemetry imports or dashboard reads. |
+| `explicit legacy fallback enabled` | `SIDESTREAM_ALLOW_LEGACY_SUPABASE_TELEMETRY=1` is visible, so the emergency legacy Supabase REST fallback is deliberately enabled and still lower priority than Neon. | Treat this as temporary, verify why it is on, then remove the flag after the emergency window closes. |
+
+This is an operator/runbook check, not a telemetry platform. Do not expand it into Blob importers, cron jobs, dashboard read endpoints, or production polling. Future dashboard work should use manual refresh or bounded scheduled imports, avoid high-frequency polling, and avoid broad raw-event reads; raw event access should stay behind guarded recent/timeline queries with time windows and result limits.
+
 ## Current Collector Contract To Preserve
 
 `api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension and native installer postinstall script.

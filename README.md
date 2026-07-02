@@ -26,10 +26,12 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 npm run dev
 npm run build
 npm run preview
+node scripts/check-sidestream-telemetry-egress.mjs
 npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestream-1.0.5-Mac-Installer.dmg --artifact-url 'https://9kfjhekmxi6iiwni.private.blob.vercel-storage.com/sidestream/1.0.5/Sidestream-1.0.5-Mac-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
 ```
 
 `npm run dev` starts the local Node server and Vite middleware on `PORT` or `3000`. `npm run build` runs `vite build` and then copies static assets into `dist/`.
+`node scripts/check-sidestream-telemetry-egress.mjs` inspects the env vars visible to that process and prints a redacted Sidestream telemetry egress verdict without opening database or Supabase connections.
 
 ## TODO
 
@@ -125,6 +127,8 @@ POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-
 `api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension and the native Mac installer postinstall script. The plugin sends batches of up to 100 already-redacted events; the installer sends a single best-effort `installer_install_completed` event with a pseudonymous `installer_receipt_id_hash`. The server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, preserves the raw accepted batch in Vercel Blob, and imports accepted telemetry into Neon recent/rollup tables for guarded dashboard reads.
 
 Telemetry storage is Neon primary. Connection precedence is `SIDESTREAM_NEON_DATABASE_URL`, then `NEON_DATABASE_URL`, then `DATABASE_URL`/`POSTGRES_URL` only if that URL is the Neon connection. Vercel Production may still contain `SUPABASE_URL` and `SUPABASE_SECRET_KEY`, but Sidestream telemetry must not prefer Supabase REST merely because those variables exist. Supabase REST may remain only as an explicitly gated legacy Supabase fallback with `SIDESTREAM_ALLOW_LEGACY_SUPABASE_TELEMETRY=1`.
+
+Run `node scripts/check-sidestream-telemetry-egress.mjs` inside a production-like env before telemetry/dashboard changes. The check reports one of four redacted operator verdicts: Neon configured, legacy Supabase present but inert, missing Neon URL, or explicit legacy fallback enabled. If legacy Supabase vars are still present, either keep them for non-telemetry server paths with the fallback gate unset or remove them from Production once no other path needs them. Future dashboard work should prefer manual refresh and bounded scheduled imports, avoid high-frequency polling, and avoid broad raw-event reads.
 
 The route returns `200` only when the accepted batch is archived or idempotently treated as already archived from an earlier retry. Blob archive misconfiguration, partial archive writes, or collector errors return non-2xx so the CEP uploader keeps the local queue and retries. `SIDESTREAM_TELEMETRY_ENABLED=0` remains an intentional accept-and-drop kill switch and returns `202` with `disabled: true`.
 
@@ -288,6 +292,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-07-02: Added `scripts/check-sidestream-telemetry-egress.mjs` plus the operator runbook for redacted Sidestream telemetry egress checks, legacy Supabase fallback visibility, and bounded dashboard/manual refresh guardrails.
 - 2026-07-02: Implemented Neon-first `/api/plugin-telemetry` database routing in `lib/sidestream-telemetry-db.js`: `SIDESTREAM_NEON_DATABASE_URL`, `NEON_DATABASE_URL`, Neon `DATABASE_URL`, Neon `POSTGRES_URL`, then explicitly gated legacy Supabase REST only with `SIDESTREAM_ALLOW_LEGACY_SUPABASE_TELEMETRY=1`.
 - 2026-07-02: Corrected the Sidestream telemetry contract to treat Neon as the primary server-side Postgres database, require `SIDESTREAM_NEON_DATABASE_URL`/`NEON_DATABASE_URL` precedence, and mark Supabase REST as an explicitly gated legacy fallback.
 - 2026-07-02: Documented the Sidestream Neon + Vercel Blob telemetry architecture, including preserved `/api/plugin-telemetry` data points, server-only secrets, retention windows, import cadence, manual refresh expectations, failure behavior, and the FlowState dashboard API handoff.
