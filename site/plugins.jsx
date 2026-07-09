@@ -4,6 +4,8 @@ import { PriceDisplay, pricingTrackingAttrs, pricingVariantFor } from './pricing
 
 // Plugins list + Plugin detail
 
+const SIDESTREAM_SITE_URL = 'https://sidestream-xi.vercel.app/';
+
 const PLUGINS = window.PLUGINS || [
   {
     id: 'sidestream',
@@ -18,13 +20,17 @@ const PLUGINS = window.PLUGINS || [
     demoVideoSrc: 'videos/plugin showcase/sidestream demo.optimized.mp4',
     demoPosterSrc: 'videos/plugin showcase/sidestream demo.optimized.poster.jpg',
     demoDuration: '11s',
+    siteUrl: SIDESTREAM_SITE_URL,
+    ctaLabel: 'Open Sidestream Site',
+    mobileCtaLabel: 'Open Site',
+    reassurance: 'Latest download and install steps live on the Sidestream site.',
     seoTitle: 'Sidestream Premiere Pro Plugin | YouTube Media Intake for Editors',
     seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
     what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
     get: 'Sidestream 1.0.5 Mac installer DMG · signed and notarized package · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
     install: [
-      'Free for now: enter your email at checkout and Sidestream sends one Mac install package.',
+      'Open the Sidestream site for the latest download and install flow.',
       'Open Sidestream-1.0.5-Mac-Installer.dmg on your editing Mac.',
       'Double-click Install Sidestream.pkg inside the DMG.',
       'Follow the macOS installer prompts and approve the normal admin prompt if asked.',
@@ -66,8 +72,8 @@ const PLUGINS = window.PLUGINS || [
         a: 'Yes. Use it only with media you own, have licensed, or are otherwise permitted to download and edit.',
       },
       {
-        q: 'How do I receive Sidestream after checkout?',
-        a: 'The free Sidestream checkout sends one Mac install package to your email, so you can claim it on your phone and install it later on your editing Mac.',
+        q: 'Where do I get Sidestream?',
+        a: 'Use the Sidestream site for the latest download and install flow.',
       },
     ],
   },
@@ -124,8 +130,8 @@ const PLUGIN_FAQS = window.PLUGIN_FAQS || [
     a: 'No. They handle specific bottlenecks inside Premiere so you can keep making the edit decisions.',
   },
   {
-    q: 'How do I receive a plugin after checkout?',
-    a: 'The download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install later on your editing computer.',
+    q: 'How do I get a plugin?',
+    a: 'Sidestream opens its dedicated site for the latest download. Checkout-based plugins send the download link to the email you use at checkout.',
   },
 ];
 
@@ -156,6 +162,19 @@ function pluginPriceNote(plugin) {
   if (plugin?.priceNote) return plugin.priceNote;
   if (isFreePlugin(plugin)) return 'FREE FOR NOW · LIFETIME DOWNLOAD';
   return plugin?.status === 'released' ? 'ONE-TIME · LIFETIME DOWNLOAD' : 'IN DEVELOPMENT · LAUNCH LIST OPEN';
+}
+
+function pluginCtaLabel(plugin, mode = 'desktop') {
+  if (mode === 'mobile' && plugin?.mobileCtaLabel) return plugin.mobileCtaLabel;
+  if (plugin?.ctaLabel) return plugin.ctaLabel;
+  if (isFreePlugin(plugin)) return mode === 'mobile' ? 'Free Link' : 'Get Free Link';
+  return mode === 'mobile' ? 'Email Link' : 'Buy & Email Link';
+}
+
+function pluginReassurance(plugin) {
+  if (plugin?.reassurance) return plugin.reassurance;
+  if (isFreePlugin(plugin)) return 'Free Mac installer DMG sent to checkout email · no external installer required';
+  return plugin?.status === 'released' ? 'Download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues';
 }
 
 function PluginVisual({ plugin, scale = 1 }) {
@@ -313,9 +332,9 @@ function PluginsList({ go }) {
           <p className="section-title">HOW IT WORKS</p>
           <div className="how">
             <div className="how-item">
-              <div className="how-num">01 / CLAIM ONCE</div>
-              <h4 className="how-h">Instant email link</h4>
-              <p className="how-p">No subscriptions. No seats. Paid tools are one-time, and free releases still send the download link by email.</p>
+              <div className="how-num">01 / GET THE TOOL</div>
+              <h4 className="how-h">Open the plugin source</h4>
+              <p className="how-p">Sidestream links to its dedicated site. Checkout-based tools still send the download link by email.</p>
             </div>
             <div className="how-item">
               <div className="how-num">02 / INSTALL FAST</div>
@@ -336,6 +355,7 @@ function PluginsList({ go }) {
 
 function SidestreamInstallGuide({ go }) {
   const hrefFor = window.routeHref || ((id) => '#');
+  const sidestreamSiteUrl = PLUGINS.find(plugin => plugin.id === 'sidestream')?.siteUrl || '';
   const downloadUrl = React.useMemo(() => {
     try {
       return new URLSearchParams(location.search).get('download') || '';
@@ -348,11 +368,17 @@ function SidestreamInstallGuide({ go }) {
     {
       eyebrow: '01 / GET THE PACKAGE',
       title: 'Download the Mac installer DMG',
-      body: 'Use the private download button in your email. Open the DMG on your editing Mac; do not unzip it or hunt for a separate guide.',
+      body: downloadUrl
+        ? 'Use the private download button in your email. Open the DMG on your editing Mac; do not unzip it or hunt for a separate guide.'
+        : 'Open the Sidestream site for the latest package. Open the DMG on your editing Mac; do not unzip it or hunt for a separate guide.',
       action: downloadUrl ? (
         <a className="btn btn-primary" href={downloadUrl}>
           <DownloadIcon />
           Download Package
+        </a>
+      ) : sidestreamSiteUrl ? (
+        <a className="btn btn-secondary" href={sidestreamSiteUrl}>
+          Open Sidestream Site
         </a>
       ) : (
         <a
@@ -480,6 +506,7 @@ function PluginDetail({ id, go }) {
   const hrefFor = window.routeHref || ((id) => '#');
   const purchased = new URLSearchParams(location.search).get('purchased') === 'true';
   const p = PLUGINS.find(x => x.id === id) || PLUGINS[0];
+  const primaryHref = p.siteUrl || '';
   const hasDemoVideo = Boolean(p.demoVideoSrc);
   const hasBlankVisual = p.visual === 'blank' && !hasDemoVideo;
   const showGeneratedPreview = !hasBlankVisual && !hasDemoVideo;
@@ -579,13 +606,19 @@ function PluginDetail({ id, go }) {
             <div className="pd-price-note">{pluginPriceNote(p)}</div>
           </div>
           {p.status === 'released'
-            ? <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying} {...pricingTrackingAttrs(p)}>
-                <DownloadIcon />
-                <span className="cta-copy-desktop">{buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Get Free Link' : 'Buy & Email Link')}</span>
-                <span className="cta-copy-mobile">{buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}</span>
-              </button>
+            ? primaryHref
+              ? <a ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" href={primaryHref} {...pricingTrackingAttrs(p)}>
+                  <DownloadIcon />
+                  <span className="cta-copy-desktop">{pluginCtaLabel(p)}</span>
+                  <span className="cta-copy-mobile">{pluginCtaLabel(p, 'mobile')}</span>
+                </a>
+              : <button ref={buyButtonRef} className="btn btn-primary btn-lg pd-buy" onClick={handleBuy} disabled={buying} {...pricingTrackingAttrs(p)}>
+                  <DownloadIcon />
+                  <span className="cta-copy-desktop">{buying ? 'Redirecting…' : pluginCtaLabel(p)}</span>
+                  <span className="cta-copy-mobile">{buying ? 'Redirecting…' : pluginCtaLabel(p, 'mobile')}</span>
+                </button>
             : <button className="btn btn-secondary btn-lg pd-buy">Join Launch List</button>}
-          <div className="pd-reassure"><CheckIcon /> {isFreePlugin(p) ? 'Free Mac installer DMG sent to checkout email · no external installer required' : (p.status === 'released' ? 'Download link sent to checkout email · 24h support reply' : 'Shipping updates posted as development continues')}</div>
+          <div className="pd-reassure"><CheckIcon /> {pluginReassurance(p)}</div>
 
           <div className="pd-bullets">
             <div className="pd-bullet"><div className="pd-bullet-k">WHAT IT DOES</div><div className="pd-bullet-v">{p.what}</div></div>
@@ -622,9 +655,10 @@ function PluginDetail({ id, go }) {
         productName={p.name}
         productMeta="Premiere plugin · Mac package"
         price={<PriceDisplay product={p} mode="sticky" showLabel={false} />}
-        actionLabel={buying ? 'Redirecting…' : (isFreePlugin(p) ? 'Free Link' : 'Email Link')}
-        onAction={handleBuy}
-        disabled={buying}
+        actionLabel={buying ? 'Redirecting…' : pluginCtaLabel(p, 'mobile')}
+        actionHref={primaryHref}
+        onAction={primaryHref ? undefined : handleBuy}
+        disabled={primaryHref ? false : buying}
         trackingAttrs={pricingTrackingAttrs(p)}
       />
     </div>

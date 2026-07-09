@@ -10,7 +10,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `site/chrome.jsx` owns global nav/footer chrome. The mobile bottom nav is hidden on product detail routes and the Sidestream install guide so purchase/install actions are not covered by the floating menu.
 - `site/home.jsx` owns the homepage hero, hero shortcuts to LUTs/portfolio, and featured product rail, with the OMI proof teaser leading the LUT cards. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp.
 - `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `America/Los_Angeles` timezone.
-- `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, display pricing fields, media paths, and product page metadata. LUT copy also has fallback/indexable mirrors in `site/luts.jsx`, `site/home.jsx`, and `llms.txt`; keep those aligned when changing product descriptions.
+- `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, plugin CTA fields such as `siteUrl`, display pricing fields, media paths, and product page metadata. LUT copy also has fallback/indexable mirrors in `site/luts.jsx`, `site/home.jsx`, and `llms.txt`; keep those aligned when changing product descriptions.
 - `site/pricing.jsx` owns display-only pricing helpers for rendered prices, compare-at launch pricing, and pricing-variant tracking attributes. Stripe Price IDs in `lib/products.js` remain the source of truth for what checkout actually charges.
 - `site/visuals.jsx` owns reusable visual previews such as `LutPreview`. `site/media.js` owns responsive video helpers plus the constrained in-app browser detector; LUT previews render poster-based before/after layers in TikTok/Instagram-style WebViews so autoplay preview videos cannot jump into native fullscreen.
 - `lib/products.js` is the server-side commerce catalog. This is the only product catalog used for Stripe Checkout and fulfillment.
@@ -124,7 +124,7 @@ POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-
 
 ## Sidestream Plugin Telemetry
 
-`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension and the native Mac installer postinstall script. The plugin sends batches of up to 100 already-redacted events; the installer sends a single best-effort `installer_install_completed` event with a pseudonymous `installer_receipt_id_hash`. The server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, preserves the raw accepted batch in Vercel Blob, and imports accepted telemetry into Neon recent/rollup tables for guarded dashboard reads.
+`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension and the native Mac installer postinstall script. The plugin sends batches of up to 100 already-redacted events; the installer sends a single best-effort `installer_install_completed` event with a pseudonymous `installer_receipt_id_hash`. The server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, preserves the raw accepted batch in Vercel Blob, and imports accepted telemetry into Neon recent/rollup tables for guarded dashboard reads. The JSON response includes `accepted`, `recorded`, and `dropped`; `dropped` counts invalid events rejected before archive/import so the plugin can settle them instead of retrying bad records forever.
 
 Telemetry storage is Neon primary. Connection precedence is `SIDESTREAM_NEON_DATABASE_URL`, then `NEON_DATABASE_URL`, then `DATABASE_URL`/`POSTGRES_URL` only if that URL is the Neon connection. Vercel Production may still contain `SUPABASE_URL` and `SUPABASE_SECRET_KEY`, but Sidestream telemetry must not prefer Supabase REST merely because those variables exist. Supabase REST may remain only as an explicitly gated legacy Supabase fallback with `SIDESTREAM_ALLOW_LEGACY_SUPABASE_TELEMETRY=1`.
 
@@ -152,11 +152,11 @@ The `Unlock` button is intentionally instant:
 4. `api/email-capture.js` stores the lead, sends the promo email when configured, creates the signed offer token, logs analytics, and returns `{ code, offerToken }`.
 5. When the background request succeeds, the browser updates the saved offer token and marks `captureStatus: 'synced'`. If it fails, the visible code remains usable and local state records `captureStatus: 'failed'`.
 
-Checkout buttons in `site/luts.jsx` and `site/plugins.jsx` pass `offerCode`, `offerEmail`, and `offerToken` from the browser helpers exposed by `site/app.jsx`. `api/create-checkout.js` uses a valid saved offer claim only to prefill the Checkout email. It always sends `allow_promotion_codes: true` so Stripe-hosted Checkout shows the manual promotion-code field for codes such as `HIFRIEND` or one-off comp codes. Do not also send a `discounts` array for the first-visit offer unless you intentionally want Stripe to hide the manual promo-code field.
+Checkout buttons in `site/luts.jsx` and checkout-based `site/plugins.jsx` CTAs pass `offerCode`, `offerEmail`, and `offerToken` from the browser helpers exposed by `site/app.jsx`. Plugins with `siteUrl` in product data, currently Sidestream, render a normal external link instead of posting to `/api/create-checkout`. `api/create-checkout.js` uses a valid saved offer claim only to prefill the Checkout email. It always sends `allow_promotion_codes: true` so Stripe-hosted Checkout shows the manual promotion-code field for codes such as `HIFRIEND` or one-off comp codes. Do not also send a `discounts` array for the first-visit offer unless you intentionally want Stripe to hide the manual promo-code field.
 
 ## Stripe Checkout Flow
 
-1. A product detail page calls `POST /api/create-checkout` with a `productId`.
+1. A checkout-based product detail page calls `POST /api/create-checkout` with a `productId`.
 2. `api/create-checkout.js` validates the product against `lib/products.js`.
 3. Checkout fails closed if the product is unknown, the Stripe secret is missing, the product has no `stripePriceId`, or the product has no `blobUrl`.
 4. The handler creates a Stripe Checkout Session in `payment` mode with one Price ID from the server catalog.
@@ -214,13 +214,13 @@ The browser-side product entry must also point to the same server product key. L
 checkoutProductId: 'onyx'
 ```
 
-That value must match a key in `PRODUCTS`. Plugin detail pages currently post `p.id`, so released plugin IDs must also match a server product key. The current commerce product mapping is:
+That value must match a key in `PRODUCTS`. Checkout-based plugin detail pages post `p.id`, so released checkout plugin IDs must also match a server product key. Plugins with `siteUrl` in `site/product-data.js`/`site/plugins.jsx` render their primary CTA as an external link instead of starting Stripe Checkout. The current commerce product mapping is:
 
 - Frontend page `lut:cinematic-01` -> checkout product `solene` -> MERIDIAN zip.
 - Frontend page `lut:onyx` -> checkout product `onyx` -> ONYX zip.
 - Frontend page `lut:haloclyne` -> checkout product `haloclyne` -> HALOCLYNE zip.
 - Frontend page `lut:complete-lut-bundle` -> checkout product `complete-lut-bundle` -> Complete LUT Bundle zip.
-- Frontend page `plugin:sidestream` -> checkout product `sidestream` -> temporary $0 Stripe Checkout -> the current Sidestream release manifest artifact plus the `sidestream-install` backup web steps.
+- Frontend page `plugin:sidestream` -> external CTA `https://sidestream-xi.vercel.app/`; legacy checkout product `sidestream` remains available for old Stripe/download links and maps to the current Sidestream release manifest artifact plus the `sidestream-install` backup web steps.
 
 The Complete LUT Bundle detail page is intentionally data-driven: `site/luts.jsx` builds the scroll-through included-LUT sections from every available non-bundle item in `LUTS`, with one primary before/after scrubber per released LUT and the LUT name labeled beneath that panel. When adding a future LUT, the page will show its section automatically once that LUT is available, but the bundle ZIP, Stripe Price/display price, bundle copy, `llms.txt`, sitemap, and this README still need a deliberate update so checkout and fulfillment match the page.
 
@@ -249,7 +249,7 @@ Local product files can live under `plugins/` or `luts/` while they are being up
 7. Fulfillment requires a configured product Blob URL, customer email, and `RESEND_API_KEY`; paid product fulfillment also requires `DOWNLOAD_SECRET`.
 8. `api/download.makeLink()` creates a signed URL valid for 48 hours for paid product downloads.
 9. Resend sends the buyer an email from `alexg.mov <downloads@alexg.mov>`.
-10. Sidestream fulfillment emails the single native Mac installer DMG download link plus backup web steps. Because Sidestream is currently free, that email uses the public Sidestream installer route instead of the signed shop download route. The DMG contains `Install Sidestream.pkg`; no external installer app is required.
+10. Legacy checkout-based Sidestream fulfillment emails the single native Mac installer DMG download link plus backup web steps. Because Sidestream is currently free, that email uses the public Sidestream installer route instead of the signed shop download route. The public plugin CTA now points to the dedicated Sidestream site instead of this email-link flow. The DMG contains `Install Sidestream.pkg`; no external installer app is required.
 11. If `POSTGRES_URL` is configured, the webhook records the Stripe event, checkout session, customer, purchase, active license, and hashed download-link row in Supabase.
 
 Important operational detail: fulfillment errors are logged, but the webhook still responds with `{ received: true }`. That means Stripe will not retry a failed Resend send or missing-product configuration after the handler catches the error. Check deployment logs after product launches and webhook tests.
@@ -268,7 +268,7 @@ Important operational detail: fulfillment errors are logged, but the webhook sti
 8. `GET` requests stream the file as an attachment using `downloadFilename`.
 9. If `POSTGRES_URL` is configured, the handler records the download outcome in `download_events`.
 
-Sidestream is the exception while it is free: `/api/download?p=sidestream...` redirects to `SIDESTREAM_PUBLIC_DOWNLOAD_URL`, and new Sidestream checkout emails use that same public installer URL directly. This keeps old signed Sidestream email links working even if `DOWNLOAD_SECRET` or private Blob tokens drift.
+Sidestream is the exception while it is free: `/api/download?p=sidestream...` redirects to `SIDESTREAM_PUBLIC_DOWNLOAD_URL`, and any checkout-based Sidestream fulfillment uses that same public installer URL directly. This keeps old signed Sidestream email links working even if `DOWNLOAD_SECRET` or private Blob tokens drift.
 
 Download links are generated server-side only and are currently valid for 48 hours.
 
@@ -292,6 +292,8 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-07-07: Changed the Sidestream plugin page CTA from the free email-checkout flow to the dedicated Sidestream site at `https://sidestream-xi.vercel.app/`, including the sticky mobile CTA, install-guide fallback, public product data mirror, `llms.txt`, and README routing notes. Legacy checkout/download fulfillment remains documented for old links.
+- 2026-07-07: Added `/api/plugin-telemetry` response `dropped` counts for invalid events rejected before archive/import, keeping bad records from retrying indefinitely while preserving strict retry behavior for archive or collector failures.
 - 2026-07-02: Added `scripts/check-sidestream-telemetry-egress.mjs` plus the operator runbook for redacted Sidestream telemetry egress checks, legacy Supabase fallback visibility, and bounded dashboard/manual refresh guardrails.
 - 2026-07-02: Implemented Neon-first `/api/plugin-telemetry` database routing in `lib/sidestream-telemetry-db.js`: `SIDESTREAM_NEON_DATABASE_URL`, `NEON_DATABASE_URL`, Neon `DATABASE_URL`, Neon `POSTGRES_URL`, then explicitly gated legacy Supabase REST only with `SIDESTREAM_ALLOW_LEGACY_SUPABASE_TELEMETRY=1`.
 - 2026-07-02: Corrected the Sidestream telemetry contract to treat Neon as the primary server-side Postgres database, require `SIDESTREAM_NEON_DATABASE_URL`/`NEON_DATABASE_URL` precedence, and mark Supabase REST as an explicitly gated legacy fallback.

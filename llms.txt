@@ -7,6 +7,7 @@ alexg.mov is the site and shop for Alex Garrett, a filmmaker, editor, and tool-m
 - Home: https://alexg.mov/
 - Premiere Pro plugins: https://alexg.mov/?page=plugins
 - Sidestream Premiere Pro plugin: https://alexg.mov/?page=plugin%3Asidestream
+- Sidestream dedicated site: https://sidestream-xi.vercel.app/
 - Sidestream install guide: https://alexg.mov/?page=sidestream-install
 - Cinematic LUTs: https://alexg.mov/?page=luts
 - Complete LUT Bundle: https://alexg.mov/?page=lut%3Acomplete-lut-bundle
@@ -20,7 +21,7 @@ alexg.mov is the site and shop for Alex Garrett, a filmmaker, editor, and tool-m
 ### Sidestream
 
 Sidestream is a Premiere Pro plugin for YouTube-first media intake. It searches YouTube from the panel, previews sources, downloads video or audio, converts media when needed, and imports the finished file into Premiere.
-Sidestream is temporarily free and uses Stripe Checkout only to collect the email address for a single Mac install package. The package contains the signed ZXP, a Finder-visible ZXP Installer target, and a link to get the free aescripts ZXP/UXP Installer if needed.
+Sidestream is temporarily free. The alexg.mov plugin page now points to the dedicated Sidestream site for the latest download and install flow. The current package is the signed and notarized Sidestream 1.0.5 Mac installer DMG with `Install Sidestream.pkg` inside.
 
 Best-fit queries:
 - Premiere Pro plugin for YouTube download and import

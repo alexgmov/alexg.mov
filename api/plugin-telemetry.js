@@ -54,9 +54,9 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid telemetry body' });
   }
 
-  const events = sanitizeTelemetryEvents(body.events);
+  const { events, dropped } = sanitizeTelemetryEvents(body.events);
   if (!events.length) {
-    return res.status(202).json({ ok: true, accepted: 0, recorded: 0 });
+    return res.status(202).json({ ok: true, accepted: 0, recorded: 0, dropped });
   }
 
   const result = await recordTelemetrySafely({
@@ -79,6 +79,7 @@ module.exports = async function handler(req, res) {
     endpointVersion: ENDPOINT_VERSION,
     accepted: events.length,
     recorded,
+    dropped,
     acknowledged: strictSuccess,
     partial: recorded !== events.length,
     skipped: Boolean(result?.skipped),
@@ -92,6 +93,7 @@ module.exports = async function handler(req, res) {
     ok: strictSuccess,
     accepted: events.length,
     recorded,
+    dropped,
     skipped: Boolean(result?.skipped),
     collector: result?.collector || '',
     error: strictSuccess ? undefined : responseError,
@@ -114,13 +116,17 @@ function setCorsHeaders(res) {
   res.setHeader('Access-Control-Max-Age', '86400');
 }
 
+// Returns { events, dropped }: `dropped` counts events refused by validation
+// (missing id/event_name). The response reports it so the plugin can settle
+// those events instead of retrying them forever.
 function sanitizeTelemetryEvents(events) {
-  if (!Array.isArray(events)) return [];
+  if (!Array.isArray(events)) return { events: [], dropped: 0 };
 
-  return events.slice(0, MAX_EVENTS_PER_BATCH)
+  let dropped = 0;
+  const sanitized = events.slice(0, MAX_EVENTS_PER_BATCH)
     .map(event => {
-      if (!event || typeof event !== 'object') return null;
-      if (!event.id || !event.event_name) return null;
+      if (!event || typeof event !== 'object') { dropped += 1; return null; }
+      if (!event.id || !event.event_name) { dropped += 1; return null; }
       const consentState = sanitizeConsentState(event.consent_state);
 
       return {
@@ -150,6 +156,8 @@ function sanitizeTelemetryEvents(events) {
       };
     })
     .filter(Boolean);
+
+  return { events: sanitized, dropped };
 }
 
 function sanitizeString(value, maxLength) {

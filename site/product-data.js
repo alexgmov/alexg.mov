@@ -1,5 +1,7 @@
 // Small shared data payload used before lazy route chunks load.
 
+const SIDESTREAM_SITE_URL = 'https://sidestream-xi.vercel.app/';
+
 const PLUGINS = [
   {
     id: 'sidestream',
@@ -14,13 +16,17 @@ const PLUGINS = [
     demoVideoSrc: 'videos/plugin showcase/sidestream demo.optimized.mp4',
     demoPosterSrc: 'videos/plugin showcase/sidestream demo.optimized.poster.jpg',
     demoDuration: '11s',
+    siteUrl: SIDESTREAM_SITE_URL,
+    ctaLabel: 'Open Sidestream Site',
+    mobileCtaLabel: 'Open Site',
+    reassurance: 'Latest download and install steps live on the Sidestream site.',
     seoTitle: 'Sidestream Premiere Pro Plugin | YouTube Media Intake for Editors',
     seoDescription: 'Sidestream helps Premiere editors search YouTube, preview sources, download video or audio, convert media, and import files without leaving the edit.',
     what: 'Sidestream brings YouTube search, preview, video/audio download, conversion, and project import into a compact Premiere panel.',
     who: 'Editors pulling licensed reference clips, interviews, sound bites, and web footage into active Premiere projects.',
     get: 'Sidestream 1.0.5 Mac installer DMG · signed and notarized package · Premiere panel · YouTube search · video/audio downloads · lifetime download.',
     install: [
-      'Free for now: enter your email at checkout and Sidestream sends one Mac install package.',
+      'Open the Sidestream site for the latest download and install flow.',
       'Open Sidestream-1.0.5-Mac-Installer.dmg on your editing Mac.',
       'Double-click Install Sidestream.pkg inside the DMG.',
       'Follow the macOS installer prompts and approve the normal admin prompt if asked.',
@@ -62,8 +68,8 @@ const PLUGINS = [
         a: 'Yes. Use it only with media you own, have licensed, or are otherwise permitted to download and edit.',
       },
       {
-        q: 'How do I receive Sidestream after checkout?',
-        a: 'The free Sidestream checkout sends one Mac install package to your email, so you can claim it on your phone and install it later on your editing Mac.',
+        q: 'Where do I get Sidestream?',
+        a: 'Use the Sidestream site for the latest download and install flow.',
       },
     ],
   },
@@ -105,8 +111,8 @@ const PLUGIN_FAQS = [
     a: 'No. They handle specific bottlenecks inside Premiere so you can keep making the edit decisions.',
   },
   {
-    q: 'How do I receive a plugin after checkout?',
-    a: 'The download link is sent to the email you use at checkout, so you can buy or claim it on your phone and install later on your editing computer.',
+    q: 'How do I get a plugin?',
+    a: 'Sidestream opens its dedicated site for the latest download. Checkout-based plugins send the download link to the email you use at checkout.',
   },
 ];
 

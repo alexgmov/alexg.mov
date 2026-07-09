@@ -186,7 +186,14 @@ function useStickyCta(anchorRef) {
   return visible;
 }
 
-function MobileProductStickyCta({ active, productName, productMeta, price, actionLabel, actionIcon, onAction, disabled, trackingAttrs = {} }) {
+function MobileProductStickyCta({ active, productName, productMeta, price, actionLabel, actionIcon, actionHref, onAction, disabled, trackingAttrs = {} }) {
+  const actionContent = (
+    <>
+      {actionIcon}
+      {actionLabel}
+    </>
+  );
+
   return (
     <div className={"mobile-product-cta" + (active ? " show" : "")} aria-hidden={active ? undefined : 'true'} {...trackingAttrs}>
       <div className="mobile-product-cta-copy">
@@ -195,10 +202,15 @@ function MobileProductStickyCta({ active, productName, productMeta, price, actio
       </div>
       <div className="mobile-product-cta-actions">
         <span className="mobile-product-cta-price">{price}</span>
-        <button type="button" className="btn btn-primary mobile-product-cta-button" onClick={onAction} disabled={disabled} {...trackingAttrs}>
-          {actionIcon}
-          {actionLabel}
-        </button>
+        {actionHref ? (
+          <a className="btn btn-primary mobile-product-cta-button" href={actionHref} {...trackingAttrs}>
+            {actionContent}
+          </a>
+        ) : (
+          <button type="button" className="btn btn-primary mobile-product-cta-button" onClick={onAction} disabled={disabled} {...trackingAttrs}>
+            {actionContent}
+          </button>
+        )}
       </div>
     </div>
   );
