@@ -17,7 +17,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `api/*.js` and nested `api/**/*.js` files are Vercel-compatible CommonJS handlers. Locally, `server.js` maps those same files to `/api/...` routes and attaches small `res.status()`, `res.json()`, and `res.send()` helpers.
 - `server.js` serves Vite middleware in development and the `dist/` build in production mode.
 - `scripts/copy-static.mjs` copies static assets that Vite does not bundle directly, including `mockups`, `videos`, `robots.txt`, `sitemap.xml`, and `llms.txt`.
-- `data/sidestream-release-manifest.json` is the checked-in Sidestream stable release manifest served by `api/sidestream/releases/latest.js`. Update it only through `scripts/publish-sidestream-release-manifest.js` after the artifact is signed, verified, uploaded, and smoke-tested.
+- `data/sidestream-release-manifest.json` is the checked-in legacy Mac release manifest served by `api/sidestream/releases/latest.js`. The same route proxies exact `win32-x64` requests to Sidestream's canonical `sidestream.tv` manifest so already-installed Windows `1.0.12` panels can discover `1.0.13` without duplicating Windows release truth in this repo.
 - `docs/sidestream-neon-telemetry-architecture.md` documents the Sidestream telemetry egress architecture: Vercel Blob is the immutable accepted-batch archive, Neon is the primary server-side Postgres database for imports/rollups/guarded reads, and the FlowState dashboard should consume guarded website APIs instead of direct storage credentials.
 
 ## Local Commands
@@ -27,6 +27,7 @@ npm run dev
 npm run build
 npm run preview
 node scripts/check-sidestream-telemetry-egress.mjs
+npm run test:sidestream-release-manifest
 npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestream-1.0.5-Mac-Installer.dmg --artifact-url 'https://9kfjhekmxi6iiwni.private.blob.vercel-storage.com/sidestream/1.0.5/Sidestream-1.0.5-Mac-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
 ```
 
@@ -82,7 +83,7 @@ Never expose the Supabase pooler password, Postgres URL, Neon URL, legacy Supaba
 
 ## Sidestream Release Manifest
 
-`api/sidestream/releases/latest.js` serves `GET /api/sidestream/releases/latest?channel=stable&platform=darwin-arm64&version=1.0.5` for the Sidestream CEP panel update checker. The route returns release metadata: product, channel, latest version, minimum supported version, critical flag, rollout percent, release notes URL, and artifact URL/hash/size. The current Sidestream artifact URL is a private Vercel Blob URL; the panel opens `releaseNotesUrl` first, which defaults to the public Sidestream install guide at `https://alexg.mov/?page=sidestream-install`. The endpoint does not require or accept install identity, support code, email, telemetry payloads, Stripe state, or signed purchase links.
+`api/sidestream/releases/latest.js` remains the compatibility endpoint used by already-installed Sidestream builds. Mac and platformless requests read the checked-in legacy Mac manifest. Exact `platform=win32-x64` requests are proxied server-to-server to `https://sidestream.tv/api/releases/latest`, validated as an EXE release, and returned only when both `artifact.url` and `releaseNotesUrl` select `https://sidestream.tv/api/download?platform=win32-x64`. This is required because Windows `1.0.12` still calls the `alexg.mov` endpoint and opens `releaseNotesUrl` first, while `1.0.13` and later use the canonical Sidestream endpoint directly. Unsupported platforms, invalid upstream payloads, redirects, timeouts, and Mac fallback URLs fail closed. The endpoint does not require or accept install identity, support code, email, telemetry payloads, Stripe state, or signed purchase links.
 
 The stable manifest lives at `data/sidestream-release-manifest.json`. Publish a new latest release only after the release package is complete:
 
@@ -92,7 +93,7 @@ The stable manifest lives at `data/sidestream-release-manifest.json`. Publish a 
 4. Run `npm run release:publish-manifest -- --version <x.y.z> --artifact <local dmg> --artifact-url <https blob url> --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested`.
 5. Run `npm run build` before committing the website change.
 
-The publish script calculates `sha256` and `sizeBytes` from the local artifact and refuses to write the manifest unless all four release gates are passed as flags. The endpoint currently supports the `stable` channel for Mac DMG artifacts (`darwin-arm64` and `darwin-x64`). Staged rollout is expressed as `rolloutPercent`; the Sidestream panel makes the actual eligibility decision locally so the endpoint does not need to track users.
+The publish script calculates `sha256` and `sizeBytes` from the local artifact and refuses to write the checked-in Mac manifest unless all four release gates are passed as flags. The compatibility endpoint supports the `stable` channel for Mac DMG artifacts (`darwin-arm64` and `darwin-x64`) plus the canonical Windows bridge (`win32-x64`). Do not add a second Windows manifest here; Windows release truth belongs to the Sidestream site. Staged rollout is expressed as `rolloutPercent`; the Sidestream panel makes the actual eligibility decision locally so the endpoint does not need to track users.
 
 ## Supabase Business Ledger
 
@@ -292,6 +293,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-07-13: Added a fail-closed `win32-x64` compatibility bridge from the legacy `alexg.mov` update endpoint to the canonical `sidestream.tv` Windows manifest, allowing installed Windows `1.0.12` panels to discover the platform-specific `1.0.13` EXE without receiving Mac metadata.
 - 2026-07-07: Changed the Sidestream plugin page CTA from the free email-checkout flow to the dedicated Sidestream site at `https://sidestream-xi.vercel.app/`, including the sticky mobile CTA, install-guide fallback, public product data mirror, `llms.txt`, and README routing notes. Legacy checkout/download fulfillment remains documented for old links.
 - 2026-07-07: Added `/api/plugin-telemetry` response `dropped` counts for invalid events rejected before archive/import, keeping bad records from retrying indefinitely while preserving strict retry behavior for archive or collector failures.
 - 2026-07-02: Added `scripts/check-sidestream-telemetry-egress.mjs` plus the operator runbook for redacted Sidestream telemetry egress checks, legacy Supabase fallback visibility, and bounded dashboard/manual refresh guardrails.
