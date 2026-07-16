@@ -25,6 +25,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 npm run dev
 npm run build
 npm run preview
+npm run test:sidestream-database-routing
 npm run test:sidestream-release-manifest
 npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestream-1.0.5-Mac-Installer.dmg --artifact-url 'https://9kfjhekmxi6iiwni.private.blob.vercel-storage.com/sidestream/1.0.5/Sidestream-1.0.5-Mac-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
 ```
@@ -37,7 +38,7 @@ npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestre
 
 ## Environment Variables
 
-Commerce and fulfillment use these variables:
+The server runtime uses these variables:
 
 - `SITE_URL`: canonical public origin. Defaults to `https://alexg.mov`.
 - `STRIPE_SECRET_KEY`: server-side Stripe key used to create and inspect Checkout Sessions.
@@ -65,15 +66,13 @@ Commerce and fulfillment use these variables:
 - `EMAIL_POSTAL_ADDRESS` or `BUSINESS_POSTAL_ADDRESS`: footer address to include for commercial email compliance.
 - `ANALYTICS_LOG_DIR`: optional local analytics log directory.
 - `ANALYTICS_SALT`: optional visitor fingerprint salt. Falls back to `DOWNLOAD_SECRET`.
-- `POSTGRES_URL`, `DATABASE_URL`, or `SUPABASE_POSTGRES_URL`: optional Supabase/Postgres pooled connection string used for durable business logging. Prefer Supabase's shared pooler URL on Vercel, with the real password stored only in Vercel/local env vars.
-- `SUPABASE_URL`: optional Supabase project URL used with `SUPABASE_SECRET_KEY` for server-only Sidestream telemetry writes when the Postgres pooler URL is unavailable.
-- `SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY`: optional server-only Supabase REST key for Sidestream telemetry. Never expose this to browser code or the Sidestream CEP extension; it bypasses RLS and belongs only in trusted backend env vars.
+- `SIDESTREAM_NEON_DATABASE_URL`, `NEON_DATABASE_URL`, `DATABASE_URL`, and `POSTGRES_URL`: server-side database URL candidates, checked in that order. The first valid PostgreSQL URL is used for durable commerce, fulfillment, lead, and Sidestream telemetry writes. Deployed runtimes accept only `neon.tech` hosts; local development also accepts `localhost`, `127.0.0.1`, and `::1`.
 - `POSTGRES_POOL_MAX`: optional server-side Postgres pool size. Defaults to `3`, which is intentionally small for Vercel serverless.
-- `POSTGRES_SSL`: set to `0` only for a local non-SSL Postgres. Supabase pooler connections should keep SSL enabled.
+- `POSTGRES_SSL`: set to `0` only for a local non-SSL Postgres database. Neon connections should keep SSL enabled.
 - `SIDESTREAM_TELEMETRY_ENABLED`: set to `0` to make `/api/plugin-telemetry` accept but drop Sidestream plugin telemetry while keeping the route deployed.
 
 Never expose Stripe secret keys, webhook secrets, Resend keys, Blob tokens, or `DOWNLOAD_SECRET` in frontend files.
-Never expose the Supabase pooler password, Postgres URL, secret/service-role key, or any server database credential in frontend files or the Sidestream CEP extension.
+Never expose a Neon/Postgres URL or any server database credential in frontend files or the Sidestream CEP extension.
 
 ## Sidestream Release Manifest
 
@@ -91,45 +90,25 @@ Canonical release truth lives in `/Users/alexgarrett/alexg.mov/website/sidestrea
 
 The publish script calculates `sha256` and `sizeBytes` from the local artifact and refuses to write the legacy snapshot unless all four release gates are passed as flags. Staged rollout remains canonical Sidestream manifest data; the panel makes the actual eligibility decision locally so the compatibility endpoint does not need to track users.
 
-## Supabase Business Ledger
+## Neon-only Business Ledger
 
-The optional Supabase integration uses server-side database writes through `lib/supabase-db.js`. Commerce/ledger helpers use direct Postgres when a pooled Postgres URL is configured. Sidestream telemetry prefers server-only Supabase REST with `SUPABASE_URL` plus `SUPABASE_SECRET_KEY`, then falls back to direct Postgres when the REST key is absent. Browser code and the Sidestream CEP panel never receive database credentials.
+Commerce, fulfillment, lead, and Sidestream telemetry persistence uses direct PostgreSQL against Neon through `lib/postgres-db.js`. This helper is the only active database runtime: there is no database REST path or alternate hosted-database fallback, and browser code plus the Sidestream CEP panel never receive database credentials.
 
-The initial schema lives in `supabase/migrations/20260521095933_create_business_ledger.sql` and creates private ledger tables for:
+The schema contains private commerce tables for customers, email leads, Checkout Sessions, Stripe events, purchases, licenses, hashed download links, and download outcomes. Sidestream telemetry uses separate raw-event, install-rollup, and session-rollup tables so plugin event retention and indexing remain independent from the commerce ledger. Apply schema changes to the target Neon database before deploying code that depends on them.
 
-- `customers`: normalized customer emails, Stripe customer IDs, country/name when Stripe provides them, and small metadata.
-- `email_leads`: first-visit offer captures with visitor/session hashes and storage targets.
-- `checkout_sessions`: Stripe Checkout Session snapshots created by `/api/create-checkout` and refreshed by the webhook.
-- `stripe_events`: received Stripe webhook events and processing status.
-- `purchases`: one row per fulfilled Checkout Session.
-- `licenses`: active product/license entitlement rows tied to purchases and Checkout Sessions.
-- `download_links`: generated fulfillment links, stored as hashes rather than raw signed URLs.
-- `download_events`: signed download-link outcomes such as served, expired, invalid signature, missing product, or Blob fetch failure.
-- `sidestream_telemetry_events`: redacted, batched Sidestream CEP telemetry events posted through `/api/plugin-telemetry`.
-- `sidestream_installs`: latest known app/runtime/support state per hashed Sidestream install and support code.
-- `sidestream_sessions`: session start/end rollups, app/runtime summary, event counts, and latest error/action context.
-
-All new tables have RLS enabled and no public policies. The app writes through the server-side pooled Postgres credential or the Supabase `service_role` REST key only. The Sidestream rollup migration explicitly grants `service_role` table access for the REST writer while keeping `anon` and `authenticated` revoked.
-
-The Sidestream telemetry schema starts in `supabase/migrations/20260521101823_add_sidestream_plugin_telemetry.sql`. The richer automatic logging rollup migration lives in `supabase/migrations/20260612120000_add_sidestream_telemetry_rollups.sql` and adds support-code/category/error/action columns plus install/session summary tables. Keep Sidestream telemetry migrations separate from the commerce ledger migration so plugin event volume can be indexed and retained independently from customer, purchase, and license tables.
-
-Apply the migration from the Supabase SQL editor or with the Supabase CLI after linking the project. For direct Postgres writes, set the Vercel env var to the Supabase pooler connection string with the real password, for example:
-
-```sh
-POSTGRES_URL="postgresql://postgres.<project-ref>:<password>@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres"
-```
+Historical schema note: legacy SQL migrations remain under the old vendor-named `supabase/migrations/` directory for migration history only; that directory does not represent a supported runtime, integration, or fallback.
 
 ## Sidestream Plugin Telemetry
 
-`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension and the native Mac installer postinstall script. The plugin sends batches of up to 100 already-redacted events; the installer sends a single best-effort `installer_install_completed` event with a pseudonymous `installer_receipt_id_hash`. The server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, writes raw redacted rows to `sidestream_telemetry_events`, and upserts `sidestream_installs` plus `sidestream_sessions` through `lib/supabase-db.js` when events carry normal panel install/session ids.
+`api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension and the native Mac installer postinstall script. The plugin sends batches of up to 100 already-redacted events; the installer sends a single best-effort `installer_install_completed` event with a pseudonymous `installer_receipt_id_hash`. The server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, writes raw redacted rows to `sidestream_telemetry_events`, and upserts `sidestream_installs` plus `sidestream_sessions` through `lib/postgres-db.js` when events carry normal panel install/session ids.
 
-Telemetry recording prefers the server-only Supabase REST path when `SUPABASE_URL` and `SUPABASE_SECRET_KEY` are configured. If the richer telemetry migration has not been applied yet, the REST writer retries against the legacy `sidestream_telemetry_events` columns so raw redacted events are still recorded; install/session rollups begin once the migration and Supabase schema cache include the new tables/columns. If the REST key is absent, telemetry falls back to the Postgres pooler path.
+Telemetry has one direct Postgres recording path. A batch is written in one transaction; new raw events update install/session rollups, while an already-present event ID is acknowledged as a successful retry. The required ledger and telemetry migrations must be present in Neon before the route is deployed.
 
 The route returns `200` only when every accepted event is recorded or already present from an earlier retry. Database misconfiguration, partial writes, or collector errors return non-2xx so the CEP uploader keeps the local queue and retries. `SIDESTREAM_TELEMETRY_ENABLED=0` remains an intentional accept-and-drop kill switch and returns `202` with `disabled: true`.
 
-The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for dashboards that can query installs, native installer receipts, sessions, timelines, failures, update-check outcomes, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or Supabase credentials.
+The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for dashboards that can query installs, native installer receipts, sessions, timelines, failures, update-check outcomes, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or database credentials.
 
-The route intentionally does not expose Supabase, Stripe, Blob, or Resend secrets to the plugin. If Supabase is not configured, the route fails the telemetry acknowledgement instead of claiming success; the editor's search/download workflow continues because uploads happen through the plugin's bounded background queue.
+The route intentionally does not expose Neon, Stripe, Blob, or Resend secrets to the plugin. If no valid database URL resolves, the route fails the telemetry acknowledgement instead of claiming success; the editor's search/download workflow continues because uploads happen through the plugin's bounded background queue.
 
 ## First-Visit Promo Offer
 
@@ -157,7 +136,7 @@ Checkout buttons in `site/luts.jsx` and `site/plugins.jsx` pass `offerCode`, `of
 8. `cancel_url` returns the buyer to the product page declared in `product.page`.
 9. `statement_descriptor_suffix` is set when the product defines `statementDescriptorSuffix`.
 10. The server logs a `checkout_session_created` analytics event.
-11. If `POSTGRES_URL` is configured, `lib/supabase-db.js` records the Checkout Session snapshot in Supabase.
+11. When a valid Neon database URL resolves, `lib/postgres-db.js` records the Checkout Session snapshot in Postgres.
 12. The browser redirects to the Stripe-hosted Checkout URL.
 
 The integration intentionally uses Stripe-hosted Checkout Sessions for one-time digital purchases.
@@ -241,7 +220,7 @@ Local product files can live under `plugins/` or `luts/` while they are being up
 8. `api/download.makeLink()` creates a signed URL valid for 48 hours for paid product downloads.
 9. Resend sends the buyer an email from `alexg.mov <downloads@alexg.mov>`.
 10. Sidestream fulfillment emails the single native Mac installer DMG download link plus backup web steps. Because Sidestream is currently free, that email uses the public Sidestream installer route instead of the signed shop download route. The DMG contains `Install Sidestream.pkg`; no external installer app is required.
-11. If `POSTGRES_URL` is configured, the webhook records the Stripe event, checkout session, customer, purchase, active license, and hashed download-link row in Supabase.
+11. When a valid Neon database URL resolves, the webhook records the Stripe event, checkout session, customer, purchase, active license, and hashed download-link row in Postgres.
 
 Important operational detail: fulfillment errors are logged, but the webhook still responds with `{ received: true }`. That means Stripe will not retry a failed Resend send or missing-product configuration after the handler catches the error. Check deployment logs after product launches and webhook tests.
 
@@ -257,7 +236,7 @@ Important operational detail: fulfillment errors are logged, but the webhook sti
 6. The handler fetches the private Blob URL with `BLOB_READ_WRITE_TOKEN`, or with a product-specific token env such as `SIDESTREAM_BLOB_READ_WRITE_TOKEN` when configured in `lib/products.js`.
 7. `HEAD` requests validate the signed link and private Blob reachability, then return file headers without streaming the artifact.
 8. `GET` requests stream the file as an attachment using `downloadFilename`.
-9. If `POSTGRES_URL` is configured, the handler records the download outcome in `download_events`.
+9. When a valid Neon database URL resolves, the handler records the download outcome in `download_events`.
 
 Sidestream is the exception while it is free: `/api/download?p=sidestream...` redirects to `SIDESTREAM_PUBLIC_DOWNLOAD_URL`, and new Sidestream checkout emails use that same public installer URL directly. This keeps old signed Sidestream email links working even if `DOWNLOAD_SECRET` or private Blob tokens drift.
 
@@ -283,6 +262,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-07-16: Cut commerce, fulfillment, lead, and Sidestream telemetry persistence over to Neon-only direct Postgres routing, with validated database URL precedence and focused `npm run test:sidestream-database-routing` coverage.
 - 2026-07-15: Bridged legacy Sidestream update checks to the canonical `sidestream.tv` release manifest with direct `200` responses, strict Mac/Windows artifact validation, direct Mac installer routing for the legacy release-notes-first button, and v1.0.11-to-latest regression coverage so old clients are no longer stranded on the stale v1.0.8 snapshot.
 - 2026-07-02: Dropped all LUT checkout prices by 75%: individual LUTs now display and charge `$4.50`, the Complete LUT Bundle displays and charges `$9.75`, Stripe Products default to the new live one-time Prices, the previous `$18`/`$39` Stripe Prices are archived, and the bundle fallback Price ID now matches the sale price.
 - 2026-06-22: Allowed Sidestream telemetry event category `install` so native Mac installer receipt events keep their category when posted through `/api/plugin-telemetry`.
@@ -295,9 +275,7 @@ The current location is derived automatically at page load using the current dat
 - 2026-06-22: Updated Sidestream checkout/download fulfillment, release manifest, and public install copy to the `1.0.5` native Mac installer DMG, removing the retired ZXP-helper package from the customer path while keeping private Blob delivery behind signed `/api/download` links.
 - 2026-06-17: Published Sidestream `1.0.3` release metadata, updated the checkout fulfillment fallback to the `1.0.3` private Blob DMG, and defaulted release-note/update clicks to the live Sidestream install guide.
 - 2026-06-12: Added the Sidestream stable release manifest endpoint at `/api/sidestream/releases/latest`, a gated manifest publish script, update telemetry category support, and docs for the no-identity update-check protocol.
-- 2026-06-12: Granted Supabase `service_role` access to Sidestream telemetry tables so the server-only REST writer can insert raw events and upsert install/session rollups while RLS stays enabled and public roles stay revoked.
-- 2026-06-12: Added a server-only Supabase REST telemetry writer using `SUPABASE_URL` plus `SUPABASE_SECRET_KEY`, with Postgres as fallback and a legacy-schema retry so Sidestream events still record before the rollup migration is applied.
-- 2026-06-12: Extended `/api/plugin-telemetry` for automatic Sidestream logging with richer redacted event envelopes, support codes, batch ids, category/severity/error/action fields, structured consent payloads, and Supabase rollups in `sidestream_installs` plus `sidestream_sessions`.
+- 2026-06-12: Extended `/api/plugin-telemetry` for automatic Sidestream logging with richer redacted event envelopes, support codes, batch ids, category/severity/error/action fields, structured consent payloads, and install/session rollups.
 - 2026-06-09: Replaced the default Open Graph/Twitter share preview image with the branded `mockups/alexg-og-card.png` card so home/portfolio/service links no longer default to the MERIDIAN product mockup.
 - 2026-06-09: Complete LUT Bundle previews now show one primary before/after scrubber per released LUT, with the LUT name labeled beneath each bundle preview panel.
 - 2026-06-07: Removed the global header `Shop products` shortcut from `site/chrome.jsx`; shoppers still reach LUTs from the homepage hero CTA and product routes.
@@ -306,8 +284,8 @@ The current location is derived automatically at page load using the current dat
 - 2026-05-21: Moved the homepage OMI proof teaser into the first slot of the featured LUT stack so case-study proof leads the product cards.
 - 2026-05-21: Clamped LUT listing-card descriptions to a three-line block so the longer HALOCLYNE copy does not make its card taller than the other LUT cards.
 - 2026-05-21: Switched Sidestream fulfillment to the private Blob Mac install package DMG so the email sends one polished Finder-style package with the signed ZXP, ZXP Installer target, and fallback installer link; `/api/download` still streams large private Blob files instead of buffering them in memory.
-- 2026-05-21: Added `/api/plugin-telemetry` plus the `sidestream_telemetry_events` Supabase table so the Sidestream CEP extension can upload redacted batched search, preview, download, import, settings, heartbeat, and error telemetry through the server-only Postgres helper.
-- 2026-05-21: Added the first Supabase/Postgres business-ledger integration: schema migration, server-only pooled Postgres helper, Stripe Checkout/webhook persistence, lead capture storage, license rows, hashed download-link records, and download outcome logging.
+- 2026-05-21: Added `/api/plugin-telemetry` plus durable redacted event storage so the Sidestream CEP extension can upload batched search, preview, download, import, settings, heartbeat, and error telemetry through the server-only Postgres helper.
+- 2026-05-21: Added the first business-ledger schema and pooled Postgres helper for Stripe Checkout/webhook persistence, lead capture storage, license rows, hashed download-link records, and download outcome logging.
 - 2026-05-19: Added the Complete LUT Bundle to the LUT shop with a `$87` compare-at / `$39` launch bundle price, private Blob ZIP, live Stripe Price fallback, checkout catalog mapping, sitemap/LLM mirrors, and a bundle detail page that scrolls through all available individual LUTs.
 - 2026-05-17: LUT cards, detail pages, homepage featured cards, sticky mobile CTAs, click analytics, and Checkout Session metadata now use the shared display-pricing helper with `$29` compare-at / `$18` launch pricing for LUTs.
 - 2026-05-17: Removed the retired AI clip-search plugin from public plugin data, SEO mirrors, sitemap/LLM mirrors, checkout catalog, analytics persona copy, and README routing docs.
