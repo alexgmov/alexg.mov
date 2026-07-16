@@ -21,7 +21,7 @@ const {
 const {
   isDatabaseConfigured,
   recordEmailLead,
-} = require('../lib/supabase-db');
+} = require('../lib/postgres-db');
 
 const DEFAULT_AUDIENCE_NAME = 'alexg.mov first-visit offers';
 
@@ -181,12 +181,12 @@ async function storeLead(email, body, ids) {
         path: body.path,
         ids,
         body,
-        storageTargets: storage.concat('supabase'),
+        storageTargets: storage.concat('postgres'),
       });
-      storage.push('supabase');
+      storage.push('postgres');
     } catch (err) {
-      errors.push(`Supabase: ${err.message}`);
-      console.error('Supabase lead storage failed:', err.message);
+      errors.push(`Postgres: ${err.message}`);
+      console.error('Postgres lead storage failed:', err.message);
     }
   }
 

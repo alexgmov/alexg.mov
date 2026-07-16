@@ -8,7 +8,7 @@ const {
   recordFulfilledPurchase,
   recordStripeEvent,
   tryRecord,
-} = require('../lib/supabase-db');
+} = require('../lib/postgres-db');
 
 const CANONICAL_ORIGIN = normalizeOrigin(process.env.SITE_URL || 'https://alexg.mov');
 const SIDESTREAM_PUBLIC_DOWNLOAD_URL = process.env.SIDESTREAM_PUBLIC_DOWNLOAD_URL || 'https://sidestream-xi.vercel.app/api/download';
