@@ -3,7 +3,7 @@ const { PRODUCTS } = require('../lib/products');
 const {
   recordCheckoutSession,
   tryRecord,
-} = require('../lib/supabase-db');
+} = require('../lib/postgres-db');
 const {
   OFFER_CODE,
   hashEmail,

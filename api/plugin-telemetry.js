@@ -1,6 +1,6 @@
 const {
   recordPluginTelemetryBatch,
-} = require('../lib/supabase-db');
+} = require('../lib/postgres-db');
 const {
   logEvent,
   readBody,
@@ -102,7 +102,7 @@ async function recordTelemetrySafely(options) {
   try {
     return await recordPluginTelemetryBatch(options);
   } catch (err) {
-    console.error('[supabase] sidestream plugin telemetry failed:', err.message);
+    console.error('[postgres] sidestream plugin telemetry failed:', err.message);
     return { error: err.message, recorded: 0 };
   }
 }

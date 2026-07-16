@@ -4,7 +4,7 @@ const { PRODUCTS } = require('../lib/products');
 const {
   recordDownloadEvent,
   tryRecord,
-} = require('../lib/supabase-db');
+} = require('../lib/postgres-db');
 
 const SIDESTREAM_PUBLIC_DOWNLOAD_URL = process.env.SIDESTREAM_PUBLIC_DOWNLOAD_URL || 'https://sidestream-xi.vercel.app/api/download';
 
