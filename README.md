@@ -17,7 +17,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `api/*.js` and nested `api/**/*.js` files are Vercel-compatible CommonJS handlers. Locally, `server.js` maps those same files to `/api/...` routes and attaches small `res.status()`, `res.json()`, and `res.send()` helpers.
 - `server.js` serves Vite middleware in development and the `dist/` build in production mode.
 - `scripts/copy-static.mjs` copies static assets that Vite does not bundle directly, including `mockups`, `videos`, `robots.txt`, `sitemap.xml`, and `llms.txt`.
-- `data/sidestream-release-manifest.json` is the checked-in Sidestream stable release manifest served by `api/sidestream/releases/latest.js`. Update it only through `scripts/publish-sidestream-release-manifest.js` after the artifact is signed, verified, uploaded, and smoke-tested.
+- `api/sidestream/releases/latest.js` is the compatibility endpoint used by older Sidestream panels. It returns a validated `200` copy of the canonical `sidestream.tv` manifest for Mac and Windows; it must not redirect because the v1.0.11 updater rejects non-2xx responses. `data/sidestream-release-manifest.json` remains only as legacy shop/download metadata and no longer controls update checks.
 
 ## Local Commands
 
@@ -25,6 +25,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 npm run dev
 npm run build
 npm run preview
+npm run test:sidestream-release-manifest
 npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestream-1.0.5-Mac-Installer.dmg --artifact-url 'https://9kfjhekmxi6iiwni.private.blob.vercel-storage.com/sidestream/1.0.5/Sidestream-1.0.5-Mac-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
 ```
 
@@ -50,7 +51,7 @@ Commerce and fulfillment use these variables:
 - `ONYX_BLOB_URL`: optional private Vercel Blob URL override for ONYX.
 - `HALOCLYNE_BLOB_URL`: optional private Vercel Blob URL override for HALOCLYNE.
 - `COMPLETE_LUT_BUNDLE_BLOB_URL`: optional private Vercel Blob URL override for the Complete LUT Bundle ZIP.
-- `SIDESTREAM_RELEASE_MANIFEST_PATH`: optional server-side override for the Sidestream release manifest JSON. Defaults to `data/sidestream-release-manifest.json`.
+- `SIDESTREAM_RELEASE_MANIFEST_PATH`: optional path override for the legacy manifest publish script. It does not control the compatibility update endpoint.
 - `DOWNLOAD_SECRET`: HMAC secret used to sign expiring download links.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` to fetch private product files.
 - `SIDESTREAM_BLOB_READ_WRITE_TOKEN`: Vercel Blob token used by `/api/download` for Sidestream when its release DMG lives in a separate Blob store from the LUT products.
@@ -76,9 +77,11 @@ Never expose the Supabase pooler password, Postgres URL, secret/service-role key
 
 ## Sidestream Release Manifest
 
-`api/sidestream/releases/latest.js` serves `GET /api/sidestream/releases/latest?channel=stable&platform=darwin-arm64&version=1.0.5` for the Sidestream CEP panel update checker. The route returns release metadata: product, channel, latest version, minimum supported version, critical flag, rollout percent, release notes URL, and artifact URL/hash/size. The current Sidestream artifact URL is a private Vercel Blob URL; the panel opens `releaseNotesUrl` first, which defaults to the public Sidestream install guide at `https://alexg.mov/?page=sidestream-install`. The endpoint does not require or accept install identity, support code, email, telemetry payloads, Stripe state, or signed purchase links.
+`api/sidestream/releases/latest.js` serves `GET /api/sidestream/releases/latest?channel=stable&platform=darwin-arm64&version=1.0.11` for already-installed Sidestream panels. The v1.0.11 client does not follow HTTP redirects, so this route fetches `https://sidestream.tv/api/releases/latest` server-to-server and returns the validated manifest directly with `200`. The request's stable channel, supported platform, and current version are forwarded; the client can therefore move directly from v1.0.11 to the latest release instead of stopping at v1.0.12.
 
-The stable manifest lives at `data/sidestream-release-manifest.json`. Publish a new latest release only after the release package is complete:
+The bridge supports Mac DMGs for `darwin-arm64`, `darwin-x64`, and platformless legacy requests, plus the exact `win32-x64` Windows route. Mac artifacts must resolve to `https://sidestream.tv/api/download`; Windows artifact and release-note URLs must resolve to `https://sidestream.tv/api/download?platform=win32-x64`. Invalid payloads, redirects, unsupported platforms, oversized responses, upstream errors, and timeouts fail closed. The endpoint does not require or accept install identity, support code, email, telemetry payloads, Stripe state, or signed purchase links.
+
+Canonical release truth lives in `/Users/alexgarrett/alexg.mov/website/sidestream/data/release-manifest.json` and is served by `sidestream.tv`. The checked-in `data/sidestream-release-manifest.json` in this repo remains legacy shop/download metadata; updating it does not change what old panels see through the compatibility endpoint. If that legacy snapshot needs to be refreshed, publish it only after the release package is complete:
 
 1. Build/sign/notarize the native Mac installer DMG from the FlowState repo.
 2. Verify the signed package and smoke-test the install.
@@ -86,7 +89,7 @@ The stable manifest lives at `data/sidestream-release-manifest.json`. Publish a 
 4. Run `npm run release:publish-manifest -- --version <x.y.z> --artifact <local dmg> --artifact-url <https blob url> --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested`.
 5. Run `npm run build` before committing the website change.
 
-The publish script calculates `sha256` and `sizeBytes` from the local artifact and refuses to write the manifest unless all four release gates are passed as flags. The endpoint currently supports the `stable` channel for Mac DMG artifacts (`darwin-arm64` and `darwin-x64`). Staged rollout is expressed as `rolloutPercent`; the Sidestream panel makes the actual eligibility decision locally so the endpoint does not need to track users.
+The publish script calculates `sha256` and `sizeBytes` from the local artifact and refuses to write the legacy snapshot unless all four release gates are passed as flags. Staged rollout remains canonical Sidestream manifest data; the panel makes the actual eligibility decision locally so the compatibility endpoint does not need to track users.
 
 ## Supabase Business Ledger
 
@@ -280,6 +283,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-07-15: Bridged legacy Sidestream update checks to the canonical `sidestream.tv` release manifest with direct `200` responses, strict Mac/Windows artifact validation, and v1.0.11-to-latest regression coverage so old clients are no longer stranded on the stale v1.0.8 snapshot.
 - 2026-07-02: Dropped all LUT checkout prices by 75%: individual LUTs now display and charge `$4.50`, the Complete LUT Bundle displays and charges `$9.75`, Stripe Products default to the new live one-time Prices, the previous `$18`/`$39` Stripe Prices are archived, and the bundle fallback Price ID now matches the sale price.
 - 2026-06-22: Allowed Sidestream telemetry event category `install` so native Mac installer receipt events keep their category when posted through `/api/plugin-telemetry`.
 - 2026-06-22: Routed free Sidestream installer fulfillment through the known-good public Sidestream download endpoint, with `/api/download?p=sidestream...` redirecting old signed links there so installer access no longer depends on the shop signed-link secret or separate Blob token.

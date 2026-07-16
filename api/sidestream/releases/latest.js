@@ -1,10 +1,13 @@
-const fs = require('fs');
-const path = require('path');
 const { logEvent } = require('../../../lib/analytics-store');
 
-const DEFAULT_MANIFEST_PATH = path.join(__dirname, '../../../data/sidestream-release-manifest.json');
 const SUPPORTED_CHANNELS = new Set(['stable']);
-const SUPPORTED_PLATFORMS = new Set(['darwin-arm64', 'darwin-x64']);
+const WINDOWS_PLATFORM = 'win32-x64';
+const SUPPORTED_PLATFORMS = new Set(['darwin-arm64', 'darwin-x64', WINDOWS_PLATFORM]);
+const CANONICAL_RELEASE_ENDPOINT = 'https://sidestream.tv/api/releases/latest';
+const CANONICAL_DOWNLOAD_ORIGIN = 'https://sidestream.tv';
+const CANONICAL_DOWNLOAD_PATH = '/api/download';
+const UPSTREAM_TIMEOUT_MS = 4000;
+const MAX_UPSTREAM_MANIFEST_BYTES = 64 * 1024;
 
 module.exports = async function handler(req, res) {
   setCorsHeaders(res);
@@ -34,8 +37,10 @@ module.exports = async function handler(req, res) {
 
   let manifest;
   try {
-    manifest = readManifest();
+    manifest = await readCanonicalManifest({ channel, platform, currentVersion });
     validateManifest(manifest);
+    validatePlatformManifest(manifest, platform);
+    manifest = toPublicManifest(manifest);
   } catch (err) {
     console.error('[sidestream releases] manifest unavailable:', err.message);
     await logManifestRequest(req, {
@@ -70,9 +75,46 @@ module.exports = async function handler(req, res) {
   return res.status(200).json(manifest);
 };
 
-function readManifest() {
-  const manifestPath = process.env.SIDESTREAM_RELEASE_MANIFEST_PATH || DEFAULT_MANIFEST_PATH;
-  return JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+async function readCanonicalManifest({ channel, platform, currentVersion }) {
+  const endpoint = new URL(CANONICAL_RELEASE_ENDPOINT);
+  endpoint.searchParams.set('channel', channel);
+  if (platform) endpoint.searchParams.set('platform', platform);
+  if (currentVersion) endpoint.searchParams.set('version', currentVersion);
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      redirect: 'error',
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`canonical manifest returned HTTP ${response.status}`);
+    }
+
+    const declaredLength = Number(response.headers.get('content-length') || 0);
+    if (declaredLength > MAX_UPSTREAM_MANIFEST_BYTES) {
+      throw new Error('canonical manifest is too large');
+    }
+
+    const body = await response.text();
+    if (Buffer.byteLength(body, 'utf8') > MAX_UPSTREAM_MANIFEST_BYTES) {
+      throw new Error('canonical manifest is too large');
+    }
+
+    return JSON.parse(body);
+  } catch (err) {
+    if (err && err.name === 'AbortError') {
+      throw new Error('canonical manifest request timed out');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function validateManifest(manifest) {
@@ -89,6 +131,62 @@ function validateManifest(manifest) {
   if (!Number.isFinite(Number(manifest.artifact.sizeBytes)) || Number(manifest.artifact.sizeBytes) <= 0) {
     throw new Error('artifact size missing');
   }
+}
+
+function validatePlatformManifest(manifest, platform) {
+  if (platform === WINDOWS_PLATFORM) {
+    if (String(manifest.artifact.type || '').toLowerCase() !== 'exe') {
+      throw new Error('Windows release artifact must be an EXE');
+    }
+    if (!isCanonicalDownloadUrl(manifest.artifact.url, WINDOWS_PLATFORM)) {
+      throw new Error('Windows artifact URL must use the canonical Windows download route');
+    }
+    if (!isCanonicalDownloadUrl(manifest.releaseNotesUrl, WINDOWS_PLATFORM)) {
+      throw new Error('Windows release notes URL must use the canonical Windows download route');
+    }
+    return;
+  }
+
+  if (String(manifest.artifact.type || '').toLowerCase() !== 'dmg') {
+    throw new Error('Mac release artifact must be a DMG');
+  }
+  if (!isCanonicalDownloadUrl(manifest.artifact.url)) {
+    throw new Error('Mac artifact URL must use the canonical Mac download route');
+  }
+}
+
+function isCanonicalDownloadUrl(value, platform = '') {
+  try {
+    const url = new URL(String(value || ''));
+    const params = Array.from(url.searchParams.entries());
+    if (url.origin !== CANONICAL_DOWNLOAD_ORIGIN || url.pathname !== CANONICAL_DOWNLOAD_PATH) {
+      return false;
+    }
+    if (!platform) return params.length === 0;
+    return params.length === 1 && params[0][0] === 'platform' && params[0][1] === platform;
+  } catch {
+    return false;
+  }
+}
+
+function toPublicManifest(manifest) {
+  return {
+    schemaVersion: manifest.schemaVersion,
+    product: manifest.product,
+    channel: manifest.channel,
+    version: manifest.version,
+    minSupportedVersion: manifest.minSupportedVersion,
+    critical: Boolean(manifest.critical),
+    rolloutPercent: Number(manifest.rolloutPercent),
+    publishedAt: String(manifest.publishedAt || ''),
+    releaseNotesUrl: String(manifest.releaseNotesUrl || ''),
+    artifact: {
+      type: String(manifest.artifact.type || ''),
+      url: String(manifest.artifact.url || ''),
+      sha256: String(manifest.artifact.sha256 || ''),
+      sizeBytes: Number(manifest.artifact.sizeBytes),
+    },
+  };
 }
 
 function setCorsHeaders(res) {
