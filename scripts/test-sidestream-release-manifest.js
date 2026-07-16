@@ -73,6 +73,7 @@ test('Sidestream legacy release endpoint bridges old clients to canonical releas
       assert.equal(response.body.version, '1.0.14');
       assert.equal(response.body.artifact.type, 'dmg');
       assert.equal(response.body.artifact.url, MAC_DOWNLOAD_URL);
+      assert.equal(response.body.releaseNotesUrl, MAC_DOWNLOAD_URL);
       assert.equal(Object.hasOwn(response.body.artifact, 'filename'), false);
       assert.equal(Object.hasOwn(response.body.artifact, 'pathname'), false);
     });
@@ -93,6 +94,7 @@ test('Sidestream legacy release endpoint bridges old clients to canonical releas
       assert.equal(response.statusCode, 200);
       assert.equal(response.body.version, '1.0.14');
       assert.equal(response.body.artifact.url, MAC_DOWNLOAD_URL);
+      assert.equal(response.body.releaseNotesUrl, MAC_DOWNLOAD_URL);
     });
     assert.equal(requestedUrl, 'https://sidestream.tv/api/releases/latest?channel=stable');
   });

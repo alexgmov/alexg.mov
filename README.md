@@ -77,7 +77,7 @@ Never expose the Supabase pooler password, Postgres URL, secret/service-role key
 
 ## Sidestream Release Manifest
 
-`api/sidestream/releases/latest.js` serves `GET /api/sidestream/releases/latest?channel=stable&platform=darwin-arm64&version=1.0.11` for already-installed Sidestream panels. The v1.0.11 client does not follow HTTP redirects, so this route fetches `https://sidestream.tv/api/releases/latest` server-to-server and returns the validated manifest directly with `200`. The request's stable channel, supported platform, and current version are forwarded; the client can therefore move directly from v1.0.11 to the latest release instead of stopping at v1.0.12.
+`api/sidestream/releases/latest.js` serves `GET /api/sidestream/releases/latest?channel=stable&platform=darwin-arm64&version=1.0.11` for already-installed Sidestream panels. The v1.0.11 client does not follow HTTP redirects and prefers `releaseNotesUrl` when its Install button is clicked, so this route fetches `https://sidestream.tv/api/releases/latest` server-to-server, returns the validated manifest directly with `200`, and maps the legacy Mac release-notes field to the canonical `/api/download` URL. The request's stable channel, supported platform, and current version are forwarded; the client can therefore move directly from v1.0.11 to the latest installer instead of stopping at v1.0.12 or requiring an extra landing-page click.
 
 The bridge supports Mac DMGs for `darwin-arm64`, `darwin-x64`, and platformless legacy requests, plus the exact `win32-x64` Windows route. Mac artifacts must resolve to `https://sidestream.tv/api/download`; Windows artifact and release-note URLs must resolve to `https://sidestream.tv/api/download?platform=win32-x64`. Invalid payloads, redirects, unsupported platforms, oversized responses, upstream errors, and timeouts fail closed. The endpoint does not require or accept install identity, support code, email, telemetry payloads, Stripe state, or signed purchase links.
 
@@ -283,7 +283,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
-- 2026-07-15: Bridged legacy Sidestream update checks to the canonical `sidestream.tv` release manifest with direct `200` responses, strict Mac/Windows artifact validation, and v1.0.11-to-latest regression coverage so old clients are no longer stranded on the stale v1.0.8 snapshot.
+- 2026-07-15: Bridged legacy Sidestream update checks to the canonical `sidestream.tv` release manifest with direct `200` responses, strict Mac/Windows artifact validation, direct Mac installer routing for the legacy release-notes-first button, and v1.0.11-to-latest regression coverage so old clients are no longer stranded on the stale v1.0.8 snapshot.
 - 2026-07-02: Dropped all LUT checkout prices by 75%: individual LUTs now display and charge `$4.50`, the Complete LUT Bundle displays and charges `$9.75`, Stripe Products default to the new live one-time Prices, the previous `$18`/`$39` Stripe Prices are archived, and the bundle fallback Price ID now matches the sale price.
 - 2026-06-22: Allowed Sidestream telemetry event category `install` so native Mac installer receipt events keep their category when posted through `/api/plugin-telemetry`.
 - 2026-06-22: Routed free Sidestream installer fulfillment through the known-good public Sidestream download endpoint, with `/api/download?p=sidestream...` redirecting old signed links there so installer access no longer depends on the shop signed-link secret or separate Blob token.

@@ -40,7 +40,7 @@ module.exports = async function handler(req, res) {
     manifest = await readCanonicalManifest({ channel, platform, currentVersion });
     validateManifest(manifest);
     validatePlatformManifest(manifest, platform);
-    manifest = toPublicManifest(manifest);
+    manifest = toPublicManifest(manifest, platform);
   } catch (err) {
     console.error('[sidestream releases] manifest unavailable:', err.message);
     await logManifestRequest(req, {
@@ -169,7 +169,7 @@ function isCanonicalDownloadUrl(value, platform = '') {
   }
 }
 
-function toPublicManifest(manifest) {
+function toPublicManifest(manifest, platform) {
   return {
     schemaVersion: manifest.schemaVersion,
     product: manifest.product,
@@ -179,7 +179,9 @@ function toPublicManifest(manifest) {
     critical: Boolean(manifest.critical),
     rolloutPercent: Number(manifest.rolloutPercent),
     publishedAt: String(manifest.publishedAt || ''),
-    releaseNotesUrl: String(manifest.releaseNotesUrl || ''),
+    releaseNotesUrl: String(platform === WINDOWS_PLATFORM
+      ? manifest.releaseNotesUrl || ''
+      : manifest.artifact.url || ''),
     artifact: {
       type: String(manifest.artifact.type || ''),
       url: String(manifest.artifact.url || ''),
