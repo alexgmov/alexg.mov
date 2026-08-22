@@ -2,7 +2,7 @@
 // local tests own the three-state database routing contract.
 import { next, rewrite } from "@vercel/functions";
 
-export const DATABASE_CUTOVER_MODE = "fenced";
+export const DATABASE_CUTOVER_MODE = "target";
 const MODES = new Set(["source", "fenced", "target"]);
 const ORIGIN_AUTH_HEADER = "x-sidestream-origin-auth";
 const ORIGINAL_HOST_HEADER = "x-sidestream-original-host";

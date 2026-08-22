@@ -269,7 +269,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
-- 2026-08-22: Entered the guarded alexg.mov telemetry `fenced` phase after the direct-Neon rehearsal matched all 13 schema sections, all 32 migration checksums, sequences, ownership, and local/SCRAM security posture. Expected live drift was limited to installs, sessions, and telemetry events; it is not accepted as final parity.
+- 2026-08-22: Promoted alexg.mov API routing to the authenticated Hetzner telemetry target only after the fenced direct-Neon snapshot and an independent target backup/restore-check both matched all 13 schema sections, all 32 migration checksums, all 52 tables, and all 5,441,184 rows.
 
 - 2026-08-22: Added the source/fence/target Hetzner API boundary, loopback-only resolver/service guards, expiring encrypted secret transfer, durable Stripe webhook acknowledgements with Resend and database idempotency, and focused routing/runtime/fulfillment tests.
 - 2026-07-16: Cut commerce, fulfillment, lead, and Sidestream telemetry persistence over to Neon-only direct Postgres routing, with validated database URL precedence and focused `npm run test:sidestream-database-routing` coverage.
