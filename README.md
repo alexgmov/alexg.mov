@@ -68,7 +68,7 @@ The server runtime uses these variables:
 - `FIRST_VISIT_OFFER_EMAIL_ENABLED`: set to `0` to disable the promo code email while keeping the on-site code reveal active.
 - `FIRST_VISIT_OFFER_SECRET`: optional HMAC secret for first-visit offer tokens. Falls back to `DOWNLOAD_SECRET`, then `STRIPE_SECRET_KEY`, then the dev fallback in `lib/first-visit-offer.js`.
 - `EMAIL_POSTAL_ADDRESS` or `BUSINESS_POSTAL_ADDRESS`: footer address to include for commercial email compliance.
-- `ANALYTICS_LOG_DIR`: optional local analytics log directory.
+- `ANALYTICS_LOG_DIR`: optional local analytics log directory. The hardened Hetzner service points this at `/var/lib/sidestream-alexg/analytics`, inside its private systemd-managed state directory, because the deployed repository is read-only.
 - `ANALYTICS_SALT`: optional visitor fingerprint salt. Falls back to `DOWNLOAD_SECRET`.
 - `SIDESTREAM_HETZNER_POSTGRES_URL`: accepted only when `SIDESTREAM_HETZNER_RUNTIME=1`, Vercel markers are absent, and the URL host is exactly `localhost`, `127.0.0.1`, or `::1`. It is first in the resolver only for the protected Hetzner service and never permits a remote database host.
 - `SIDESTREAM_NEON_DATABASE_URL`, `NEON_DATABASE_URL`, `DATABASE_URL`, and `POSTGRES_URL`: source/rollback database URL candidates, checked after the Hetzner-only selector. Production Vercel accepts only `neon.tech`; ordinary local development may use loopback.
@@ -268,7 +268,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
-- 2026-08-22: Completed the Website and telemetry database cutover to private Hetzner PostgreSQL, removed the temporary encrypted runtime-export handler after capture, and retained Neon only as a credential-rotated rollback source.
+- 2026-08-22: Completed the Website and telemetry database cutover to private Hetzner PostgreSQL, removed the temporary encrypted runtime-export handler after capture, retained Neon only as a credential-rotated rollback source, and placed the optional local analytics mirror in a private writable service state directory.
 
 - 2026-08-22: Promoted alexg.mov API routing to the authenticated Hetzner telemetry target only after the fenced direct-Neon snapshot and an independent target backup/restore-check both matched all 13 schema sections, all 32 migration checksums, all 52 tables, and all 5,441,184 rows.
 
