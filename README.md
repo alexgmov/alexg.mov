@@ -260,8 +260,11 @@ The current location is derived automatically at page load using the current dat
 
 `HologramGlobe()` in `site/home.jsx` applies a visual +60 degree longitude rotation after centering the current location. Keep that offset separate from `LOCATIONS` latitude/longitude data so the list and date logic remain geographically correct while the planet framing can be art-directed. The globe canvas stays pointer-transparent; `site/home.jsx` positions a circular `.travel2-globe-hitarea` over the rendered sphere so pointer drag can rotate the D3 projection without blocking the travel list or content below the globe bleed.
 
+The globe also renders a raised great-circle web between every unique past/current itinerary destination. Longer connections arch higher, routes linked to the current location render brighter, and sphere-depth occlusion hides the portions passing behind the planet. A future-only destination joins the web automatically when its itinerary status changes to `here`.
+
 ## Recent Change Log
 
+- 2026-08-22: Added a depth-aware web of elevated arcs connecting every visited/current destination on the homepage travel globe.
 - 2026-08-22: Updated homepage travel dates to show Delhi, India from Aug 17–24 and New York City, USA from Aug 24–30, with San Francisco ending Aug 17.
 - 2026-07-16: Cut commerce, fulfillment, lead, and Sidestream telemetry persistence over to Neon-only direct Postgres routing, with validated database URL precedence and focused `npm run test:sidestream-database-routing` coverage.
 - 2026-07-15: Bridged legacy Sidestream update checks to the canonical `sidestream.tv` release manifest with direct `200` responses, strict Mac/Windows artifact validation, direct Mac installer routing for the legacy release-notes-first button, and v1.0.11-to-latest regression coverage so old clients are no longer stranded on the stale v1.0.8 snapshot.
