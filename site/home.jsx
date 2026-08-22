@@ -57,8 +57,22 @@ const LOCATIONS = {
       scale: '~10 KM ACROSS',
     }
   },
+  'delhi': {
+    city: 'Delhi', country: 'India', lat: 28.6139, lng: 77.209,
+    map: {
+      shapes: [
+        // Yamuna river, running north-south along eastern Delhi
+        "M710,0 C680,90 700,170 675,250 C650,330 680,410 650,500 C640,540 635,570 630,600",
+      ],
+      roads: [
+        "M100,300 L900,300", "M500,40 L500,560", "M180,470 L820,130",
+      ],
+      pin: { x: 510, y: 315 },
+      scale: '~20 KM ACROSS',
+    }
+  },
   'new-york': {
-    city: 'New York', country: 'USA', lat: 40.7128, lng: -74.006,
+    city: 'New York City', country: 'USA', lat: 40.7128, lng: -74.006,
     map: {
       shapes: [
         // Manhattan outline
