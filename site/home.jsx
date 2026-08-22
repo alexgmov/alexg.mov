@@ -317,6 +317,33 @@ function HologramGlobe({ locKey }) {
     const dragDegreesPerPixel = 0.26;
     const maxDragLat = 62;
     const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+    const d3 = window.d3;
+    const visitedLocations = Array.from(new Set(
+      ITINERARY
+        .filter(row => row.status !== 'next')
+        .map(row => row.key)
+        .filter(key => LOCATIONS[key])
+    )).map(key => ({ key, ...LOCATIONS[key] }));
+    const travelConnectionArcs = [];
+
+    visitedLocations.forEach((from, fromIndex) => {
+      visitedLocations.slice(fromIndex + 1).forEach(to => {
+        const start = [from.lng, from.lat];
+        const end = [to.lng, to.lat];
+        const interpolate = d3.geoInterpolate(start, end);
+        const angularDistance = d3.geoDistance(start, end);
+        const sampleCount = Math.max(24, Math.ceil(angularDistance * 30));
+
+        travelConnectionArcs.push({
+          connectsCurrentLocation: from.key === locKey || to.key === locKey,
+          height: Math.min(0.46, 0.13 + ((angularDistance / Math.PI) * 0.38)),
+          samples: Array.from({ length: sampleCount + 1 }, (_, index) => ({
+            coordinates: interpolate(index / sampleCount),
+            progress: index / sampleCount,
+          })),
+        });
+      });
+    });
 
     if (document.fonts && !fontsReady) {
       document.fonts.ready.then(() => { fontsReady = true; });
@@ -368,6 +395,10 @@ function HologramGlobe({ locKey }) {
 
     const draw = () => {
       const w = canvas.offsetWidth, h = canvas.offsetHeight;
+      if (!w || !h) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
       if (Math.round(canvas.width) !== Math.round(w * dpr)) {
         canvas.width  = Math.round(w * dpr);
         canvas.height = Math.round(h * dpr);
@@ -443,7 +474,6 @@ function HologramGlobe({ locKey }) {
       const rotLng  = baselineRotLng + ((scrollY - baselineScrollY) * 0.12) + dragRotLng;
       const rotLat  = clamp((-loc.lat * 0.08) + dragRotLat, -85, 85);
 
-      const d3  = window.d3;
       const geo = geoRef.current;
       const rootStyles = getComputedStyle(document.documentElement);
       const liveBlue = rootStyles.getPropertyValue('--blue').trim() || '#6EC1FF';
@@ -484,6 +514,73 @@ function HologramGlobe({ locKey }) {
       ctx.strokeStyle = withAlpha(liveBlue, 0.88);
       ctx.lineWidth = 1.1;
       ctx.stroke();
+
+      // Complete travel web. Each great-circle route expands away from the
+      // sphere at its midpoint, then the globe occludes any samples behind it.
+      const projectionCenter = [-rotLng, -rotLat];
+      const visibleArcSegments = [];
+
+      travelConnectionArcs.forEach(arc => {
+        let segment = [];
+        let segmentDepth = 0;
+
+        const finishSegment = () => {
+          if (segment.length > 1) {
+            visibleArcSegments.push({
+              connectsCurrentLocation: arc.connectsCurrentLocation,
+              depth: segmentDepth / segment.length,
+              points: segment,
+            });
+          }
+          segment = [];
+          segmentDepth = 0;
+        };
+
+        arc.samples.forEach(sample => {
+          const altitude = arc.height * Math.pow(Math.sin(Math.PI * sample.progress), 0.82);
+          const radiusScale = 1 + altitude;
+          const surfacePoint = projection(sample.coordinates);
+          const x = cx + ((surfacePoint[0] - cx) * radiusScale);
+          const y = cy + ((surfacePoint[1] - cy) * radiusScale);
+          const depth = Math.cos(d3.geoDistance(sample.coordinates, projectionCenter)) * radiusScale;
+          const normalizedRadiusSquared = (
+            Math.pow((x - cx) / R, 2) + Math.pow((y - cy) / R, 2)
+          );
+          const clearsGlobe = normalizedRadiusSquared >= 1;
+          const frontSurfaceDepth = clearsGlobe
+            ? -Infinity
+            : Math.sqrt(Math.max(0, 1 - normalizedRadiusSquared));
+          const isVisible = clearsGlobe || depth >= frontSurfaceDepth - 0.012;
+
+          if (!isVisible) {
+            finishSegment();
+            return;
+          }
+
+          segment.push([x, y]);
+          segmentDepth += depth;
+        });
+
+        finishSegment();
+      });
+
+      visibleArcSegments.sort((a, b) => a.depth - b.depth);
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      visibleArcSegments.forEach(segment => {
+        ctx.beginPath();
+        segment.points.forEach(([x, y], index) => {
+          if (index === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.shadowColor = liveBlue;
+        ctx.shadowBlur = segment.connectsCurrentLocation ? 9 : 5;
+        ctx.strokeStyle = withAlpha(liveBlue, segment.connectsCurrentLocation ? 0.62 : 0.3);
+        ctx.lineWidth = segment.connectsCurrentLocation ? 1.15 : 0.72;
+        ctx.stroke();
+      });
+      ctx.restore();
 
       // Current-location ping on the front hemisphere.
       const pinDist = d3.geoDistance([loc.lng, loc.lat], [-rotLng, -rotLat]);
