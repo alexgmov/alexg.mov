@@ -269,7 +269,9 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
-- 2026-08-22: Added the source/fence/target Hetzner API boundary, loopback-only resolver/service guards, expiring encrypted secret transfer, durable Stripe webhook acknowledgements with Resend and database idempotency, and focused routing/runtime/fulfillment tests. The checked-in mode remains `source` until the final fenced transfer and independent restore verification pass.
+- 2026-08-22: Entered the guarded alexg.mov telemetry `fenced` phase after the direct-Neon rehearsal matched all 13 schema sections, all 32 migration checksums, sequences, ownership, and local/SCRAM security posture. Expected live drift was limited to installs, sessions, and telemetry events; it is not accepted as final parity.
+
+- 2026-08-22: Added the source/fence/target Hetzner API boundary, loopback-only resolver/service guards, expiring encrypted secret transfer, durable Stripe webhook acknowledgements with Resend and database idempotency, and focused routing/runtime/fulfillment tests.
 - 2026-07-16: Cut commerce, fulfillment, lead, and Sidestream telemetry persistence over to Neon-only direct Postgres routing, with validated database URL precedence and focused `npm run test:sidestream-database-routing` coverage.
 - 2026-07-15: Bridged legacy Sidestream update checks to the canonical `sidestream.tv` release manifest with direct `200` responses, strict Mac/Windows artifact validation, direct Mac installer routing for the legacy release-notes-first button, and v1.0.11-to-latest regression coverage so old clients are no longer stranded on the stale v1.0.8 snapshot.
 - 2026-07-02: Dropped all LUT checkout prices by 75%: individual LUTs now display and charge `$4.50`, the Complete LUT Bundle displays and charges `$9.75`, Stripe Products default to the new live one-time Prices, the previous `$18`/`$39` Stripe Prices are archived, and the bundle fallback Price ID now matches the sale price.
