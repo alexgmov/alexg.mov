@@ -9,7 +9,6 @@
     "test:sidestream-database-routing": "node --test scripts/test-sidestream-database-routing.mjs",
     "test:database-cutover-routing": "node --test scripts/test-database-cutover-routing.mjs",
     "test:hetzner-runtime": "node --test scripts/test-hetzner-runtime.mjs",
-    "test:hetzner-secret-export": "node --test scripts/test-hetzner-secret-export.mjs",
     "test:webhook-durability": "node --test scripts/test-webhook-durability.mjs",
     "test:sidestream-release-manifest": "node --test scripts/test-sidestream-release-manifest.js",
     "release:publish-manifest": "node scripts/publish-sidestream-release-manifest.js",

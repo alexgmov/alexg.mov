@@ -30,7 +30,6 @@ const apiRoutes = {
   '/api/create-checkout': './api/create-checkout',
   '/api/download': './api/download',
   '/api/email-capture': './api/email-capture',
-  '/api/hetzner-secret-export': './api/hetzner-secret-export',
   '/api/plugin-telemetry': './api/plugin-telemetry',
   '/api/sidestream/releases/latest': './api/sidestream/releases/latest',
   '/api/webhook': './api/webhook',

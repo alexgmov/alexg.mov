@@ -29,7 +29,6 @@ npm run preview
 npm run test:sidestream-database-routing
 npm run test:database-cutover-routing
 npm run test:hetzner-runtime
-npm run test:hetzner-secret-export
 npm run test:webhook-durability
 npm run test:sidestream-release-manifest
 npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestream-1.0.5-Mac-Installer.dmg --artifact-url 'https://9kfjhekmxi6iiwni.private.blob.vercel-storage.com/sidestream/1.0.5/Sidestream-1.0.5-Mac-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
@@ -268,6 +267,8 @@ The current location is derived automatically at page load using the current dat
 `HologramGlobe()` in `site/home.jsx` applies a visual +60 degree longitude rotation after centering the current location. Keep that offset separate from `LOCATIONS` latitude/longitude data so the list and date logic remain geographically correct while the planet framing can be art-directed. The globe canvas stays pointer-transparent; `site/home.jsx` positions a circular `.travel2-globe-hitarea` over the rendered sphere so pointer drag can rotate the D3 projection without blocking the travel list or content below the globe bleed.
 
 ## Recent Change Log
+
+- 2026-08-22: Completed the Website and telemetry database cutover to private Hetzner PostgreSQL, removed the temporary encrypted runtime-export handler after capture, and retained Neon only as a credential-rotated rollback source.
 
 - 2026-08-22: Promoted alexg.mov API routing to the authenticated Hetzner telemetry target only after the fenced direct-Neon snapshot and an independent target backup/restore-check both matched all 13 schema sections, all 32 migration checksums, all 52 tables, and all 5,441,184 rows.
 
