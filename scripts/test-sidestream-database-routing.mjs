@@ -7,6 +7,8 @@ const { resolveDatabaseUrl } = require('../lib/postgres-db');
 
 const ROUTING_ENV_KEYS = [
   'SIDESTREAM_NEON_DATABASE_URL',
+  'SIDESTREAM_HETZNER_POSTGRES_URL',
+  'SIDESTREAM_HETZNER_RUNTIME',
   'NEON_DATABASE_URL',
   'DATABASE_URL',
   'POSTGRES_URL',
@@ -99,5 +101,34 @@ test('database routing allows localhost only during local development', () => {
     NODE_ENV: 'development',
     VERCEL: '1',
     POSTGRES_URL: localUrl,
+  }, () => assert.equal(resolveDatabaseUrl(), ''));
+});
+
+test('database routing permits only an explicitly marked loopback Hetzner runtime', () => {
+  withRoutingEnv({
+    NODE_ENV: 'production',
+    SIDESTREAM_HETZNER_RUNTIME: '1',
+    SIDESTREAM_HETZNER_POSTGRES_URL: localUrl,
+    SIDESTREAM_NEON_DATABASE_URL: sidestreamNeonUrl,
+  }, () => assert.equal(resolveDatabaseUrl(), localUrl));
+
+  withRoutingEnv({
+    NODE_ENV: 'production',
+    SIDESTREAM_HETZNER_POSTGRES_URL: localUrl,
+    SIDESTREAM_NEON_DATABASE_URL: sidestreamNeonUrl,
+  }, () => assert.equal(resolveDatabaseUrl(), sidestreamNeonUrl));
+
+  withRoutingEnv({
+    NODE_ENV: 'production',
+    SIDESTREAM_HETZNER_RUNTIME: '1',
+    SIDESTREAM_HETZNER_POSTGRES_URL:
+      'postgresql://runtime:secret@10.0.0.12:5432/sidestream_telemetry',
+  }, () => assert.equal(resolveDatabaseUrl(), ''));
+
+  withRoutingEnv({
+    NODE_ENV: 'production',
+    VERCEL: '1',
+    SIDESTREAM_HETZNER_RUNTIME: '1',
+    SIDESTREAM_HETZNER_POSTGRES_URL: localUrl,
   }, () => assert.equal(resolveDatabaseUrl(), ''));
 });

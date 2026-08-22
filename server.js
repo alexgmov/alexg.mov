@@ -2,13 +2,25 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const { trackGetRequest } = require('./lib/analytics-store');
+const { checkDatabaseHealth } = require('./lib/postgres-db');
+const {
+  authorizedOriginRequest,
+  configuredHost,
+  configuredOriginSecret,
+  isHetznerRuntime,
+} = require('./lib/hetzner-runtime');
 
 const root = __dirname;
 const distRoot = path.join(root, 'dist');
+loadEnv(path.join(root, '.env.local'));
 const port = parseInt(process.env.PORT || '3000', 10);
 const useViteDev = process.env.NODE_ENV !== 'production';
-
-loadEnv(path.join(root, '.env.local'));
+const host = configuredHost();
+const hetznerRuntime = isHetznerRuntime();
+const originSecret = configuredOriginSecret();
+const deployedSha = /^[0-9a-f]{40}$/i.test(process.env.SIDESTREAM_DEPLOYED_SHA || '')
+  ? process.env.SIDESTREAM_DEPLOYED_SHA.toLowerCase()
+  : '';
 
 const apiRoutes = {
   '/api/analytics': './api/analytics',
@@ -18,6 +30,7 @@ const apiRoutes = {
   '/api/create-checkout': './api/create-checkout',
   '/api/download': './api/download',
   '/api/email-capture': './api/email-capture',
+  '/api/hetzner-secret-export': './api/hetzner-secret-export',
   '/api/plugin-telemetry': './api/plugin-telemetry',
   '/api/sidestream/releases/latest': './api/sidestream/releases/latest',
   '/api/webhook': './api/webhook',
@@ -59,9 +72,18 @@ async function start() {
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host || `localhost:${port}`}`);
     trackGetRequest(req, res, url);
+    if (url.pathname === '/healthz') {
+      return serveHealth(req, res);
+    }
     const route = apiRoutes[url.pathname];
 
     if (route) {
+      if (hetznerRuntime && !authorizedOriginRequest(req, originSecret)) {
+        res.statusCode = 404;
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.end(JSON.stringify({ error: 'Not found' }));
+        return;
+      }
       attachResponseHelpers(res);
       try {
         const resolved = require.resolve(route);
@@ -106,10 +128,40 @@ async function start() {
     serveStatic(req, url.pathname, res, distRoot, true);
   });
 
-  server.listen(port, () => {
+  server.listen(port, host, () => {
     const mode = vite ? 'dev' : 'production';
-    console.log(`alexg.mov ${mode} server running at http://localhost:${port}`);
+    console.log(`alexg.mov ${mode} server running on ${host}:${port} at ${deployedSha || 'unknown-sha'}`);
   });
+}
+
+async function serveHealth(req, res) {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.statusCode = 405;
+    res.setHeader('Allow', 'GET, HEAD');
+    return res.end();
+  }
+  let database = 'unreachable';
+  try {
+    if (await checkDatabaseHealth()) database = 'reachable';
+  } catch (err) {
+    console.error('alexg.mov database health check failed:', safeErrorCode(err));
+  }
+  const body = JSON.stringify({
+    ok: database === 'reachable',
+    service: 'alexg-api',
+    database,
+    deployedSha,
+  });
+  res.statusCode = database === 'reachable' ? 200 : 503;
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Length', Buffer.byteLength(body));
+  res.end(req.method === 'HEAD' ? undefined : body);
+}
+
+function safeErrorCode(error) {
+  const code = error && typeof error === 'object' ? String(error.code || error.name || '') : '';
+  return /^[A-Za-z0-9_]{1,32}$/.test(code) ? code : 'database_error';
 }
 
 async function createViteMiddleware() {

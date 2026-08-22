@@ -7,7 +7,7 @@ const {
   recordCheckoutSession,
   recordFulfilledPurchase,
   recordStripeEvent,
-  tryRecord,
+  isCheckoutSessionFulfilled,
 } = require('../lib/postgres-db');
 
 const CANONICAL_ORIGIN = normalizeOrigin(process.env.SITE_URL || 'https://alexg.mov');
@@ -61,7 +61,21 @@ function isFulfilledCheckoutStatus(paymentStatus) {
   return paymentStatus === 'paid' || paymentStatus === 'no_payment_required';
 }
 
-module.exports = async function handler(req, res) {
+const defaultDependencies = Object.freeze({
+  Stripe,
+  Resend,
+  PRODUCTS,
+  makeLink,
+  logEvent,
+  recordCheckoutSession,
+  recordFulfilledPurchase,
+  recordStripeEvent,
+  isCheckoutSessionFulfilled,
+});
+
+function createWebhookHandler(overrides = {}) {
+  const dependencies = { ...defaultDependencies, ...overrides };
+  return async function handler(req, res) {
   try {
     if (req.method !== 'POST') {
       res.setHeader('Allow', 'POST');
@@ -75,7 +89,7 @@ module.exports = async function handler(req, res) {
 
     const rawBody = await readBody(req);
     const sig = req.headers['stripe-signature'];
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const stripe = new dependencies.Stripe(process.env.STRIPE_SECRET_KEY);
 
     let event;
     try {
@@ -88,9 +102,9 @@ module.exports = async function handler(req, res) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object || {};
       const productId = session.metadata?.productId;
-      const product = PRODUCTS[productId];
+      const product = dependencies.PRODUCTS[productId];
 
-      await logEvent({
+      await dependencies.logEvent({
         type: 'stripe_webhook_checkout_completed',
         source: 'stripe_webhook',
         stripeEventId: event.id,
@@ -101,43 +115,80 @@ module.exports = async function handler(req, res) {
         amountTotal: session.amount_total,
         currency: session.currency,
       });
-      await tryRecord('checkout session completed', () => recordCheckoutSession(session, {
+      requireRecorded('checkout session completed', await dependencies.recordCheckoutSession(session, {
         productId,
         product,
       }));
-      await tryRecord('stripe webhook event received', () => recordStripeEvent(event, session));
+      requireRecorded(
+        'stripe webhook event received',
+        await dependencies.recordStripeEvent(event, session),
+      );
 
       if (!isFulfilledCheckoutStatus(session.payment_status)) {
         console.warn('Checkout session is not ready for fulfillment:', {
           sessionId: session.id,
           paymentStatus: session.payment_status,
         });
+        requireRecorded(
+          'stripe webhook event processed',
+          await dependencies.recordStripeEvent(event, session, 'processed'),
+        );
         return res.json({ received: true });
       }
 
+      const fulfillmentState = await dependencies.isCheckoutSessionFulfilled(session.id);
+      if (fulfillmentState?.skipped) {
+        throw new Error('Fulfillment database is not configured');
+      }
+      if (fulfillmentState?.fulfilled) {
+        requireRecorded(
+          'stripe webhook event processed',
+          await dependencies.recordStripeEvent(event, session, 'processed'),
+        );
+        return res.json({ received: true, duplicate: true });
+      }
+
       try {
-        await fulfillCheckoutSession(session, req);
-        await tryRecord('stripe webhook event processed', () => recordStripeEvent(event, session, 'processed'));
+        await fulfillCheckoutSession(session, req, dependencies);
+        requireRecorded(
+          'stripe webhook event processed',
+          await dependencies.recordStripeEvent(event, session, 'processed'),
+        );
       } catch (err) {
         console.error('Checkout fulfillment failed:', {
           eventId: event.id,
           sessionId: session.id,
           message: err.message,
         });
-        await tryRecord('stripe webhook event failed', () => recordStripeEvent(event, session, 'failed', err.message));
+        try {
+          requireRecorded(
+            'stripe webhook event failed',
+            await dependencies.recordStripeEvent(event, session, 'failed', err.message),
+          );
+        } catch (recordError) {
+          console.error('Stripe webhook failure state was not persisted:', recordError.message);
+        }
+        return res.status(503).json({
+          error: 'Checkout fulfillment is temporarily unavailable',
+          retryable: true,
+        });
       }
     }
 
     return res.json({ received: true });
   } catch (err) {
     console.error('Stripe webhook handler crashed:', err);
-    return res.status(500).json({ error: 'Webhook handler failed' });
+    return res.status(503).json({ error: 'Webhook handler failed', retryable: true });
   }
-};
+  };
+}
 
-async function fulfillCheckoutSession(session, req) {
+module.exports = createWebhookHandler();
+module.exports.createWebhookHandler = createWebhookHandler;
+
+async function fulfillCheckoutSession(session, req, dependencies = defaultDependencies) {
   const { productId } = session.metadata || {};
-  const product = PRODUCTS[productId];
+  const product = dependencies.PRODUCTS[productId];
   const email = session.customer_details?.email || session.customer_email;
 
   if (!product?.blobUrl) {
@@ -156,11 +207,11 @@ async function fulfillCheckoutSession(session, req) {
   const origin = getPublicOrigin(req);
   const downloadUrl = productId === 'sidestream'
     ? SIDESTREAM_PUBLIC_DOWNLOAD_URL
-    : makeLink(origin, productId);
+    : dependencies.makeLink(origin, productId);
   const installUrl = productId === 'sidestream'
     ? `${origin}/?page=sidestream-install&download=${encodeURIComponent(downloadUrl)}`
     : '';
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = new dependencies.Resend(process.env.RESEND_API_KEY);
   const result = await resend.emails.send({
     from: 'alexg.mov <downloads@alexg.mov>',
     to: email,
@@ -170,19 +221,28 @@ async function fulfillCheckoutSession(session, req) {
       installUrl,
       productId,
     }),
+  }, {
+    idempotencyKey: `stripe-checkout-fulfillment-${session.id}`.slice(0, 256),
   });
 
   if (result?.error) {
     throw new Error(result.error.message || 'Resend rejected the email');
   }
 
-  await tryRecord('purchase fulfillment', () => recordFulfilledPurchase(session, {
+  requireRecorded('purchase fulfillment', await dependencies.recordFulfilledPurchase(session, {
     productId,
     product,
     email,
     downloadUrl,
     emailDeliveryId: result?.data?.id || '',
   }));
+}
+
+function requireRecorded(label, result) {
+  if (result?.recorded) return result;
+  const error = new Error(`${label} was not durably stored`);
+  error.code = result?.skipped ? 'database_not_configured' : 'database_write_failed';
+  throw error;
 }
 
 function buildEmail(productName, downloadUrl, options = {}) {

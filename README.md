@@ -16,6 +16,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `lib/products.js` is the server-side commerce catalog. This is the only product catalog used for Stripe Checkout and fulfillment.
 - `api/*.js` and nested `api/**/*.js` files are Vercel-compatible CommonJS handlers. Locally, `server.js` maps those same files to `/api/...` routes and attaches small `res.status()`, `res.json()`, and `res.send()` helpers.
 - `server.js` serves Vite middleware in development and the `dist/` build in production mode.
+- `middleware.ts`, `server.js`, and `lib/hetzner-runtime.js` own the independent `source`/`fenced`/`target` API cutover. Vercel keeps the existing public `/api/*` URLs; target mode rewrites them to the protected Hetzner HTTPS base path, and the Node service accepts API traffic only with the shared origin secret while binding to loopback.
 - `scripts/copy-static.mjs` copies static assets that Vite does not bundle directly, including `mockups`, `videos`, `robots.txt`, `sitemap.xml`, and `llms.txt`.
 - `api/sidestream/releases/latest.js` is the compatibility endpoint used by older Sidestream panels. It returns a validated `200` copy of the canonical `sidestream.tv` manifest for Mac and Windows; it must not redirect because the v1.0.11 updater rejects non-2xx responses. `data/sidestream-release-manifest.json` remains only as legacy shop/download metadata and no longer controls update checks.
 
@@ -26,6 +27,10 @@ npm run dev
 npm run build
 npm run preview
 npm run test:sidestream-database-routing
+npm run test:database-cutover-routing
+npm run test:hetzner-runtime
+npm run test:hetzner-secret-export
+npm run test:webhook-durability
 npm run test:sidestream-release-manifest
 npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestream-1.0.5-Mac-Installer.dmg --artifact-url 'https://9kfjhekmxi6iiwni.private.blob.vercel-storage.com/sidestream/1.0.5/Sidestream-1.0.5-Mac-Installer.dmg?download=1' --release-notes-url 'https://alexg.mov/?page=sidestream-install' --signed --verified --uploaded --smoke-tested
 ```
@@ -66,7 +71,9 @@ The server runtime uses these variables:
 - `EMAIL_POSTAL_ADDRESS` or `BUSINESS_POSTAL_ADDRESS`: footer address to include for commercial email compliance.
 - `ANALYTICS_LOG_DIR`: optional local analytics log directory.
 - `ANALYTICS_SALT`: optional visitor fingerprint salt. Falls back to `DOWNLOAD_SECRET`.
-- `SIDESTREAM_NEON_DATABASE_URL`, `NEON_DATABASE_URL`, `DATABASE_URL`, and `POSTGRES_URL`: server-side database URL candidates, checked in that order. The first valid PostgreSQL URL is used for durable commerce, fulfillment, lead, and Sidestream telemetry writes. Deployed runtimes accept only `neon.tech` hosts; local development also accepts `localhost`, `127.0.0.1`, and `::1`.
+- `SIDESTREAM_HETZNER_POSTGRES_URL`: accepted only when `SIDESTREAM_HETZNER_RUNTIME=1`, Vercel markers are absent, and the URL host is exactly `localhost`, `127.0.0.1`, or `::1`. It is first in the resolver only for the protected Hetzner service and never permits a remote database host.
+- `SIDESTREAM_NEON_DATABASE_URL`, `NEON_DATABASE_URL`, `DATABASE_URL`, and `POSTGRES_URL`: source/rollback database URL candidates, checked after the Hetzner-only selector. Production Vercel accepts only `neon.tech`; ordinary local development may use loopback.
+- `ALEXG_HETZNER_ORIGIN_URL` and `SIDESTREAM_ORIGIN_AUTH_SECRET`: Vercel target-mode HTTPS base path and its 32-512 character internal credential. `SIDESTREAM_HETZNER_RUNTIME=1`, `HOST=127.0.0.1` or `::1`, `PORT`, and `SIDESTREAM_DEPLOYED_SHA` configure the protected Node service.
 - `POSTGRES_POOL_MAX`: optional server-side Postgres pool size. Defaults to `3`, which is intentionally small for Vercel serverless.
 - `POSTGRES_SSL`: set to `0` only for a local non-SSL Postgres database. Neon connections should keep SSL enabled.
 - `SIDESTREAM_TELEMETRY_ENABLED`: set to `0` to make `/api/plugin-telemetry` accept but drop Sidestream plugin telemetry while keeping the route deployed.
@@ -90,11 +97,11 @@ Canonical release truth lives in `/Users/alexgarrett/alexg.mov/website/sidestrea
 
 The publish script calculates `sha256` and `sizeBytes` from the local artifact and refuses to write the legacy snapshot unless all four release gates are passed as flags. Staged rollout remains canonical Sidestream manifest data; the panel makes the actual eligibility decision locally so the compatibility endpoint does not need to track users.
 
-## Neon-only Business Ledger
+## Business Ledger and Telemetry Database
 
-Commerce, fulfillment, lead, and Sidestream telemetry persistence uses direct PostgreSQL against Neon through `lib/postgres-db.js`. This helper is the only active database runtime: there is no database REST path or alternate hosted-database fallback, and browser code plus the Sidestream CEP panel never receive database credentials.
+Commerce, fulfillment, lead, and Sidestream telemetry persistence uses direct PostgreSQL through `lib/postgres-db.js`. The original Vercel runtime accepts only Neon. The prepared Hetzner runtime accepts only its explicit loopback selector; Vercel proxies the unchanged public API URL over HTTPS and never connects to PostgreSQL. Browser code and the Sidestream CEP panel never receive database credentials. The cross-repository writer inventory, verification gates, and rollback boundary are in the Website repository's `docs/hetzner-production-cutover.md`.
 
-The schema contains private commerce tables for customers, email leads, Checkout Sessions, Stripe events, purchases, licenses, hashed download links, and download outcomes. Sidestream telemetry uses separate raw-event, install-rollup, and session-rollup tables so plugin event retention and indexing remain independent from the commerce ledger. Apply schema changes to the target Neon database before deploying code that depends on them.
+The schema contains private commerce tables for customers, email leads, Checkout Sessions, Stripe events, purchases, licenses, hashed download links, and download outcomes. Sidestream telemetry uses separate raw-event, install-rollup, and session-rollup tables so plugin event retention and indexing remain independent from the commerce ledger. Runtime handlers do not apply schema changes; migration history remains copied and verified as data/catalog state.
 
 Historical schema note: legacy SQL migrations remain under the old vendor-named `supabase/migrations/` directory for migration history only; that directory does not represent a supported runtime, integration, or fallback.
 
@@ -102,13 +109,13 @@ Historical schema note: legacy SQL migrations remain under the old vendor-named 
 
 `api/plugin-telemetry.js` accepts `POST /api/plugin-telemetry` from the Sidestream CEP extension and the native Mac installer postinstall script. The plugin sends batches of up to 100 already-redacted events; the installer sends a single best-effort `installer_install_completed` event with a pseudonymous `installer_receipt_id_hash`. The server validates body size, event field lengths, timestamps, category/severity labels, structured consent state, and JSON payload size. It hashes request IP/user-agent context with the server secret, writes raw redacted rows to `sidestream_telemetry_events`, and upserts `sidestream_installs` plus `sidestream_sessions` through `lib/postgres-db.js` when events carry normal panel install/session ids.
 
-Telemetry has one direct Postgres recording path. A batch is written in one transaction; new raw events update install/session rollups, while an already-present event ID is acknowledged as a successful retry. The required ledger and telemetry migrations must be present in Neon before the route is deployed.
+Telemetry has one direct Postgres recording path. A batch is written in one transaction; new raw events update install/session rollups, while an already-present event ID is acknowledged as a successful retry. The required ledger and telemetry migrations must be present in the selected local or Neon database before the route is deployed.
 
 The route returns `200` only when every accepted event is recorded or already present from an earlier retry. Database misconfiguration, partial writes, or collector errors return non-2xx so the CEP uploader keeps the local queue and retries. `SIDESTREAM_TELEMETRY_ENABLED=0` remains an intentional accept-and-drop kill switch and returns `202` with `disabled: true`.
 
 The event envelope supports `support_code`, `batch_id`, `payload_redaction_version`, `event_category`, `severity`, `error_class`, and `action_name` for dashboards that can query installs, native installer receipts, sessions, timelines, failures, update-check outcomes, and support lookups without exposing raw URLs, local paths, filenames, titles, channels, queries, command output, stacks, cookies, clipboard content, or database credentials.
 
-The route intentionally does not expose Neon, Stripe, Blob, or Resend secrets to the plugin. If no valid database URL resolves, the route fails the telemetry acknowledgement instead of claiming success; the editor's search/download workflow continues because uploads happen through the plugin's bounded background queue.
+The route does not expose PostgreSQL, Stripe, Blob, or Resend secrets to the plugin. If no valid database URL resolves, it fails the telemetry acknowledgement instead of claiming success; the editor's search/download workflow continues because uploads happen through the plugin's bounded background queue.
 
 ## First-Visit Promo Offer
 
@@ -136,7 +143,7 @@ Checkout buttons in `site/luts.jsx` and `site/plugins.jsx` pass `offerCode`, `of
 8. `cancel_url` returns the buyer to the product page declared in `product.page`.
 9. `statement_descriptor_suffix` is set when the product defines `statementDescriptorSuffix`.
 10. The server logs a `checkout_session_created` analytics event.
-11. When a valid Neon database URL resolves, `lib/postgres-db.js` records the Checkout Session snapshot in Postgres.
+11. When a valid selected database URL resolves, `lib/postgres-db.js` records the Checkout Session snapshot in Postgres.
 12. The browser redirects to the Stripe-hosted Checkout URL.
 
 The integration intentionally uses Stripe-hosted Checkout Sessions for one-time digital purchases.
@@ -220,9 +227,9 @@ Local product files can live under `plugins/` or `luts/` while they are being up
 8. `api/download.makeLink()` creates a signed URL valid for 48 hours for paid product downloads.
 9. Resend sends the buyer an email from `alexg.mov <downloads@alexg.mov>`.
 10. Sidestream fulfillment emails the single native Mac installer DMG download link plus backup web steps. Because Sidestream is currently free, that email uses the public Sidestream installer route instead of the signed shop download route. The DMG contains `Install Sidestream.pkg`; no external installer app is required.
-11. When a valid Neon database URL resolves, the webhook records the Stripe event, checkout session, customer, purchase, active license, and hashed download-link row in Postgres.
+11. The webhook requires a valid selected database and durably records the Stripe event, checkout session, customer, purchase, active license, and hashed download-link row in Postgres before success.
 
-Important operational detail: fulfillment errors are logged, but the webhook still responds with `{ received: true }`. That means Stripe will not retry a failed Resend send or missing-product configuration after the handler catches the error. Check deployment logs after product launches and webhook tests.
+The webhook returns a retryable `503` when required database persistence, Resend delivery, or fulfillment persistence fails, so Stripe does not receive a false success. Resend receives a Checkout-Session-scoped idempotency key; the database takes a transaction advisory lock and recognizes an already fulfilled Session before creating another download-link record. A fully persisted duplicate returns success without sending another email.
 
 ## Download Delivery
 
@@ -236,7 +243,7 @@ Important operational detail: fulfillment errors are logged, but the webhook sti
 6. The handler fetches the private Blob URL with `BLOB_READ_WRITE_TOKEN`, or with a product-specific token env such as `SIDESTREAM_BLOB_READ_WRITE_TOKEN` when configured in `lib/products.js`.
 7. `HEAD` requests validate the signed link and private Blob reachability, then return file headers without streaming the artifact.
 8. `GET` requests stream the file as an attachment using `downloadFilename`.
-9. When a valid Neon database URL resolves, the handler records the download outcome in `download_events`.
+9. When a valid selected database URL resolves, the handler records the download outcome in `download_events`.
 
 Sidestream is the exception while it is free: `/api/download?p=sidestream...` redirects to `SIDESTREAM_PUBLIC_DOWNLOAD_URL`, and new Sidestream checkout emails use that same public installer URL directly. This keeps old signed Sidestream email links working even if `DOWNLOAD_SECRET` or private Blob tokens drift.
 
@@ -262,6 +269,7 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-08-22: Added the source/fence/target Hetzner API boundary, loopback-only resolver/service guards, expiring encrypted secret transfer, durable Stripe webhook acknowledgements with Resend and database idempotency, and focused routing/runtime/fulfillment tests. The checked-in mode remains `source` until the final fenced transfer and independent restore verification pass.
 - 2026-07-16: Cut commerce, fulfillment, lead, and Sidestream telemetry persistence over to Neon-only direct Postgres routing, with validated database URL precedence and focused `npm run test:sidestream-database-routing` coverage.
 - 2026-07-15: Bridged legacy Sidestream update checks to the canonical `sidestream.tv` release manifest with direct `200` responses, strict Mac/Windows artifact validation, direct Mac installer routing for the legacy release-notes-first button, and v1.0.11-to-latest regression coverage so old clients are no longer stranded on the stale v1.0.8 snapshot.
 - 2026-07-02: Dropped all LUT checkout prices by 75%: individual LUTs now display and charge `$4.50`, the Complete LUT Bundle displays and charges `$9.75`, Stripe Products default to the new live one-time Prices, the previous `$18`/`$39` Stripe Prices are archived, and the bundle fallback Price ID now matches the sale price.
