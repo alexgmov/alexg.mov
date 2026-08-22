@@ -10,44 +10,63 @@ const PORTFOLIO_SCROLL_BLUR_SELECTOR = '[data-portfolio-scroll-blur]';
 // click-through / project-file purchase layer can attach to this same model.
 const PORTFOLIO_CATEGORIES = [
   {
+    id: 'long-form-youtube',
+    label: 'Long-Form YouTube Videos',
+    kicker: '01',
+    intro: 'I filmed this behind-the-scenes Wispr Flow vlog for the team, now at 329K+ views.',
+  },
+  {
     id: 'launchbrand',
     label: 'Launch / Brand',
-    kicker: '01',
+    kicker: '02',
     intro: 'Launch films and brand pieces built to land quickly.',
   },
   {
     id: 'talking-heads',
     label: 'Talking Heads',
-    kicker: '02',
+    kicker: '03',
     intro: 'Founder, realtor, and hospitality-led reels built around people on camera.',
   },
   {
     id: 'motion-graphics',
     label: 'Motion Graphics',
-    kicker: '03',
+    kicker: '04',
     intro: 'Typography, transitions, and motion that make the message clearer.',
   },
   {
     id: 'ai-speed-ramp-edits',
     label: 'Speed Ramp Edits',
-    kicker: '04',
+    kicker: '05',
     intro: 'Fast social edits with punchy pacing and kinetic movement.',
   },
   {
     id: 'real-estate',
     label: 'Real Estate',
-    kicker: '05',
+    kicker: '06',
     intro: 'Property promos and realtor-led edits with a premium finish.',
   },
   {
     id: 'short-film',
     label: 'Short Films',
-    kicker: '06',
+    kicker: '07',
     intro: 'Widescreen edits focused on pacing, tone, and atmosphere.',
   },
 ];
 
 const PORTFOLIO_VIDEOS = [
+  {
+    id: 'wispr-flow-behind-the-scenes-youtube',
+    title: 'This Is What Running a $2B AI Startup Looks Like',
+    category: 'long-form-youtube',
+    kind: 'Behind-the-scenes company vlog',
+    client: 'Wispr Flow',
+    blurb: 'A behind-the-scenes Wispr Flow vlog I filmed for the team.',
+    viewCount: '329K+ views',
+    source: 'YouTube',
+    sourceUrl: 'https://www.youtube.com/watch?v=fhs7voB2eJQ',
+    posterSrc: 'https://i.ytimg.com/vi/fhs7voB2eJQ/maxresdefault.jpg',
+    layout: 'feature',
+  },
   {
     id: 'omi-launch-film',
     title: 'OMI launch film',
@@ -395,7 +414,7 @@ function PortfolioVideoTile({ item, priority = false }) {
       href={sourceUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className={"port-item port-video " + item.layout}
+      className={"port-item port-video " + item.layout + (item.viewCount ? ' port-item-featured-meta' : '')}
       style={{ '--video-scale': item.videoScale || 1 }}
       data-portfolio-id={item.id}
       data-category={item.category}
@@ -403,24 +422,35 @@ function PortfolioVideoTile({ item, priority = false }) {
       data-source-url={sourceUrl}
       aria-label={`Open ${item.title} source on ${item.source}`}
     >
-      <video
-        ref={videoRef}
-        src={priority ? playbackSrc : undefined}
-        poster={posterSrc}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload={priority ? 'metadata' : 'none'}
-        aria-label={item.title}
-        title={item.title}
-        disablePictureInPicture
-        controlsList="nodownload nofullscreen noremoteplayback"
-      />
+      {item.src ? (
+        <video
+          ref={videoRef}
+          src={priority ? playbackSrc : undefined}
+          poster={posterSrc}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload={priority ? 'metadata' : 'none'}
+          aria-label={item.title}
+          title={item.title}
+          disablePictureInPicture
+          controlsList="nodownload nofullscreen noremoteplayback"
+        />
+      ) : (
+        <img
+          src={item.posterSrc}
+          alt=""
+          loading={priority ? 'eager' : 'lazy'}
+          referrerPolicy="no-referrer"
+        />
+      )}
       <div className="port-overlay">
         <div className="port-caption">
           <p className="port-kicker">For {item.client || item.source}</p>
           <h3 className="port-title">{item.title}</h3>
+          {item.viewCount && item.blurb ? <p className="port-blurb">{item.blurb}</p> : null}
+          {item.viewCount ? <p className="port-stat">{item.viewCount}</p> : null}
         </div>
       </div>
     </a>
@@ -456,7 +486,9 @@ function PortfolioCategorySection({ category, priority = false }) {
             <h2>{category.label}</h2>
             <p>{category.intro}</p>
           </div>
-          <span className="portfolio-count">{category.items.length} pieces</span>
+          <span className="portfolio-count">
+            {category.items.length} {category.items.length === 1 ? 'piece' : 'pieces'}
+          </span>
         </div>
       </div>
       <div className="portfolio-rails">
