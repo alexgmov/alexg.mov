@@ -8,7 +8,7 @@ This repository is the alexg.mov marketing site and digital product shop. It is 
 - `site/app.jsx` owns the query-string router. Public pages are represented by `?page=...`, for example `?page=luts`, `?page=lut:cinematic-01`, `?page=sidestream-install`, and `?page=success`.
 - Route components are split into chunks: home, plugins, LUTs, and supporting pages.
 - `site/chrome.jsx` owns global nav/footer chrome. The mobile bottom nav is hidden on product detail routes and the Sidestream install guide so purchase/install actions are not covered by the floating menu.
-- `site/home.jsx` owns the homepage hero, hero shortcuts to LUTs/portfolio, and featured product rail, with the OMI proof teaser leading the LUT cards. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp. Portfolio entries can use local looping video sources or a remote poster-only source card; poster-only cards keep the same click-through and responsive rail behavior without downloading the source video.
+- `site/home.jsx` owns the homepage hero, hero shortcuts to LUTs/portfolio, and featured product rail, with the OMI proof teaser leading the LUT cards. `site/pages.jsx` owns portfolio/services pages, keeps the service case-study fallback copy, and uses opt-in `data-portfolio-scroll-blur` markers only on portfolio content that should blur while the top category header stays crisp. Portfolio entries can use local looping video sources or poster-only source cards; poster-only cards keep the same click-through and responsive rail behavior without downloading the source video.
 - `site/travel.js` owns the homepage travel itinerary. Each row has a `startsOn` ISO date; the browser derives `past`, `here`, and `next` statuses from the current date in the `America/Los_Angeles` timezone.
 - `site/product-data.js` mirrors public product data for the browser. It contains display copy, SEO data, product IDs used by checkout buttons, display pricing fields, media paths, and product page metadata. LUT copy also has fallback/indexable mirrors in `site/luts.jsx`, `site/home.jsx`, and `llms.txt`; keep those aligned when changing product descriptions.
 - `site/pricing.jsx` owns display-only pricing helpers for rendered prices, compare-at launch pricing, and pricing-variant tracking attributes. Stripe Price IDs in `lib/products.js` remain the source of truth for what checkout actually charges.
@@ -264,6 +264,7 @@ The globe also renders a raised great-circle web between every unique past/curre
 
 ## Recent Change Log
 
+- 2026-08-22: Added the Lanesurf $15K AI Agent Challenge LinkedIn video to the Launch / Brand portfolio section with a durable local poster image.
 - 2026-08-22: Added a dedicated Long-Form YouTube Videos portfolio section featuring the 329K+ view behind-the-scenes Wispr Flow vlog filmed by Alex.
 - 2026-08-22: Added a depth-aware web of elevated arcs connecting every visited/current destination on the homepage travel globe.
 - 2026-08-22: Updated homepage travel dates to show Delhi, India from Aug 17–24 and New York City, USA from Aug 24–30, with San Francisco ending Aug 17.

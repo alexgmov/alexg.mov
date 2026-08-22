@@ -68,6 +68,18 @@ const PORTFOLIO_VIDEOS = [
     layout: 'feature',
   },
   {
+    id: 'lanesurf-ai-agent-challenge',
+    title: 'Lanesurf $15K AI Agent Challenge',
+    category: 'launchbrand',
+    kind: 'Campaign launch film',
+    client: 'Lanesurf',
+    blurb: "Launch video for Lanesurf's public $15K AI freight broker challenge.",
+    source: 'LinkedIn',
+    sourceUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7490434929772621824/',
+    posterSrc: 'videos/portfolio/web/lanesurf-ai-agent-challenge.poster.jpg',
+    layout: 'landscape',
+  },
+  {
     id: 'omi-launch-film',
     title: 'OMI launch film',
     category: 'launchbrand',
