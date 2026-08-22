@@ -22,7 +22,9 @@ export const TRAVEL_ITINERARY = [
   { key: 'bangkok',    when: 'APR 15–17',      startsOn: '2026-04-15' },
   { key: 'ko-samui',   when: 'APR 17–MAY 6',   startsOn: '2026-04-17' },
   { key: 'sydney',     when: 'MAY 6–25',       startsOn: '2026-05-06' },
-  { key: 'san-francisco', when: 'MAY 25–ONWARD', startsOn: '2026-05-25' },
+  { key: 'san-francisco', when: 'MAY 25–AUG 17', startsOn: '2026-05-25' },
+  { key: 'delhi',         when: 'AUG 17–24',      startsOn: '2026-08-17' },
+  { key: 'new-york',      when: 'AUG 24–30',      startsOn: '2026-08-24' },
 ];
 
 function dateValueInTimeZone(date, timeZone) {
