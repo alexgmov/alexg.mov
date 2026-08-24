@@ -268,6 +268,8 @@ The current location is derived automatically at page load using the current dat
 
 ## Recent Change Log
 
+- 2026-08-24: Matched the Wispr Flow long-form tile to the rest of the portfolio by removing its always-visible text overlay; the filming context and 329K+ view count remain in the section copy.
+
 - 2026-08-22: Completed the Website and telemetry database cutover to private Hetzner PostgreSQL, removed the temporary encrypted runtime-export handler after capture, retained Neon only as a credential-rotated rollback source, and placed the optional local analytics mirror in a private writable service state directory.
 
 - 2026-08-22: Promoted alexg.mov API routing to the authenticated Hetzner telemetry target only after the fenced direct-Neon snapshot and an independent target backup/restore-check both matched all 13 schema sections, all 32 migration checksums, all 52 tables, and all 5,441,184 rows.

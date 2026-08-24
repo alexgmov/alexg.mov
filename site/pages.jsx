@@ -60,8 +60,6 @@ const PORTFOLIO_VIDEOS = [
     category: 'long-form-youtube',
     kind: 'Behind-the-scenes company vlog',
     client: 'Wispr Flow',
-    blurb: 'A behind-the-scenes Wispr Flow vlog I filmed for the team.',
-    viewCount: '329K+ views',
     source: 'YouTube',
     sourceUrl: 'https://www.youtube.com/watch?v=fhs7voB2eJQ',
     posterSrc: 'https://i.ytimg.com/vi/fhs7voB2eJQ/maxresdefault.jpg',
