@@ -11,7 +11,7 @@
 // when: display label shown in the list (e.g. "JAN 2026", "APR 17–MAY 6")
 // startsOn: ISO date that flips this row to the current location.
 
-export const TRAVEL_TIME_ZONE = 'America/Los_Angeles';
+export const TRAVEL_TIME_ZONE = 'America/New_York';
 
 export const TRAVEL_ITINERARY = [
   { key: 'rio',         when: 'FEB 7–22',      startsOn: '2026-02-07' },

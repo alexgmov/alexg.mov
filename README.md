@@ -262,7 +262,7 @@ Stripe-hosted Checkout does not expose internal Checkout page clicks, field focu
 
 `site/travel.js` is the source of truth for the homepage location list. To update travel, add or edit rows in `TRAVEL_ITINERARY`, keep `startsOn` sorted oldest to newest, and make sure each `key` exists in the `LOCATIONS` map in `site/home.jsx`. `LOCATIONS` entries usually render as `City, Country`; country-level stops can leave `country` blank and the travel list will omit the comma suffix.
 
-The current location is derived automatically at page load using the current date in the `America/Los_Angeles` timezone. The latest row whose `startsOn` date is today or earlier becomes `here`; earlier rows become `past`; later rows become `next`. The final row remains `here` until another row is added, even when its display label has a known end date, so add the next destination before that handoff when it becomes known.
+The current location is derived automatically at page load using the current date in the `America/New_York` timezone. The latest row whose `startsOn` date is today or earlier becomes `here`; earlier rows become `past`; later rows become `next`. The final row remains `here` until another row is added, even when its display label has a known end date, so add the next destination before that handoff when it becomes known.
 
 `HologramGlobe()` in `site/home.jsx` applies a visual +60 degree longitude rotation after centering the current location. Keep that offset separate from `LOCATIONS` latitude/longitude data so the list and date logic remain geographically correct while the planet framing can be art-directed. The globe canvas stays pointer-transparent; `site/home.jsx` positions a circular `.travel2-globe-hitarea` over the rendered sphere so pointer drag can rotate the D3 projection without blocking the travel list or content below the globe bleed.
 
@@ -270,6 +270,7 @@ The globe also renders a raised great-circle web between every unique past/curre
 
 ## Recent Change Log
 
+- 2026-08-24: Switched the travel-status clock to New York time so the Aug 24 New York City handoff becomes current at local midnight.
 - 2026-08-22: Completed the Website and telemetry database cutover to private Hetzner PostgreSQL, removed the temporary encrypted runtime-export handler after capture, retained Neon only as a credential-rotated rollback source, and placed the optional local analytics mirror in a private writable service state directory.
 
 - 2026-08-22: Promoted alexg.mov API routing to the authenticated Hetzner telemetry target only after the fenced direct-Neon snapshot and an independent target backup/restore-check both matched all 13 schema sections, all 32 migration checksums, all 52 tables, and all 5,441,184 rows.
