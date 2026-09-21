@@ -1,59 +1,28 @@
 import React from 'react';
 import { useScrollBlur } from './scroll-blur.js';
-import { getVideoPosterSrc, useResponsiveVideoSrc } from './media.js';
+import { getVideoPosterSrc, useResponsiveVideoSrc, useMediaQuery } from './media.js';
+import { PortfolioYouTubePlayer } from './portfolio-youtube.jsx';
 
 // Portfolio, Services, Support, Terms, Refund
 
 const PORTFOLIO_SCROLL_BLUR_SELECTOR = '[data-portfolio-scroll-blur]';
 
-// Keep source links and per-project metadata on each tile so the next
-// click-through / project-file purchase layer can attach to this same model.
-const PORTFOLIO_CATEGORIES = [
-  {
-    id: 'long-form-youtube',
-    label: 'Long-Form YouTube Videos',
-    kicker: '01',
-    intro: 'I filmed this behind-the-scenes Wispr Flow vlog for the team, now at 329K+ views.',
-  },
-  {
-    id: 'launchbrand',
-    label: 'Launch / Brand',
-    kicker: '02',
-    intro: 'Launch films and brand pieces built to land quickly.',
-  },
-  {
-    id: 'talking-heads',
-    label: 'Talking Heads',
-    kicker: '03',
-    intro: 'Founder, realtor, and hospitality-led reels built around people on camera.',
-  },
-  {
-    id: 'motion-graphics',
-    label: 'Motion Graphics',
-    kicker: '04',
-    intro: 'Typography, transitions, and motion that make the message clearer.',
-  },
-  {
-    id: 'ai-speed-ramp-edits',
-    label: 'Speed Ramp Edits',
-    kicker: '05',
-    intro: 'Fast social edits with punchy pacing and kinetic movement.',
-  },
-  {
-    id: 'real-estate',
-    label: 'Real Estate',
-    kicker: '06',
-    intro: 'Property promos and realtor-led edits with a premium finish.',
-  },
-  {
-    id: 'short-film',
-    label: 'Short Films',
-    kicker: '07',
-    intro: 'Widescreen edits focused on pacing, tone, and atmosphere.',
-  },
-];
-
+// Source destinations stay attached to each project for the story and original film link.
 const PORTFOLIO_VIDEOS = [
+  {
+    id: 'conviction-launch-film',
+    title: 'Conviction — Trading Desk in Your Pocket',
+    category: 'launchbrand',
+    kind: 'Product launch film',
+    client: 'Conviction',
+    blurb: 'A launch film introducing Conviction, an AI trading platform that turns ideas into strategies.',
+    story: 'A launch film introducing Conviction: a trading desk in your pocket. Live action and product graphics follow an idea from a missed opportunity through backtesting, simulated trading, and deployment.',
+    source: 'LinkedIn',
+    sourceUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7506131071520907264/',
+    src: 'videos/portfolio/web/conviction-launch-film.mp4',
+    filmSrc: 'videos/portfolio/web/conviction-launch-film.full.mp4',
+    layout: 'landscape',
+  },
   {
     id: 'wispr-flow-behind-the-scenes-youtube',
     title: 'This Is What Running a $2B AI Startup Looks Like',
@@ -61,10 +30,13 @@ const PORTFOLIO_VIDEOS = [
     kind: 'Behind-the-scenes company vlog',
     client: 'Wispr Flow',
     blurb: 'A behind-the-scenes Wispr Flow vlog I filmed for the team.',
-    viewCount: '329K+ views',
     source: 'YouTube',
     sourceUrl: 'https://www.youtube.com/watch?v=fhs7voB2eJQ',
     posterSrc: 'https://i.ytimg.com/vi/fhs7voB2eJQ/maxresdefault.jpg',
+    youtubeId: 'fhs7voB2eJQ',
+    logo: 'mockups/portfolio/wispr-flow-logo.svg',
+    story: 'A behind-the-scenes Wispr Flow vlog I filmed for the team.',
+    outcome: 'Got 500k+ views and 12k subscribers on the channel in 3 weeks starting from zero.',
     layout: 'feature',
   },
   {
@@ -77,27 +49,33 @@ const PORTFOLIO_VIDEOS = [
     source: 'LinkedIn',
     sourceUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7490434929772621824/',
     posterSrc: 'videos/portfolio/web/lanesurf-ai-agent-challenge.poster.jpg',
+    src: 'videos/portfolio/web/lanesurf-ai-agent-challenge.mp4',
     layout: 'landscape',
   },
   {
     id: 'omi-launch-film',
+    logo: 'mockups/portfolio/omi-logo.png',
+    logoLabel: 'omi',
     title: 'OMI launch film',
     category: 'launchbrand',
     kind: 'Product launch film',
     client: 'OMI',
-    blurb: 'Launch film with 10M organic views.',
-    source: 'alexg.mov',
-    sourceUrl: 'videos/portfolio/web/omi-launch-film.mp4',
+    blurb: '10M views in two weeks across platforms and 100K installs.',
+    story: 'The OMI launch film reached 10M views across platforms in two weeks and drove 100K installs. I handled concept, script, production, edit, and onscreen product moments.',
+    source: 'X',
+    sourceUrl: 'https://x.com/kodjima33/status/2044078767518138555',
     src: 'videos/portfolio/web/omi-launch-film.mp4',
+    filmSrc: 'videos/portfolio/web/omi-launch-film.full.mp4',
+    filmPosterSrc: 'videos/portfolio/web/omi-launch-film.full.poster.jpg',
     layout: 'feature',
   },
   {
     id: 'ekta-portrait',
-    title: 'Ekta portrait cut',
+    title: 'Horse Edit',
     category: 'ai-speed-ramp-edits',
-    kind: 'Portrait social reel',
+    kind: 'Travel speed ramp',
     client: 'Ekta',
-    blurb: 'Clean portrait reel with a quiet cinematic feel.',
+    blurb: 'A horse encounter in Tonga, cut with fast transitions and island scenery.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DMZNWMJRyu5/',
     src: 'videos/portfolio/web/ekta-portrait.mp4',
@@ -105,11 +83,11 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'alexg-portrait',
-    title: 'Alex Garrett social spot',
+    title: 'Pigeon Edit',
     category: 'ai-speed-ramp-edits',
-    kind: 'Personal brand spot',
+    kind: 'Surreal social edit',
     client: 'Alex Garrett',
-    blurb: 'Fast personal-brand spot with sharper rhythm.',
+    blurb: 'A pigeon becomes the star of a short edit with layered screens and surreal transitions.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DOyrMpyCXV0/',
     src: 'videos/portfolio/web/alexg-portrait.mp4',
@@ -117,11 +95,11 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'alexg-tiktok-speed-ramp-7556166361496440077',
-    title: 'Higgsfield speed ramp edit',
+    title: 'Crab Battle',
     category: 'ai-speed-ramp-edits',
-    kind: 'Speed ramp social edit',
+    kind: 'AI speed ramp edit',
     client: 'Higgsfield',
-    blurb: 'Speed ramp edit built around AI-generated action.',
+    blurb: 'Shoreline crabs reimagined as a fighting game, with character selection and a victory finish.',
     source: 'TikTok',
     sourceUrl: 'https://www.tiktok.com/@alexg.mov/video/7556166361496440077',
     src: 'videos/portfolio/web/alexg-tiktok-speed-ramp-7556166361496440077.mp4',
@@ -129,6 +107,10 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'interview-coder-linkedin',
+    story: 'Introducing Interview Coder 2.0 through a founder-led launch film. A direct-to-camera story puts the person behind the product at the center.',
+    posterSrc: 'videos/portfolio/web/interview-coder-work.poster.jpg',
+    logo: 'mockups/portfolio/interview-coder-logo.svg',
+    logoLabel: 'Interview Coder',
     title: 'Interview Coder launch film',
     category: 'launchbrand',
     kind: 'Product launch film',
@@ -155,6 +137,7 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'cluely-launch-motion-featured',
+    posterSrc: 'videos/portfolio/web/cluely-work.poster.jpg',
     title: 'Cluely launch motion graphics',
     category: 'launchbrand',
     kind: 'Product launch motion piece',
@@ -168,11 +151,11 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'eldo-reel',
-    title: 'Eldo reel',
+    title: 'Eldo — From the Kitchen',
     category: 'talking-heads',
-    kind: 'Restaurant talking head',
+    kind: 'Restaurant reel',
     client: 'Eldo',
-    blurb: 'Hospitality reel built around a clear on-camera hook.',
+    blurb: 'A chef introduces a dish at the counter, followed by close-ups of the finished plate.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reel/DJHzWMmoXz2/',
     src: 'videos/portfolio/web/eldo-reel.mp4',
@@ -180,36 +163,24 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'abdulla-case-study',
-    title: 'Abdulla case study',
+    title: 'Gamble Everything',
     category: 'talking-heads',
-    kind: 'Founder talking head',
+    kind: 'Founder story',
     client: 'Abdulla',
-    blurb: 'Founder-facing startup reel with momentum.',
+    blurb: 'Abdulla on taking risks and building a company, with direct-to-camera storytelling and supporting footage.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/DVipr1igHR3/',
     src: 'videos/portfolio/web/abdulla-case-study.mp4',
     layout: 'portrait',
   },
-  {
-    id: 'motion-graphics-drive',
-    title: 'Cluely motion graphics build',
-    category: 'motion-graphics',
-    kind: 'Product UI motion piece',
-    client: 'Cluely',
-    blurb: 'UI motion piece with crisp demo energy.',
-    source: 'Drive',
-    sourceUrl: 'https://drive.google.com/file/d/17DS1xWMJFBe0rNCXQHvWcRSJ1y_vxUPv/view',
-    src: 'videos/portfolio/web/motion-graphics-drive.mp4',
-    layout: 'landscape-wide offset-md',
-    videoScale: 1.023,
-  },
+
   {
     id: 'infiniteviews-real-estate',
-    title: 'Real estate tour promo',
+    title: 'Desert Hillside Home',
     category: 'real-estate',
-    kind: 'Property tour promo',
+    kind: 'Property tour',
     client: 'Infinite Views',
-    blurb: 'Polished vertical walkthrough.',
+    blurb: 'A hillside property tour moving from the desert setting and pool into the living spaces.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DHqw-C_pAtq/',
     src: 'videos/portfolio/web/infiniteviews-real-estate.mp4',
@@ -217,11 +188,11 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'infiniteviews-marketing',
-    title: 'Infinite Views marketing reel',
+    title: 'Waterfront Estate',
     category: 'real-estate',
-    kind: 'Marketing reel',
+    kind: 'Property tour',
     client: 'Infinite Views',
-    blurb: 'A fast brand reel for a real estate team.',
+    blurb: 'A waterfront home shown through poolside shots, interior transitions, and aerial views.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DN3XI1IYksn/',
     src: 'videos/portfolio/web/infiniteviews-marketing.mp4',
@@ -229,11 +200,11 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'pcg-luxury-real-estate',
-    title: 'Luxury real estate promo',
+    title: 'Indoor–Outdoor Living',
     category: 'real-estate',
-    kind: 'Luxury listing promo',
+    kind: 'Property tour',
     client: 'PCG',
-    blurb: 'Smooth listing edit with a clean finish.',
+    blurb: 'A modern home tour connecting the kitchen and living spaces with the terrace and pool.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reels/DJ5J48LgmjQ/',
     src: 'videos/portfolio/web/pcg-luxury-real-estate.mp4',
@@ -241,11 +212,11 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'pcg-private-client-reel-domos8nkfiw',
-    title: 'Private Client Group reel',
+    title: 'Desert Villa',
     category: 'real-estate',
-    kind: 'Luxury real estate reel',
+    kind: 'Property tour',
     client: 'Private Client Group',
-    blurb: 'Luxury real estate reel for Private Client Group.',
+    blurb: 'A desert home with warm exterior tones, arched interiors, and aerial views at dusk.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reel/DOMoS8nkfiw/',
     src: 'videos/portfolio/web/pcg-real-estate-domos8nkfiw.mp4',
@@ -253,11 +224,11 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'pcg-private-client-reel-diklq7kiksf',
-    title: 'Private Client Group property reel',
+    title: 'Courtyard Home',
     category: 'real-estate',
-    kind: 'Luxury real estate reel',
+    kind: 'Property tour',
     client: 'Private Client Group',
-    blurb: 'Luxury property reel for Private Client Group.',
+    blurb: 'A home tour moving from the courtyard into bright living spaces and interior details.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/reel/DIkLq7kiKSF/',
     src: 'videos/portfolio/web/pcg-real-estate-diklq7kiksf.mp4',
@@ -265,11 +236,11 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'snowflakes-youtube',
-    title: 'Snowflakes widescreen preview',
+    title: 'Snowflake Research Documentary',
     category: 'short-film',
-    kind: 'Widescreen short',
-    client: 'Snowflakes',
-    blurb: 'Widescreen science short on avalanche prevention.',
+    kind: 'Snowflake research documentary',
+    client: 'University of Utah',
+    blurb: 'A documentary about snowflake research at the University of Utah.',
     source: 'YouTube',
     sourceUrl: 'https://www.youtube.com/watch?v=RE6ahIf3kwA&t=61s',
     src: 'videos/portfolio/web/snowflakes-youtube.mp4',
@@ -278,11 +249,12 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'wide-youtube',
-    title: 'Widescreen interview preview',
+    posterSrc: 'videos/portfolio/web/widescreen-work.poster.jpg',
+    title: 'What Lies Beyond',
     category: 'short-film',
-    kind: 'Interview short',
-    client: 'Widescreen',
-    blurb: 'Slow, cinematic interview short.',
+    kind: 'Short film',
+    client: null,
+    blurb: 'What Lies Beyond, a cinematic short film.',
     source: 'YouTube',
     sourceUrl: 'https://www.youtube.com/watch?v=xTR8c4j_DKk&t=13s',
     src: 'videos/portfolio/web/wide-youtube.mp4',
@@ -291,35 +263,25 @@ const PORTFOLIO_VIDEOS = [
   },
   {
     id: 'ashlie-realtor',
-    title: 'Ashlie Brewer realtor reel',
+    title: 'Dream Home Advice',
     category: 'talking-heads',
-    kind: 'Realtor talking head',
+    kind: 'Realtor tips',
     client: 'Ashlie Brewer',
-    blurb: 'A realtor-led reel with a clear dream-home hook.',
+    blurb: 'Ashlie Brewer shares dream-home advice in a direct-to-camera reel with animated captions.',
     source: 'Instagram',
     sourceUrl: 'https://www.instagram.com/p/C4gJ_6qut97/',
     src: 'videos/portfolio/web/ashlie-realtor.mp4',
     layout: 'portrait',
   },
-  {
-    id: 'kaedim-linkedin',
-    title: 'Kaedim launch post',
-    category: 'motion-graphics',
-    kind: '3D motion launch post',
-    client: 'Kaedim',
-    blurb: '3D product launch asset with clean motion.',
-    source: 'LinkedIn',
-    sourceUrl: 'https://www.linkedin.com/posts/kaedim_today-is-a-big-milestone-for-kaedim-for-activity-7434690563268018176--REi?utm_source=share&utm_medium=member_desktop&rcm=ACoAADxqsrkB2ELwiS4XdDkChEYtbz9dxTc-INc',
-    src: 'videos/portfolio/web/kaedim-linkedin.mp4',
-    layout: 'landscape',
-    videoScale: 1.023,
-  },
+
 ];
 
-const PORTFOLIO_SECTIONS = PORTFOLIO_CATEGORIES.map((category) => ({
-  ...category,
-  items: PORTFOLIO_VIDEOS.filter((item) => item.category === category.id),
-}));
+const FEATURED_PORTFOLIO_IDS = [
+  'omi-launch-film', 'wispr-flow-behind-the-scenes-youtube', 'interview-coder-linkedin',
+];
+const FEATURED_PORTFOLIO = FEATURED_PORTFOLIO_IDS.map((id) => PORTFOLIO_VIDEOS.find((item) => item.id === id));
+const HORIZONTAL_PORTFOLIO = PORTFOLIO_VIDEOS.filter((item) => !item.layout.includes('portrait'));
+const VERTICAL_PORTFOLIO = PORTFOLIO_VIDEOS.filter((item) => item.layout.includes('portrait'));
 
 const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
   client: 'OMI',
@@ -346,181 +308,159 @@ const FEATURED_SERVICE_CASE_STUDY = window.OMI_CASE_STUDY || {
   ],
 };
 
-function PortfolioVideoTile({ item, priority = false }) {
+function PortfolioVideoTile({ item, featured = false, onOpen }) {
   const cardRef = React.useRef(null);
   const videoRef = React.useRef(null);
-  const sourceUrl = item.sourceUrl || item.src;
+  const [hovered, setHovered] = React.useState(false);
+  const [focused, setFocused] = React.useState(false);
+  const [inView, setInView] = React.useState(false);
+  const [visible, setVisible] = React.useState(!document.hidden);
+  const [failed, setFailed] = React.useState(false);
+  const [ready, setReady] = React.useState(false);
+  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const canHover = useMediaQuery('(hover: hover) and (pointer: fine)');
   const playbackSrc = useResponsiveVideoSrc(item.src);
-  const posterSrc = getVideoPosterSrc(item.src);
+  const active = ((hovered && canHover) || focused) && inView && visible && !reduceMotion && !failed;
+  const poster = item.posterSrc || getVideoPosterSrc(item.src);
+  const cardTitle = item.layout.includes('portrait') ? item.title : item.client || item.title;
 
   React.useEffect(() => {
-    const card = cardRef.current;
-    const video = videoRef.current;
-    if (!card || !video) return undefined;
-
-    let hydrated = video.getAttribute('src') === playbackSrc;
-    let inView = false;
-
-    const ensureHydrated = () => {
-      if (hydrated) return;
-      hydrated = true;
-      video.preload = priority ? 'metadata' : 'none';
-      video.src = playbackSrc;
-      video.load();
-    };
-
-    const play = () => {
-      ensureHydrated();
-      if (video.preload !== 'auto') {
-        video.preload = 'auto';
-        video.load();
-      }
-      const pending = video.play();
-      if (pending && typeof pending.catch === 'function') pending.catch(() => {});
-    };
-
-    const pause = () => {
-      video.pause();
-    };
-
-    const handleVisibility = () => {
-      if (document.hidden) pause();
-      else if (inView) play();
-    };
-
-    const handleCanPlay = () => {
-      if (inView && !document.hidden) play();
-    };
-
-    video.defaultMuted = true;
-    video.muted = true;
-    video.playsInline = true;
-    video.loop = true;
-
-    if (priority) ensureHydrated();
-
     const observer = new IntersectionObserver(([entry]) => {
-      inView = entry.isIntersecting;
-      if (entry.isIntersecting && !document.hidden) play();
-      else pause();
-    }, {
-      threshold: 0.01,
-      rootMargin: '180px 0px',
-    });
-
-    observer.observe(card);
-    document.addEventListener('visibilitychange', handleVisibility);
-    video.addEventListener('canplay', handleCanPlay);
-
+      setInView(entry.isIntersecting);
+    }, { threshold: 0.05 });
+    observer.observe(cardRef.current);
+    const onVisibility = () => setVisible(!document.hidden);
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       observer.disconnect();
-      document.removeEventListener('visibilitychange', handleVisibility);
-      video.removeEventListener('canplay', handleCanPlay);
-      pause();
+      document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [playbackSrc, priority]);
+  }, []);
+
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !active) return undefined;
+    let cancelled = false;
+    if (video.getAttribute('src') !== playbackSrc) {
+      video.src = playbackSrc;
+      video.load();
+    }
+    const pending = video.play();
+    if (pending) pending.then(() => { if (cancelled) video.pause(); }).catch(() => {});
+    return () => { cancelled = true; video.pause(); };
+  }, [active, playbackSrc]);
 
   return (
     <a
       ref={cardRef}
-      href={sourceUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={"port-item port-video " + item.layout + (item.viewCount ? ' port-item-featured-meta' : '')}
+      href={`?page=portfolio&project=${item.id}`}
+      className={'work-card' + (featured ? ' work-card-featured' : '')}
       style={{ '--video-scale': item.videoScale || 1 }}
       data-portfolio-id={item.id}
-      data-category={item.category}
-      data-source={item.source}
-      data-source-url={sourceUrl}
-      aria-label={`Open ${item.title} source on ${item.source}`}
+      data-portfolio-scroll-blur
+      aria-label={`View ${item.title}`}
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onClick={(event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+        setHovered(false);
+        setFocused(false);
+        onOpen(item);
+      }}
     >
-      {item.src ? (
-        <video
-          ref={videoRef}
-          src={priority ? playbackSrc : undefined}
-          poster={posterSrc}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload={priority ? 'metadata' : 'none'}
-          aria-label={item.title}
-          title={item.title}
-          disablePictureInPicture
-          controlsList="nodownload nofullscreen noremoteplayback"
-        />
-      ) : (
-        <img
-          src={item.posterSrc}
-          alt=""
-          loading={priority ? 'eager' : 'lazy'}
-          referrerPolicy="no-referrer"
-        />
+      <img className="work-poster" src={poster} alt="" loading={featured ? 'eager' : 'lazy'} referrerPolicy="no-referrer" />
+      {item.src && !failed && (
+        <video ref={videoRef} className={active && ready ? 'work-preview is-playing' : 'work-preview'}
+          muted loop playsInline preload="none" aria-hidden="true" tabIndex={-1}
+          onPlaying={() => setReady(true)} onError={() => setFailed(true)} disablePictureInPicture />
       )}
-      <div className="port-overlay">
-        <div className="port-caption">
-          <p className="port-kicker">For {item.client || item.source}</p>
-          <h3 className="port-title">{item.title}</h3>
-          {item.viewCount && item.blurb ? <p className="port-blurb">{item.blurb}</p> : null}
-          {item.viewCount ? <p className="port-stat">{item.viewCount}</p> : null}
-        </div>
-      </div>
+      {item.youtubeId && active && (
+        <PortfolioYouTubePlayer item={item} preview onUnavailable={() => setFailed(true)} />
+      )}
+      <span className="work-shade" />
+      {featured && (
+        <span className={'work-logo' + (item.logoLabel ? ' work-logo-with-label' : '')} aria-hidden="true">
+          <img src={item.logo} alt="" />
+          {item.logoLabel && <span>{item.logoLabel}</span>}
+        </span>
+      )}
+      <span className="work-card-arrow" aria-hidden="true">↗</span>
+      <span className="work-caption">
+        <span className="work-client">{cardTitle}</span>
+        <span className="work-description">{item.kind}</span>
+      </span>
+      {featured && <span className="work-story-hint" aria-hidden="true">View project ↗</span>}
     </a>
   );
 }
 
-function isPortraitPortfolioItem(item) {
-  return item.layout.includes('portrait');
-}
+function PortfolioProjectStory({ item, onClose }) {
+  const dialogRef = React.useRef(null);
+  const closeRef = React.useRef(null);
+  const previewSrc = useResponsiveVideoSrc(item?.src);
 
-function PortfolioCategorySection({ category, priority = false }) {
-  const indexedItems = category.items.map((item, index) => ({ item, index }));
-  const railGroups = [
-    {
-      id: 'horizontal',
-      items: indexedItems.filter(({ item }) => !isPortraitPortfolioItem(item)),
-    },
-    {
-      id: 'portrait',
-      items: indexedItems.filter(({ item }) => isPortraitPortfolioItem(item)),
-    },
-  ].filter((group) => group.items.length);
+  React.useEffect(() => {
+    if (!item) return undefined;
+    const dialog = dialogRef.current;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    dialog.showModal();
+    closeRef.current?.focus();
+    return () => {
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus({ preventScroll: true });
+    };
+  }, [item]);
 
+  if (!item) return null;
+  const omi = item.id === 'omi-launch-film';
   return (
-    <section
-      id={`portfolio-${category.id}`}
-      className="portfolio-section"
-      data-category={category.id}
-    >
-      <div className="portfolio-section-head">
-        <div className="portfolio-section-copy" data-portfolio-scroll-blur>
-          <div>
-            <h2>{category.label}</h2>
-            <p>{category.intro}</p>
-          </div>
-          <span className="portfolio-count">
-            {category.items.length} {category.items.length === 1 ? 'piece' : 'pieces'}
-          </span>
+    <dialog ref={dialogRef} className="work-story" aria-labelledby="work-story-title"
+      onCancel={(event) => { event.preventDefault(); onClose(); }}
+      onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <div className="work-story-inner">
+        <div className="work-story-nav">
+          <span>{item.client || item.title} / {item.kind}</span>
+          <button ref={closeRef} type="button" onClick={onClose} aria-label="Close project">Back to work <span aria-hidden="true">×</span></button>
         </div>
-      </div>
-      <div className="portfolio-rails">
-        {railGroups.map((group) => (
-          <div
-            key={group.id}
-            className={`portfolio-rail portfolio-rail-${group.id}`}
-            data-portfolio-scroll-blur
-          >
-            {group.items.map(({ item, index }) => (
-              <PortfolioVideoTile
-                key={item.id}
-                item={item}
-                priority={priority && index < 2}
-              />
-            ))}
+        <div className={'work-story-media' + (item.layout.includes('portrait') ? ' is-portrait' : '')}
+          style={item.youtubeId ? { backgroundImage: `url("${item.posterSrc}")`, backgroundSize: 'cover' } : undefined}>
+          {item.youtubeId ? (
+            <PortfolioYouTubePlayer key={item.id} item={item} />
+          ) : item.src ? (
+            <video key={item.id} src={item.filmSrc || previewSrc} poster={item.filmPosterSrc || item.posterSrc || getVideoPosterSrc(item.src)} controls playsInline preload="metadata" />
+          ) : <img src={item.posterSrc} alt={item.title} />}
+        </div>
+        <div className="work-story-copy">
+          <div>
+            <p className="work-eyebrow">{item.client || item.kind}</p>
+            <h2 id="work-story-title">{item.title}</h2>
+            <p className="work-story-summary">{item.story || (omi ? FEATURED_SERVICE_CASE_STUDY.summary : item.blurb)}</p>
+            {item.outcome && <p className="work-story-outcome">{item.outcome}</p>}
+            <a className="work-original" href={item.sourceUrl || item.src} target="_blank" rel="noopener noreferrer">
+              Watch original on {item.source} <span aria-hidden="true">↗</span>
+            </a>
+            {!item.youtubeId && !item.filmSrc && <p className="work-preview-note">Preview above. Watch the full film at the original link.</p>}
           </div>
-        ))}
+          <dl className="work-story-facts">
+            {item.client && <div><dt>Client</dt><dd>{item.client}</dd></div>}
+            <div><dt>Project</dt><dd>{item.kind}</dd></div>
+            {omi && <div><dt>Scope</dt><dd>{FEATURED_SERVICE_CASE_STUDY.services.join(' / ')}</dd></div>}
+            {item.youtubeId && <div><dt>Role</dt><dd>Filming</dd></div>}
+          </dl>
+        </div>
+        {omi && <div className="work-story-chapters">
+          {FEATURED_SERVICE_CASE_STUDY.detailSections.map((section) => (
+            <section key={section.title}><h3>{section.title}</h3><p>{section.body}</p></section>
+          ))}
+        </div>}
       </div>
-    </section>
+    </dialog>
   );
 }
 
@@ -563,71 +503,56 @@ function PortfolioAbout() {
   );
 }
 
-function Portfolio({ go }) {
-  const [activeCategory, setActiveCategory] = React.useState(PORTFOLIO_SECTIONS[0].id);
+function Portfolio() {
+  const readProject = () => PORTFOLIO_VIDEOS.find((item) => item.id === new URLSearchParams(window.location.search).get('project')) || null;
+  const [project, setProject] = React.useState(readProject);
   useScrollBlur(PORTFOLIO_SCROLL_BLUR_SELECTOR);
 
   React.useEffect(() => {
-    const sections = PORTFOLIO_SECTIONS.map((category) =>
-      document.getElementById(`portfolio-${category.id}`)
-    ).filter(Boolean);
-    if (!sections.length) return undefined;
-
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (visible) setActiveCategory(visible.target.dataset.category || PORTFOLIO_SECTIONS[0].id);
-    }, {
-      threshold: [0.2, 0.35, 0.5, 0.7],
-      rootMargin: '-18% 0px -48% 0px',
-    });
-
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+    const onPopState = () => setProject(readProject());
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
-  const scrollToCategory = (categoryId) => {
-    setActiveCategory(categoryId);
-    const section = document.getElementById(`portfolio-${categoryId}`);
-    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const openProject = (item) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('project', item.id);
+    window.history.pushState({ ...window.history.state, portfolioProject: true }, '', url);
+    setProject(item);
+  };
+  const closeProject = () => {
+    if (window.history.state?.portfolioProject) window.history.back();
+    else {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('project');
+      window.history.replaceState(window.history.state, '', url);
+      setProject(null);
+    }
   };
 
   return (
-    <>
-      <section className="list-head portfolio-head">
-        <div className="wrap">
-          <h1>Selected Video Work</h1>
-          <div className="portfolio-jump-wrap">
-            <div className="portfolio-jump-list" aria-label="Portfolio categories">
-              {PORTFOLIO_SECTIONS.map((category) => (
-                <button
-                  key={category.id}
-                  type="button"
-                  className={"portfolio-jump" + (activeCategory === category.id ? ' active' : '')}
-                  onClick={() => scrollToCategory(category.id)}
-                >
-                  <span>{category.label}</span>
-                  <strong>{category.items.length}</strong>
-                </button>
-              ))}
-            </div>
-          </div>
+    <div className="portfolio-page">
+      <header className="work-heading">
+        <div><p className="work-eyebrow">Alex Garrett / Selected projects</p><h1>Recent Work</h1></div>
+      </header>
+      <section className="work-featured" aria-label="Featured projects">
+        {FEATURED_PORTFOLIO.map((item) => <PortfolioVideoTile key={item.id} item={item} featured onOpen={openProject} />)}
+      </section>
+      <section className="work-collection" aria-label="All horizontal films">
+        <div className="work-collection-label"><span>The films</span><span>{String(HORIZONTAL_PORTFOLIO.length).padStart(2, '0')} projects</span></div>
+        <div className="work-grid">
+          {HORIZONTAL_PORTFOLIO.map((item) => <PortfolioVideoTile key={item.id} item={item} onOpen={openProject} />)}
         </div>
       </section>
-      <div className="wrap">
-        <div className="portfolio-body">
-          {PORTFOLIO_SECTIONS.map((category, index) => (
-            <PortfolioCategorySection
-              key={category.id}
-              category={category}
-              priority={index === 0}
-            />
-          ))}
-          <PortfolioAbout />
+      <section className="work-vertical" aria-label="Vertical films">
+        <div className="work-divider"><span>Short form content</span><span>9:16 / In motion</span></div>
+        <div className="work-zigzag">
+          {VERTICAL_PORTFOLIO.map((item) => <PortfolioVideoTile key={item.id} item={item} onOpen={openProject} />)}
         </div>
-      </div>
-    </>
+      </section>
+      <PortfolioAbout />
+      <PortfolioProjectStory item={project} onClose={closeProject} />
+    </div>
   );
 }
 
