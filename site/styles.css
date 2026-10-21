@@ -2298,6 +2298,55 @@ footer {
   flex-direction: column;
   justify-content: center;
 }
+/* Optional inverted ASCII hero study, selected with ?hero=ascii. */
+.hero-immersive.hero-ascii {
+  color: #f7f8f3;
+  background: #08070c;
+}
+.hero-ascii .hero-bg {
+  background: #08070c;
+  box-shadow: none;
+}
+.hero-ascii .hero-bg-visual::after,
+.hero-ascii .hero-bg::after,
+.hero-ascii .hero-bg-grain,
+.hero-ascii .hero-bg-vignette {
+  display: none;
+}
+.hero-ascii .hero-bg-video { opacity: 1; }
+.hero-ascii .hero-bg-dim {
+  background: radial-gradient(ellipse at center, rgba(8,7,12,0.42), transparent 65%);
+}
+.home-page .hero-ascii .hero-h1-italic {
+  color: #f7f8f3;
+  text-shadow: 0 2px 30px rgba(8,7,12,0.85);
+}
+.hero-ascii .hero-product-shortcut {
+  color: #f7f8f3;
+  background: rgba(8,7,12,0.82);
+  border-color: rgba(247,248,243,0.24);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.hero-ascii .hero-product-shortcut:hover {
+  background: #f7f8f3;
+  color: #293235;
+  border-color: #f7f8f3;
+}
+.hero-ascii .hero-product-shortcut:focus-visible {
+  outline-color: #f7f8f3;
+}
+@media (max-width: 720px) {
+  .hero-ascii .hero-bg {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+  .hero.hero-immersive.hero-ascii .hero-content.hero-content-left {
+    margin-top: -12px;
+    padding-bottom: 12px;
+  }
+}
 .hero-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; background: transparent; }
 .hero-bg-visual::after {
   content: "";

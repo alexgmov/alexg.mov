@@ -1,6 +1,6 @@
 import React from 'react';
 import { getScrollBlur, useScrollBlur } from './scroll-blur.js';
-import { getVideoPosterSrc, useResponsiveVideoSrc } from './media.js';
+import { getVideoPosterSrc, useMediaQuery, useResponsiveVideoSrc } from './media.js';
 import { PriceDisplay, pricingTrackingAttrs } from './pricing.jsx';
 
 // Home page. personal site first, shop second
@@ -836,19 +836,20 @@ function useHeroVideoParallax() {
   return visualRef;
 }
 
-function HeroReel() {
+function HeroReel({ ascii = false }) {
   const visualRef = useHeroVideoParallax();
-  const baseSrc = 'videos/website%20landing%20page.mp4';
+  const baseSrc = ascii ? 'videos/website%20landing%20page.ascii.mp4' : 'videos/website%20landing%20page.mp4';
   const videoSrc = useResponsiveVideoSrc(baseSrc);
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   return (
     <div className="hero-bg">
       <div className="hero-bg-visual" ref={visualRef}>
         <video
           className="hero-bg-video"
-          src={videoSrc}
+          src={ascii && reducedMotion ? undefined : videoSrc}
           poster={getVideoPosterSrc(baseSrc)}
-          autoPlay
+          autoPlay={!ascii || !reducedMotion}
           muted
           loop
           playsInline
@@ -1032,10 +1033,11 @@ function Home({ go }) {
   const featuredLuts = FEATURED_HOME_LUT_IDS
     .map(id => luts.find(l => l.id === id) || fallbackLutsById[id])
     .filter(Boolean);
+  const asciiHero = new URLSearchParams(window.location.search).get('hero') === 'ascii';
   return (
     <main className="home-page">
-      <section className="hero hero-immersive">
-        <HeroReel />
+      <section className={`hero hero-immersive${asciiHero ? ' hero-ascii' : ''}`}>
+        <HeroReel ascii={asciiHero} />
         <div className="wrap hero-content hero-content-left">
           <HeroTitle>
             <div className="hero-actions hero-product-actions hero-title-cta">

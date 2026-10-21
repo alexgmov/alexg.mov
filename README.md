@@ -32,6 +32,21 @@ npm run release:publish-manifest -- --version 1.0.5 --artifact /path/to/Sidestre
 
 `npm run dev` starts the local Node server and Vite middleware on `PORT` or `3000`. `npm run build` runs `vite build` and then copies static assets into `dist/`.
 
+## ASCII Time-Lapse Study
+
+The homepage's nighttime desk time lapse is `videos/website landing page.mp4`, selected by `HeroReel` in `site/home.jsx`. A separate inverted ASCII treatment is available as `videos/website landing page.ascii.mp4`, with matching `.ascii.mobile.mp4` and `.ascii.poster.jpg` variants. Preview it on the homepage with `/?hero=ascii`; `site/home.jsx` selects the alternate media and `.hero-ascii` rules in `site/styles.css` provide a near-black hero with light text and legible buttons. Reduced-motion visitors see the still poster. The original clip and the default homepage are unchanged.
+
+`scripts/render-ascii-timelapse.py` converts the source into a 160 × 72 character grid at 1920 × 1080 and the source's 23.976 fps. The default render inverts the paper-and-ink palette into pale character cells on a near-black background, with faint grid lines and restrained character changes. Use `--light` with a separate `--output` path to reproduce the earlier warm-paper treatment. It preserves the full 305-frame duration; the source has no audio. Render dependencies are local `ffmpeg`, Pillow, NumPy, and a monospace font (default `/Library/Fonts/IBMPlexMono-Regular.ttf`, override with `--font`). They are not website runtime dependencies.
+
+```sh
+python3 scripts/render-ascii-timelapse.py --still 3 --output /tmp/ascii-study.png
+python3 scripts/render-ascii-timelapse.py
+ffmpeg -i 'videos/website landing page.ascii.mp4' -vf 'scale=960:540:flags=lanczos' -an -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p -movflags +faststart 'videos/website landing page.ascii.mobile.mp4'
+ffmpeg -ss 1 -i 'videos/website landing page.ascii.mp4' -frames:v 1 -q:v 2 'videos/website landing page.ascii.poster.jpg'
+```
+
+Verify a full decode with `ffmpeg -v error -i 'videos/website landing page.ascii.mp4' -f null -`, confirm duration/frame count with `ffprobe`, and inspect frames across the loop, including the dim ending. Static assets are copied by the existing build script.
+
 ## TODO
 
 - Make the Services testimonials section happy later, then uncomment `ServiceTestimonials` in `site/pages.jsx`.
