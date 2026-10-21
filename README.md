@@ -47,6 +47,8 @@ ffmpeg -ss 1 -i 'videos/website landing page.ascii.mp4' -frames:v 1 -q:v 2 'vide
 
 Verify a full decode with `ffmpeg -v error -i 'videos/website landing page.ascii.mp4' -f null -`, confirm duration/frame count with `ffprobe`, and inspect frames across the loop, including the dim ending. Static assets are copied by the existing build script.
 
+Production publishing is separate from `git push`. The public domain proxies the website to Vercel; deploy the approved frontend against the existing Production baseline and retain its API functions and routing. The 2026-10-21 ASCII release is `dpl_AmfcDhyxQ5YCRu6s8FGd5ox7XZMY`, built from the byte-verified frontend of `dpl_3SoGJQKV5RBbXmxJ5MJpTMxXtM6d` plus commits `c64d242` and `c8a5a48`. To reproduce that earlier frontend, recover its source base `dpl_Dihh2bivfgEFoAgQguFsQGmKhZxQ` and apply the portfolio changes from `81de14b`; compare every compiled file with the deployed hashes before applying further changes. Do not deploy this dirty checkout wholesale.
+
 ## TODO
 
 - Make the Services testimonials section happy later, then uncomment `ServiceTestimonials` in `site/pages.jsx`.
