@@ -1033,7 +1033,7 @@ function Home({ go }) {
   const featuredLuts = FEATURED_HOME_LUT_IDS
     .map(id => luts.find(l => l.id === id) || fallbackLutsById[id])
     .filter(Boolean);
-  const asciiHero = new URLSearchParams(window.location.search).get('hero') === 'ascii';
+  const asciiHero = new URLSearchParams(window.location.search).get('hero') !== 'original';
   return (
     <main className="home-page">
       <section className={`hero hero-immersive${asciiHero ? ' hero-ascii' : ''}`}>

@@ -2298,7 +2298,7 @@ footer {
   flex-direction: column;
   justify-content: center;
 }
-/* Optional inverted ASCII hero study, selected with ?hero=ascii. */
+/* Default inverted ASCII hero; ?hero=original retains the source video. */
 .hero-immersive.hero-ascii {
   color: #f7f8f3;
   background: #08070c;
